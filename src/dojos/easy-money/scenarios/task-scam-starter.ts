@@ -36,7 +36,7 @@ export const taskScamStarter = defineScenario({
         {
           id: "dm-offer",
           from: "them",
-          text: "Hi! Aapka profile dekha 😊 Part-time work from home hai, bas YouTube videos like karo aur ₹3,000/day kamao",
+          text: "Hi! Aapka profile dekha 😊 Part-time work from home hai, bas videos like karo aur ₹3,000/day kamao",
           delayMs: 1000,
           redFlagId: "pay-far-above-work",
         },

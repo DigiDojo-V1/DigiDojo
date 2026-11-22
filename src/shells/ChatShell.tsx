@@ -5,6 +5,7 @@ import { useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { ChevronLeft, EllipsisVertical, Flag, Phone } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { SimulationBadge } from "./SimulationBadge";
 import type { ChatBubble, ShellProps } from "./types";
 
 export type ChatTheme = "whatsapp" | "telegram" | "instagram";
@@ -88,8 +89,9 @@ export function ChatShell({
             {typing ? `${typingSender ? `${typingSender} is ` : ""}typing…` : contact.subtitle}
           </div>
         </div>
-        <Phone className="size-5 opacity-80" aria-hidden />
-        <EllipsisVertical className="size-5 opacity-80" aria-hidden />
+        <SimulationBadge />
+        <Phone className="size-5 shrink-0 opacity-80" aria-hidden />
+        <EllipsisVertical className="size-5 shrink-0 opacity-80" aria-hidden />
       </header>
 
       <div className="flex flex-1 flex-col gap-1.5 px-3 pt-4 pb-3">

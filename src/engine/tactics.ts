@@ -1,45 +1,45 @@
 import type { Tactic } from "./schema";
 
-/** Manipulation tactics: a short label and one line the debrief shows the player. */
+/** Manipulation tactics: a short label and one Hinglish line the debrief shows the player. */
 export const TACTICS_INFO: Record<Tactic, { label: string; explanation: string }> = {
   "small-win-first": {
     label: "Small win first",
-    explanation: "They pay you a little first so you trust them with a lot.",
+    explanation: "Pehle thode paise dete hain, taaki tum unpe bada bharosa kar lo.",
   },
   "pay-to-earn": {
     label: "Pay to earn",
-    explanation: "You're asked to pay money before you can earn money. Real jobs never do this.",
+    explanation: "Kamane se pehle paise bharne ko kehte hain. Asli kaam mein aisa kabhi nahi hota.",
   },
   urgency: {
     label: "Urgency",
-    explanation: "A ticking clock stops you from thinking or asking someone.",
+    explanation: "Time ka pressure daalte hain taaki tum soch na sako ya kisi se pooch na sako.",
   },
   "social-proof": {
     label: "Social proof",
-    explanation: "Fake members and screenshots make it look like everyone is winning.",
+    explanation: "Fake members aur screenshots se lagta hai ki sab kama rahe hain.",
   },
   "sunk-cost": {
     label: "Sunk cost",
-    explanation: "Once you've paid, they make you pay more to 'unlock' what you already paid.",
+    explanation: "Ek baar paise de diye, toh woh 'unlock' karne ke naam pe aur maangte hain.",
   },
   authority: {
     label: "Authority",
-    explanation: "Someone claims to be police, a bank or an officer so you obey without checking.",
+    explanation: "Police, bank ya officer ban ke darate hain taaki tum bina check kiye maan lo.",
   },
   isolation: {
     label: "Isolation",
-    explanation: "They tell you to keep it secret so nobody can warn you.",
+    explanation: "Kehte hain kisi ko mat batana, taaki koi tumhe warn na kar sake.",
   },
   "too-good-to-be-true": {
     label: "Too good to be true",
-    explanation: "The pay or prize is far above what the effort is worth.",
+    explanation: "Kaam ke hisaab se paisa ya inaam bahut zyada hai.",
   },
   flattery: {
     label: "Flattery",
-    explanation: "Praise and 'you're specially selected' lower your guard.",
+    explanation: "Tareef aur 'aap special selected ho' sun ke guard neeche aa jaata hai.",
   },
   impersonation: {
     label: "Impersonation",
-    explanation: "They pretend to be someone you know or trust.",
+    explanation: "Kisi jaan-pehchaan wale ya bharosemand insaan ki nakal karte hain.",
   },
 };

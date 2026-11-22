@@ -10,7 +10,6 @@ import { formatRupees } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { CallShell } from "@/shells/CallShell";
 import { ChatShell } from "@/shells/ChatShell";
-import { SimulationBadge } from "@/shells/SimulationBadge";
 import { SmsShell } from "@/shells/SmsShell";
 import type { ShellProps } from "@/shells/types";
 import { UpiShell } from "@/shells/UpiShell";
@@ -180,7 +179,10 @@ function ThreadView({
 
   const typing = next !== undefined && next.from === "them" && !seenBefore.has(next.id);
   const done = next === undefined;
-  const showHint = scenario.coldRun !== true && flagged.length === 0;
+  // Decided once per screen, so the hint doesn't vanish (and shift the chat) on the first tap.
+  const [showHint] = useState(
+    () => scenario.coldRun !== true && useRunStore.getState().flagged.length === 0,
+  );
 
   const footer = done ? (
     <motion.div
@@ -215,8 +217,7 @@ function ThreadView({
   };
 
   return (
-    <div className="relative flex flex-1 flex-col">
-      <SimulationBadge />
+    <div className="flex flex-1 flex-col">
       <Shell app={node.app} {...shellProps} />
     </div>
   );
