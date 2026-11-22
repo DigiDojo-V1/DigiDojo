@@ -30,6 +30,7 @@ You write the story. Claude builds it. The checks catch mistakes. You play it be
 4. **Play every path** in the browser at phone width (DevTools → device toolbar → 390 px). Anything off? Tell Claude what to change.
 5. **Ship it.** In Claude Code, run `/ship`. It checks everything, commits, pushes and opens the PR. Attach a screen recording of you playing it.
 6. **Review.** The lead or another pair checks out your branch, plays it and approves. Then merge.
+7. **Hinglish, later.** Scenarios ship in English. Someone who reads Hindi runs `/translate-hinglish src/dojos/<dojo-id>/scenarios/<scenario-id>.ts` on a new branch, checks the en-vs-hinglish table it prints, and ships that as its own PR. `npm run i18n:report` shows what still needs translating.
 
 ## Building something that isn't a scenario
 

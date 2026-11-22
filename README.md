@@ -18,15 +18,16 @@ npm install
 npm run dev      # http://localhost:3000
 ```
 
-| Script                 | Does                              |
-| ---------------------- | --------------------------------- |
-| `npm run dev`          | Dev server                        |
-| `npm run build`        | Production build                  |
-| `npm run lint`         | ESLint                            |
-| `npm run typecheck`    | Generates route types, then `tsc` |
-| `npm test`             | Vitest (validates every scenario) |
-| `npm run format`       | Prettier, writes changes          |
-| `npm run format:check` | Prettier, only checks             |
+| Script                 | Does                                                             |
+| ---------------------- | ---------------------------------------------------------------- |
+| `npm run dev`          | Dev server                                                       |
+| `npm run build`        | Production build                                                 |
+| `npm run lint`         | ESLint                                                           |
+| `npm run typecheck`    | Generates route types, then `tsc`                                |
+| `npm test`             | Vitest (validates every scenario)                                |
+| `npm run i18n:report`  | Per scenario: fields missing Hinglish (report only, never fails) |
+| `npm run format`       | Prettier, writes changes                                         |
+| `npm run format:check` | Prettier, only checks                                            |
 
 Before you push: `npm run lint && npm run typecheck && npm test && npm run build`. CI runs the same four.
 
@@ -42,6 +43,7 @@ src/
       scenarios/*.ts        one file per scenario
       components/           dojo-only components, if any
   engine/                   schema (zod), defineScenario, store, ScenarioPlayer, Debrief, tactics
+  i18n/                     language toggle, UI strings (ui.ts), useT() / useText()
   shells/                   fake app UIs: ChatShell (whatsapp/telegram/instagram themes), Sms/Upi/Call placeholders
   components/ui/            shadcn primitives (add with npx shadcn@latest add <name>)
 tests/                      vitest: schema rules + every registered scenario
@@ -56,13 +58,13 @@ The usual way: write a script from [`docs/SCENARIO_TEMPLATE.md`](docs/SCENARIO_T
 2. Copy `src/dojos/easy-money/scenarios/task-scam-starter.ts` into `src/dojos/<your-dojo>/scenarios/<scenario-id>.ts`.
 3. Rename the export, set `id` (kebab-case) and `dojoId`, and write `title`, `summary`, `legit`, and a `primer` (or `coldRun: true`).
 4. Write the `nodes`: `thread` nodes (app, contact, messages, choices) leading to `outcome` nodes (safe / loss / partial-loss / missed-opportunity). Put `rewindToNodeId` on losses.
-5. Put a `redFlagId` on each message that carries a cue, and define each one in `redFlags` with a `tactic` from `src/engine/tactics.ts`.
+5. Put a `redFlagId` on each message that carries a cue, and define each one in `redFlags` with a `tactic` from the `TACTICS` list in `src/engine/schema.ts`.
 6. Fill in `debrief.rule` (one line) and `debrief.realWorldAction`.
 7. Import it in your dojo's `index.ts` and add it to `scenarios`. If it's your first real scenario, delete `coming-soon.ts`.
 8. Run `npm test` (it tells you exactly which rule is broken), then `npm run dev` and play it at 390 px wide.
 9. Open a PR with screenshots.
 
-Rules: everything fictional (no real brands, logos, banks, agencies or officer names); never ask for real OTPs, PINs, card numbers or passwords; player-facing text in natural Hinglish; each dojo needs at least one **legit** scenario so rejecting everything never wins.
+Rules: everything fictional (no real brands, logos, banks, agencies or officer names); never ask for real OTPs, PINs, card numbers or passwords; write all player-facing text in English as plain strings (Hinglish is added later with `/translate-hinglish <scenario file>`, never changing the English); each dojo needs at least one **legit** scenario so rejecting everything never wins.
 
 ## Branches and PRs
 

@@ -13,4 +13,4 @@
 - [ ] No real brands: every company, bank, agency, app and person is fictional, with no real logos
 - [ ] Never asks for real secrets: OTP, PIN, card number or password fields accept anything and store nothing
 - [ ] Every simulation screen shows the "Simulation" label
-- [ ] Player-facing text is natural Hinglish (unless the scenario says otherwise)
+- [ ] Player-facing text is written in English (Hinglish only via `/translate-hinglish`, with `en` unchanged)

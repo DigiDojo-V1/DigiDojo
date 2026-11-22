@@ -61,26 +61,36 @@ src/
     store.ts                           # zustand: current run (node, flags, history) + persisted progress
     ScenarioPlayer.tsx                 # renders the current node with the right shell
     Debrief.tsx
-    tactics.ts                         # tactic ids → label + one-line explanation
   shells/
     ChatShell.tsx                      # generic chat: header, bubbles, typing indicator, flag-on-tap; theme: whatsapp | telegram | instagram
     SmsShell.tsx                       # placeholder in scaffold
     UpiShell.tsx                       # placeholder in scaffold
     CallShell.tsx                      # placeholder in scaffold
     SimulationBadge.tsx
+  i18n/
+    locale.ts                          # Locale = "en" | "hinglish", default "hinglish"
+    ui.ts                              # every UI string (incl. tactic labels/explanations); "en" complete, "hinglish" partial
+    text.ts                            # resolveText(text, locale), falls back to en
+    hooks.ts                           # useLocale(), useT(), useText()
+    LanguageToggle.tsx                 # "EN | Hinglish" segmented toggle
+    coverage.ts                        # counts text fields missing Hinglish (npm run i18n:report)
   components/ui/                       # shadcn
   lib/
 tests/
   scenarios.test.ts                    # validates every registered scenario
 ```
 
-Progress (completed scenarios) lives in localStorage via zustand `persist` for now. A database comes later.
+Progress (completed scenarios) and the chosen language live in localStorage via zustand `persist` for now. A database comes later.
 
 ## 5. Scenario format
 
 Write in `src/engine/schema.ts` with zod, then infer the TypeScript types. Shape:
 
 ```ts
+// Authors write a plain string (English) or { en, hinglish? }.
+// The zod schema normalises both to { en: string; hinglish?: string }.
+type LocalizedText = string | { en: string; hinglish?: string };
+
 type AppTheme = "whatsapp" | "telegram" | "instagram" | "sms" | "upi" | "call";
 
 type Tactic =
@@ -98,30 +108,30 @@ type Tactic =
 interface Scenario {
   id: string; // kebab-case, unique within the dojo
   dojoId: DojoId;
-  title: string;
-  summary: string; // one line for the dojo page
+  title: LocalizedText;
+  summary: LocalizedText; // one line for the dojo page
   legit: boolean; // true = a real message the player should trust
   coldRun?: boolean; // true = no primer, no hints
-  primer?: { title: string; body: string };
+  primer?: { title: LocalizedText; body: LocalizedText };
   startNodeId: string;
   nodes: Record<string, ScenarioNode>;
-  redFlags: Record<string, { label: string; tactic: Tactic; explanation: string }>;
-  debrief: { rule: string; realWorldAction: string };
+  redFlags: Record<string, { label: LocalizedText; tactic: Tactic; explanation: LocalizedText }>;
+  debrief: { rule: LocalizedText; realWorldAction: LocalizedText };
 }
 
 type ScenarioNode =
   | {
       kind: "thread";
       app: AppTheme;
-      contact: { name: string; subtitle?: string; avatar?: string };
+      contact: { name: LocalizedText; subtitle?: LocalizedText; avatar?: string };
       messages: Message[];
       choices: Choice[]; // at least one
     }
   | {
       kind: "outcome";
       result: "safe" | "loss" | "partial-loss" | "missed-opportunity";
-      title: string;
-      body: string;
+      title: LocalizedText;
+      body: LocalizedText;
       moneyDelta?: number; // rupees, negative = lost
       rewindToNodeId?: string;
     };
@@ -129,14 +139,14 @@ type ScenarioNode =
 interface Message {
   id: string; // unique within the scenario
   from: "them" | "me" | "system"; // system = credit alerts, "X joined the group", etc.
-  sender?: string; // display name inside group chats
-  text: string;
+  sender?: LocalizedText; // display name inside group chats
+  text: LocalizedText;
   delayMs?: number; // default 800
   redFlagId?: string; // set only if this message carries a red flag
 }
 
 interface Choice {
-  label: string;
+  label: LocalizedText;
   nextNodeId: string;
 }
 ```
@@ -156,6 +166,16 @@ Engine behaviour:
 - Rewind keeps flags but returns to the target node.
 - Finishing a scenario (reaching the debrief) marks it complete in persisted progress.
 
+### Language
+
+Scenarios are written in **English**. Every player-facing field above is a `LocalizedText`: write a plain string, which counts as English, and leave Hinglish to the translation pass. `/translate-hinglish <scenario file>` turns each string into `{ en, hinglish }` and never changes `en`. Dojo `name` and `tagline` are `LocalizedText` too.
+
+- The app has two locales, `en` and `hinglish`, and defaults to `hinglish`. Where a field has no Hinglish yet, the player sees the English.
+- Every screen has a small **EN | Hinglish** toggle: in the top bar of app screens, and in the strip above each fake app (next to the Simulation label) in the player. The choice is saved with progress in localStorage, so it survives a reload, and `<html lang>` follows it (`en` / `hi-Latn`).
+- Switching mid-scenario re-renders the current screen in the other language. The run, flags and history stay as they are.
+- Components never read `.en` / `.hinglish`. Scenario text goes through `useText()` and UI strings through `useT()` (`src/i18n/ui.ts`, where `en` must have every key). Both fall back to English.
+- `npm run i18n:report` lists, per scenario, how many fields still lack Hinglish. Missing Hinglish never fails tests or the build.
+
 ## 6. Scaffold spec (build this now)
 
 Goal: anyone on the team can `git pull`, `npm install`, `npm run dev`, open the app, and start building their dojo by copying the example scenario.
@@ -165,7 +185,7 @@ Build:
 1. Next.js (latest, App Router, TypeScript strict, `src/` dir, Tailwind v4, ESLint) in the existing repo root. If the folder isn't empty, generate in a temp folder and move the files in without overwriting `.git`.
 2. Prettier, `.nvmrc` (current Node LTS), `.editorconfig`, `.env.example` (empty for now), scripts: `dev`, `build`, `lint`, `typecheck`, `test`, `format`.
 3. shadcn/ui initialised. Add `button`, `card`, `badge`, `progress`. Install `zustand`, `zod`, `motion`, `vitest`.
-4. The engine (§5): schema, `defineScenario`, `defineDojo`, store, `ScenarioPlayer`, `Debrief`, `tactics.ts`.
+4. The engine (§5): schema, `defineScenario`, `defineDojo`, store, `ScenarioPlayer`, `Debrief`, tactic labels (now in `src/i18n/ui.ts`).
 5. `ChatShell` with three themes (WhatsApp green, Telegram blue, Instagram gradient-free purple). Use our own simple look, not copies of the real apps' branding. Placeholder components for `SmsShell`, `UpiShell` and `CallShell` that render "Coming soon: <name> shell".
 6. Registry with the 4 dojos in §2, each with a `index.ts`. Easy Money contains the example scenario below. The other three each contain one placeholder scenario with a single outcome node, titled "Coming soon".
 7. Screens:

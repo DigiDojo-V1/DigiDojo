@@ -14,6 +14,7 @@ Next.js (App Router) · TypeScript (strict) · Tailwind CSS v4 · shadcn/ui · m
 | `src/dojos/registry.ts` | The list of dojos shown on the home screen                                  | Lead only                                                                  |
 | `src/engine/`           | Scenario types, zod schema, the player state machine, debrief logic         | Lead reviews every change                                                  |
 | `src/shells/`           | Fake app UIs: chat (WhatsApp / Telegram / Instagram themes), SMS, UPI, call | Shared. Extend with props or themes, never copy a shell into a dojo folder |
+| `src/i18n/`             | Language toggle, UI strings (`ui.ts`), `useT()` / `useText()` hooks         | Lead reviews. Add every new UI string to `en` in `ui.ts`                   |
 | `src/components/ui/`    | shadcn primitives                                                           | Add with `npx shadcn@latest add <name>`, don't hand-edit                   |
 | `src/app/`              | Routes only, kept thin                                                      | Lead reviews                                                               |
 
@@ -24,7 +25,8 @@ Next.js (App Router) · TypeScript (strict) · Tailwind CSS v4 · shadcn/ui · m
 - **Mobile-first.** Design at 390 px wide. On desktop the app renders in a centred phone-width column (max 420 px).
 - **Everything fictional.** No real company, bank, agency, app brand, logo or officer names. Every simulation screen carries a small "Simulation" label.
 - **Never collect real secrets.** The app never asks for real OTPs, PINs, card numbers or passwords. Fields that look like it accept anything and store nothing.
-- **Language.** Player-facing text is Hinglish written in Roman script unless the scenario says otherwise. Keep it natural, the way real scammers actually write.
+- **Language.** Write all player-facing text in English. Hinglish is added later with /translate-hinglish; never change en text while translating.
+- **No hard-coded UI text.** Components get UI strings from `useT()` (`src/i18n/ui.ts`) and scenario text from `useText()`. Never read `.en` or `.hinglish` directly.
 - **Types.** No `any`. Validate data at boundaries with zod.
 - **Done means green.** Before you say a task is finished, run `npm run lint && npm run typecheck && npm test && npm run build`. All four must pass.
 
