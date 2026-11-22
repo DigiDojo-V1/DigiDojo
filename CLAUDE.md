@@ -28,6 +28,10 @@ Next.js (App Router) · TypeScript (strict) · Tailwind CSS v4 · shadcn/ui · m
 - **Types.** No `any`. Validate data at boundaries with zod.
 - **Done means green.** Before you say a task is finished, run `npm run lint && npm run typecheck && npm test && npm run build`. All four must pass.
 
+## Workflow
+
+Adding a scenario: write it from docs/SCENARIO_TEMPLATE.md, then run /new-scenario <path>. Finishing work: run /ship. Full workflow: docs/HOW_WE_WORK.md.
+
 ## Git
 
 - Never commit to `main`. Branch as `<dojo-id>/<short-desc>` (example: `easy-money/telegram-group`). Shared work uses `core/<short-desc>`.

@@ -4,10 +4,13 @@ DigiDojo is a mobile-first webapp where Indians aged 15 to 25 practise against r
 Players make the decisions, see the consequence, rewind to the moment they slipped, and get a debrief naming each red flag and the trick behind it.
 
 Full product, learning design and scenario format: [`docs/CONTEXT.md`](docs/CONTEXT.md).
+How the team works (setup, adding a scenario, shipping): [`docs/HOW_WE_WORK.md`](docs/HOW_WE_WORK.md).
+
+Repo: https://github.com/DigiDojo-V1/DigiDojo
 
 ## Setup
 
-You need Node **26** (the version in `.nvmrc`; Node 20.9+ also works) and npm.
+You need Node **24** (the version in `.nvmrc`; Node 22+ also works) and npm.
 
 ```bash
 nvm use          # or: nvm install
@@ -46,6 +49,8 @@ docs/CONTEXT.md             the project brief
 ```
 
 ## How to add a scenario
+
+The usual way: write a script from [`docs/SCENARIO_TEMPLATE.md`](docs/SCENARIO_TEMPLATE.md) and run `/new-scenario <path>` in Claude Code (see [`docs/HOW_WE_WORK.md`](docs/HOW_WE_WORK.md)). The steps below are what that does by hand.
 
 1. Branch from `main`: `git checkout -b <dojo-id>/<short-desc>` (e.g. `easy-money/upi-mule`).
 2. Copy `src/dojos/easy-money/scenarios/task-scam-starter.ts` into `src/dojos/<your-dojo>/scenarios/<scenario-id>.ts`.
