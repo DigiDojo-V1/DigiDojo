@@ -11,7 +11,8 @@ import { cn } from "@/lib/utils";
 import { computeDebrief, type DebriefFlag } from "./scoring";
 import { OUTCOME_STYLE } from "./outcome-style";
 import type { OutcomeNode, Scenario } from "./schema";
-import { scenarioKey, useProgressStore } from "./store";
+import { scenarioKey } from "./keys";
+import { useProgressStore } from "./store";
 import { TACTICS_INFO } from "./tactics";
 
 interface DebriefProps {

@@ -104,10 +104,6 @@ export function currentNodeId(state: Pick<RunState, "trail">): string | undefine
 /* Persisted progress (localStorage)                                   */
 /* ------------------------------------------------------------------ */
 
-export function scenarioKey(dojoId: string, scenarioId: string): string {
-  return `${dojoId}/${scenarioId}`;
-}
-
 interface ProgressState {
   /** Keys are `dojoId/scenarioId`. */
   completed: Record<string, true>;

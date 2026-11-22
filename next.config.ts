@@ -1,9 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
-  cacheComponents: true,
-  partialPrefetching: true,
+  // Cache Components is off: every page is static data, and without it
+  // `dynamicParams = false` makes unknown dojo/scenario ids return a real 404.
   turbopack: {
     rules: {
       "*.css": {

@@ -17,7 +17,8 @@ import { UpiShell } from "@/shells/UpiShell";
 import { Debrief } from "./Debrief";
 import { OUTCOME_STYLE } from "./outcome-style";
 import type { AppTheme, OutcomeNode, Scenario, ThreadNode } from "./schema";
-import { currentNodeId, scenarioKey, useRunStore } from "./store";
+import { scenarioKey } from "./keys";
+import { currentNodeId, useRunStore } from "./store";
 import { priorTranscript, toBubble } from "./transcript";
 
 const DEFAULT_DELAY_MS = 800;
