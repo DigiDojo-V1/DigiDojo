@@ -4,8 +4,8 @@ import { useT } from "@/i18n/hooks";
 import { cn } from "@/lib/utils";
 
 /**
- * Small "Simulation" label. Every simulation screen must show it: each shell puts it in its
- * header, in the normal layout flow, so it never covers the contact name.
+ * Small "Simulation" label. Every simulation screen must show it: each shell renders
+ * `SimulationBar` at the top, which carries this badge in the normal layout flow.
  */
 export function SimulationBadge({ className }: { className?: string }) {
   const t = useT();

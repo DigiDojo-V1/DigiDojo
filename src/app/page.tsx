@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { DojoProgress } from "@/components/progress/DojoProgress";
+import { TopBar } from "@/components/TopBar";
 import { DOJOS } from "@/dojos/registry";
 import { scenarioKey } from "@/engine/keys";
 import { L, T } from "@/i18n/T";
@@ -8,7 +9,8 @@ import { L, T } from "@/i18n/T";
 export default function HomePage() {
   return (
     <main className="flex flex-1 flex-col gap-6 p-5 pb-10">
-      <header className="pt-6">
+      <TopBar className="-mb-4" />
+      <header>
         <h1 className="text-3xl font-bold tracking-tight">
           <T k="home.title" />
         </h1>

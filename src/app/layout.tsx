@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { HtmlLang } from "@/i18n/HtmlLang";
+import { DEFAULT_LOCALE, HTML_LANG } from "@/i18n/locale";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -25,8 +27,12 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
+    <html
+      lang={HTML_LANG[DEFAULT_LOCALE]}
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+    >
       <body className="min-h-dvh bg-neutral-200">
+        <HtmlLang />
         {/* Phone-width column: full width on mobile, centred 420px on desktop. */}
         <div className="relative mx-auto flex min-h-dvh w-full max-w-[420px] flex-col bg-background shadow-xl">
           {children}

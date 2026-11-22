@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, type ReactNode } from "react";
-import { Check, ChevronLeft, Flag, Lightbulb, Phone, RotateCcw, X } from "lucide-react";
+import { Check, Flag, Lightbulb, Phone, RotateCcw, X } from "lucide-react";
+import { TopBar } from "@/components/TopBar";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -39,14 +40,8 @@ export function Debrief({ scenario, outcome, seen, flagged, backHref, onReplay }
 
   return (
     <main className="flex flex-1 flex-col gap-4 p-4 pb-8">
+      <TopBar back={{ href: backHref, label: "nav.backToDojo" }} className="-mb-2" />
       <header className="flex items-center gap-2">
-        <Link
-          href={backHref}
-          aria-label={t("nav.backToDojo")}
-          className="rounded-full p-1.5 hover:bg-muted"
-        >
-          <ChevronLeft className="size-5" />
-        </Link>
         <div className="min-w-0">
           <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
             {t("debrief.eyebrow")}

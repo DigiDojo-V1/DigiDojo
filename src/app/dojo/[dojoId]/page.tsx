@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ChevronLeft } from "lucide-react";
 import { CompletedTick } from "@/components/progress/CompletedTick";
+import { TopBar } from "@/components/TopBar";
 import { Badge } from "@/components/ui/badge";
 import { DOJOS, getDojo } from "@/dojos/registry";
 import { scenarioKey } from "@/engine/keys";
@@ -31,13 +31,7 @@ export default async function DojoPage({ params }: PageProps<"/dojo/[dojoId]">) 
 
   return (
     <main className="flex flex-1 flex-col gap-5 p-5 pb-10">
-      <Link
-        href="/"
-        aria-label="Back to home"
-        className="-ml-1.5 self-start rounded-full p-1.5 hover:bg-muted"
-      >
-        <ChevronLeft className="size-5" />
-      </Link>
+      <TopBar back={{ href: "/", label: "nav.backToHome" }} />
 
       <header>
         <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">

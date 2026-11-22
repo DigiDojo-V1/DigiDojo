@@ -1,9 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "motion/react";
-import { ChevronLeft, RotateCcw, Sparkles } from "lucide-react";
+import { RotateCcw, Sparkles } from "lucide-react";
+import { TopBar } from "@/components/TopBar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLocale, useT, useText } from "@/i18n/hooks";
@@ -79,6 +79,7 @@ export function ScenarioPlayer({ scenario, backHref }: ScenarioPlayerProps) {
     return (
       <OutcomeView
         outcome={node}
+        backHref={backHref}
         onRewind={rewindTarget !== undefined ? () => rewind(rewindTarget) : undefined}
         onDebrief={openDebrief}
       />
@@ -111,13 +112,7 @@ function PrimerCard({
   const text = useText();
   return (
     <main className="flex flex-1 flex-col p-4">
-      <Link
-        href={backHref}
-        aria-label={t("nav.backToDojo")}
-        className="self-start rounded-full p-1.5 hover:bg-muted"
-      >
-        <ChevronLeft className="size-5" />
-      </Link>
+      <TopBar back={{ href: backHref, label: "nav.backToDojo" }} />
       <motion.div
         className="flex flex-1 flex-col justify-center"
         initial={{ opacity: 0, y: 12 }}
@@ -253,10 +248,12 @@ function Shell({ app, ...props }: ShellProps & { app: AppTheme }) {
 
 function OutcomeView({
   outcome,
+  backHref,
   onRewind,
   onDebrief,
 }: {
   outcome: OutcomeNode;
+  backHref: string;
   onRewind?: () => void;
   onDebrief: () => void;
 }) {
@@ -265,38 +262,41 @@ function OutcomeView({
   const style = OUTCOME_STYLE[outcome.result];
   const Icon = style.icon;
   return (
-    <main className="flex flex-1 flex-col justify-center gap-4 p-4">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.96 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className={cn("rounded-2xl p-6 text-center ring-1", style.soft)}
-      >
-        <Icon className={cn("mx-auto size-12", style.tone)} aria-hidden />
-        <p className={cn("mt-3 text-xs font-semibold tracking-wide uppercase", style.tone)}>
-          {t(`outcome.${outcome.result}`)}
-        </p>
-        <h1 className="mt-1 text-2xl font-bold">{text(outcome.title)}</h1>
-        {outcome.moneyDelta !== undefined && outcome.moneyDelta !== 0 && (
-          <p
-            className={cn(
-              "mt-3 text-3xl font-bold tabular-nums",
-              outcome.moneyDelta < 0 ? "text-red-700" : "text-emerald-700",
-            )}
-          >
-            {formatRupees(outcome.moneyDelta, { signed: true })}
+    <main className="flex flex-1 flex-col gap-4 p-4">
+      <TopBar back={{ href: backHref, label: "nav.backToDojo" }} />
+      <div className="flex flex-1 flex-col justify-center gap-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.96 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className={cn("rounded-2xl p-6 text-center ring-1", style.soft)}
+        >
+          <Icon className={cn("mx-auto size-12", style.tone)} aria-hidden />
+          <p className={cn("mt-3 text-xs font-semibold tracking-wide uppercase", style.tone)}>
+            {t(`outcome.${outcome.result}`)}
           </p>
-        )}
-        <p className="mt-3 leading-relaxed text-neutral-700">{text(outcome.body)}</p>
-      </motion.div>
+          <h1 className="mt-1 text-2xl font-bold">{text(outcome.title)}</h1>
+          {outcome.moneyDelta !== undefined && outcome.moneyDelta !== 0 && (
+            <p
+              className={cn(
+                "mt-3 text-3xl font-bold tabular-nums",
+                outcome.moneyDelta < 0 ? "text-red-700" : "text-emerald-700",
+              )}
+            >
+              {formatRupees(outcome.moneyDelta, { signed: true })}
+            </p>
+          )}
+          <p className="mt-3 leading-relaxed text-neutral-700">{text(outcome.body)}</p>
+        </motion.div>
 
-      {onRewind !== undefined && (
-        <Button variant="outline" size="lg" className="h-11" onClick={onRewind}>
-          <RotateCcw /> {t("outcome.rewind")}
+        {onRewind !== undefined && (
+          <Button variant="outline" size="lg" className="h-11" onClick={onRewind}>
+            <RotateCcw /> {t("outcome.rewind")}
+          </Button>
+        )}
+        <Button size="lg" className="h-11" onClick={onDebrief}>
+          {t("outcome.seeDebrief")}
         </Button>
-      )}
-      <Button size="lg" className="h-11" onClick={onDebrief}>
-        {t("outcome.seeDebrief")}
-      </Button>
+      </div>
     </main>
   );
 }

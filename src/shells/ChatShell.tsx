@@ -6,7 +6,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { ChevronLeft, EllipsisVertical, Flag, Phone } from "lucide-react";
 import { useT } from "@/i18n/hooks";
 import { cn } from "@/lib/utils";
-import { SimulationBadge } from "./SimulationBadge";
+import { SimulationBar } from "./SimulationBar";
 import type { ChatBubble, ShellProps } from "./types";
 
 export type ChatTheme = "whatsapp" | "telegram" | "instagram";
@@ -80,25 +80,27 @@ export function ChatShell({
 
   return (
     <div className={cn("flex min-h-dvh flex-col", t.wallpaper)}>
-      <header className={cn("sticky top-0 z-40 flex h-14 items-center gap-2 px-2", t.header)}>
-        <Link
-          href={backHref}
-          aria-label={tr("nav.back")}
-          className="rounded-full p-1.5 hover:bg-black/10"
-        >
-          <ChevronLeft className="size-5" />
-        </Link>
-        <Avatar name={contact.name} src={contact.avatar} className={t.avatar} />
-        <div className="min-w-0 flex-1 leading-tight">
-          <div className="truncate text-[15px] font-semibold">{contact.name}</div>
-          <div className={cn("truncate text-xs", t.headerMuted)}>
-            {typing ? tr("chat.typing")(typingSender) : contact.subtitle}
+      <div className="sticky top-0 z-40">
+        <SimulationBar />
+        <header className={cn("flex h-14 items-center gap-2 px-2", t.header)}>
+          <Link
+            href={backHref}
+            aria-label={tr("nav.back")}
+            className="rounded-full p-1.5 hover:bg-black/10"
+          >
+            <ChevronLeft className="size-5" />
+          </Link>
+          <Avatar name={contact.name} src={contact.avatar} className={t.avatar} />
+          <div className="min-w-0 flex-1 leading-tight">
+            <div className="truncate text-[15px] font-semibold">{contact.name}</div>
+            <div className={cn("truncate text-xs", t.headerMuted)}>
+              {typing ? tr("chat.typing")(typingSender) : contact.subtitle}
+            </div>
           </div>
-        </div>
-        <SimulationBadge />
-        <Phone className="size-5 shrink-0 opacity-80" aria-hidden />
-        <EllipsisVertical className="size-5 shrink-0 opacity-80" aria-hidden />
-      </header>
+          <Phone className="size-5 shrink-0 opacity-80" aria-hidden />
+          <EllipsisVertical className="size-5 shrink-0 opacity-80" aria-hidden />
+        </header>
+      </div>
 
       <div className="flex flex-1 flex-col gap-1.5 px-3 pt-4 pb-3">
         {hint !== undefined && (
