@@ -20,10 +20,11 @@ Follow these steps in order:
 
    Never invent story content, messages or red flags. The humans write the story; you build it.
 
-3. Create `src/dojos/<dojo-id>/scenarios/<scenario-id>.ts` with `defineScenario()`. Keep the script's wording exactly as written (fix only obvious typos). Give every message a unique kebab-case `id`. Register the scenario in that dojo's `index.ts`; if the dojo still has `scenarios/coming-soon.ts`, delete it and remove it from `index.ts`.
+3. Create `src/dojos/<dojo-id>/scenarios/<scenario-id>.ts` with `defineScenario()`. Scripts are written in English, so every text field goes in as a plain string (`title: "Like videos, earn money"`), not as `{ en, hinglish }`. Keep the script's wording exactly as written (fix only obvious typos). **Do not translate anything and do not add `hinglish`**: that happens later, in a separate pass, with `/translate-hinglish <scenario file>`. Give every message a unique kebab-case `id`. Register the scenario in that dojo's `index.ts`; if the dojo still has `scenarios/coming-soon.ts`, delete it and remove it from `index.ts`.
 4. Edit only files inside `src/dojos/<dojo-id>/`. If the scenario needs something the engine or shells can't do yet, stop and describe exactly what's missing so the lead can add it. Do not change shared code.
 5. Run `npm run lint && npm run typecheck && npm test && npm run build` and fix any failures in the files you created. `npm test` validates every scenario against `src/engine/schema.ts`.
 6. Finish with:
    - the URL to play it: `http://localhost:3000/dojo/<dojo-id>/<scenario-id>`
    - every path from the start to each outcome, as a short list
    - any red flag the player can't see on some path, and any scene no path reaches
+   - a reminder that the scenario is English-only for now: the app shows English in both languages until someone runs `/translate-hinglish src/dojos/<dojo-id>/scenarios/<scenario-id>.ts`
