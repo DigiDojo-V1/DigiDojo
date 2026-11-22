@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
+import { defineScenario } from "@/engine/define";
+import type { Scenario } from "@/engine/schema";
+import { computeDebrief } from "@/engine/scoring";
+import { priorTranscript, toBubble } from "@/engine/transcript";
+import { collectTexts, hinglishCoverage } from "@/i18n/coverage";
+import { LOCALES } from "@/i18n/locale";
+import { resolveText } from "@/i18n/text";
 import { translate, UI_STRINGS } from "@/i18n/ui";
+import { validScenarioInput } from "./fixtures";
 
 describe("translate", () => {
   it("returns the Hinglish string when there is one", () => {
@@ -25,5 +33,84 @@ describe("translate", () => {
     for (const [key, value] of Object.entries(UI_STRINGS.en)) {
       if (typeof value === "string") expect(value.trim(), key).not.toBe("");
     }
+  });
+});
+
+describe("resolveText", () => {
+  it("uses Hinglish when there is one and English otherwise", () => {
+    expect(resolveText({ en: "Hi", hinglish: "Namaste" }, "hinglish")).toBe("Namaste");
+    expect(resolveText({ en: "Hi", hinglish: "Namaste" }, "en")).toBe("Hi");
+    expect(resolveText({ en: "Hi" }, "hinglish")).toBe("Hi");
+  });
+});
+
+describe("a scenario written in plain English strings", () => {
+  // validScenarioInput() is written the way /new-scenario writes one: plain strings, no Hinglish.
+  const scenario: Scenario = defineScenario(validScenarioInput());
+
+  it("validates", () => {
+    expect(scenario.title).toEqual({ en: "Fixture" });
+  });
+
+  it.each(LOCALES)("shows every text field in English in the %s locale", (locale) => {
+    for (const { path, text } of collectTexts(scenario)) {
+      expect(resolveText(text, locale), path).toBe(text.en);
+      expect(resolveText(text, locale).length, path).toBeGreaterThan(0);
+    }
+  });
+
+  it.each(LOCALES)("renders the player's screens in the %s locale", (locale) => {
+    // The same view data ScenarioPlayer and Debrief build, end to end along one path.
+    const start = scenario.nodes.start;
+    const followUp = scenario.nodes["follow-up"];
+    const lost = scenario.nodes.lost;
+    if (start?.kind !== "thread" || followUp?.kind !== "thread" || lost?.kind !== "outcome") {
+      throw new Error("fixture shape changed");
+    }
+
+    expect(start.messages.map((m) => toBubble(m, locale).text)).toEqual([
+      "Hello",
+      "Send ₹500 to earn ₹5,000",
+    ]);
+    expect(start.choices.map((c) => resolveText(c.label, locale))).toEqual(["Pay", "Block"]);
+    expect(resolveText(start.contact.name, locale)).toBe("Stranger");
+
+    const trail = [
+      { nodeId: "start", choiceLabel: start.choices[0]!.label },
+      { nodeId: "follow-up" },
+    ];
+    expect(priorTranscript(scenario, trail, locale).map((b) => b.text)).toEqual([
+      "Hello",
+      "Send ₹500 to earn ₹5,000",
+      "Pay",
+    ]);
+
+    expect(resolveText(lost.title, locale)).toBe("Lost");
+    expect(resolveText(lost.body, locale)).toBe("You lost ₹1,000.");
+
+    const debrief = computeDebrief(scenario, ["m1", "m2", "m3"], ["m2", "m1"]);
+    expect(debrief.caught.map((f) => resolveText(f.label, locale))).toEqual(["Pay first"]);
+    expect(debrief.missed.map((f) => resolveText(f.messageText, locale))).toEqual([
+      "Only 2 minutes left!",
+    ]);
+    expect(debrief.falseAlarms.map((a) => resolveText(a.text, locale))).toEqual(["Hello"]);
+    expect(translate(locale, `tactic.${debrief.caught[0]!.tactic}.label`)).toBe("Pay to earn");
+    expect(resolveText(scenario.debrief.rule, locale)).toBe("Never pay to earn.");
+  });
+});
+
+describe("hinglishCoverage", () => {
+  it("counts fields with no Hinglish, and never treats that as an error", () => {
+    const scenario = defineScenario(validScenarioInput());
+    const fields = collectTexts(scenario);
+    // title, summary, primer x2, 2 contacts, 3 messages, 3 choices, 2 outcomes x2, 2 flags x2, debrief x2
+    expect(fields).toHaveLength(22);
+    expect(hinglishCoverage(fields).missing).toHaveLength(22);
+
+    const translated = defineScenario({
+      ...validScenarioInput(),
+      title: { en: "Fixture", hinglish: "Fixture wala" },
+    });
+    expect(hinglishCoverage(collectTexts(translated)).missing).toHaveLength(21);
   });
 });
