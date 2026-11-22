@@ -1,0 +1,16 @@
+# Who must review changes to each path. Later lines win.
+# TODO: replace the @PAIR... placeholders with real GitHub usernames.
+
+# Lead owns everything by default, plus the shared core.
+*                          @Vasumitra-Gajbhiye
+/src/engine/               @Vasumitra-Gajbhiye
+/src/shells/               @Vasumitra-Gajbhiye
+/src/app/                  @Vasumitra-Gajbhiye
+/src/dojos/registry.ts     @Vasumitra-Gajbhiye
+/.github/                  @Vasumitra-Gajbhiye
+
+# Each pair owns its dojo folder.
+/src/dojos/easy-money/     @PAIR1-MEMBER-A @PAIR1-MEMBER-B
+/src/dojos/dream-job/      @PAIR2-MEMBER-A @PAIR2-MEMBER-B
+/src/dojos/trust-me-bro/   @PAIR3-MEMBER-A @PAIR3-MEMBER-B
+/src/dojos/authority/      @PAIR4-MEMBER-A @PAIR4-MEMBER-B
