@@ -1,16 +1,22 @@
 # Who must review changes to each path. Later lines win.
 # TODO: replace the @PAIR... placeholders with real GitHub usernames.
 
-# Lead owns everything by default, plus the shared core.
-*                          @Vasumitra-Gajbhiye
-/src/engine/               @Vasumitra-Gajbhiye
-/src/shells/               @Vasumitra-Gajbhiye
-/src/app/                  @Vasumitra-Gajbhiye
-/src/dojos/registry.ts     @Vasumitra-Gajbhiye
-/.github/                  @Vasumitra-Gajbhiye
+# Lead owns everything by default, plus the shared core, tooling and docs.
+*                              @Vasumitra-Gajbhiye
+/src/engine/                   @Vasumitra-Gajbhiye
+/src/shells/                   @Vasumitra-Gajbhiye
+/src/app/                      @Vasumitra-Gajbhiye
+/src/dojos/registry.ts         @Vasumitra-Gajbhiye
+/.claude/                      @Vasumitra-Gajbhiye
+/.github/                      @Vasumitra-Gajbhiye
+/docs/                         @Vasumitra-Gajbhiye
 
-# Each pair owns its dojo folder.
-/src/dojos/easy-money/     @PAIR1-MEMBER-A @PAIR1-MEMBER-B
-/src/dojos/dream-job/      @PAIR2-MEMBER-A @PAIR2-MEMBER-B
-/src/dojos/trust-me-bro/   @PAIR3-MEMBER-A @PAIR3-MEMBER-B
-/src/dojos/authority/      @PAIR4-MEMBER-A @PAIR4-MEMBER-B
+# Each pair owns its dojo folder and its scenario scripts.
+/src/dojos/easy-money/         @PAIR1-MEMBER-A @PAIR1-MEMBER-B
+/docs/scenarios/easy-money/    @PAIR1-MEMBER-A @PAIR1-MEMBER-B
+/src/dojos/dream-job/          @PAIR2-MEMBER-A @PAIR2-MEMBER-B
+/docs/scenarios/dream-job/     @PAIR2-MEMBER-A @PAIR2-MEMBER-B
+/src/dojos/trust-me-bro/       @PAIR3-MEMBER-A @PAIR3-MEMBER-B
+/docs/scenarios/trust-me-bro/  @PAIR3-MEMBER-A @PAIR3-MEMBER-B
+/src/dojos/authority/          @PAIR4-MEMBER-A @PAIR4-MEMBER-B
+/docs/scenarios/authority/     @PAIR4-MEMBER-A @PAIR4-MEMBER-B
