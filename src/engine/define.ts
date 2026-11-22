@@ -1,28 +1,35 @@
 import { z } from "zod";
-import { DojoSchema, ScenarioSchema, type Dojo, type Scenario } from "./schema";
+import {
+  DojoSchema,
+  ScenarioSchema,
+  type Dojo,
+  type DojoInput,
+  type Scenario,
+  type ScenarioInput,
+} from "./schema";
 
-function assertValid<T>(schema: z.ZodType<T>, value: T, label: string): void {
+function parseOrThrow<S extends z.ZodType>(
+  schema: S,
+  value: z.input<S>,
+  label: string,
+): z.output<S> {
   const result = schema.safeParse(value);
   if (!result.success) {
     throw new Error(`Invalid ${label}:\n${z.prettifyError(result.error)}`);
   }
+  return result.data;
 }
 
 /**
- * Declare a scenario. Returns it unchanged. Outside production it is validated against
- * every rule in CONTEXT.md §5 and throws a readable error if anything is wrong.
+ * Declare a scenario. Validates it against every rule in CONTEXT.md §5 and throws a readable
+ * error if anything is wrong. Returns the parsed scenario: plain-string text fields become
+ * `{ en }`, so the rest of the app always sees `{ en, hinglish? }`.
  */
-export function defineScenario(scenario: Scenario): Scenario {
-  if (process.env.NODE_ENV !== "production") {
-    assertValid(ScenarioSchema, scenario, `scenario "${scenario.dojoId}/${scenario.id}"`);
-  }
-  return scenario;
+export function defineScenario(scenario: ScenarioInput): Scenario {
+  return parseOrThrow(ScenarioSchema, scenario, `scenario "${scenario.dojoId}/${scenario.id}"`);
 }
 
-/** Declare a dojo. Returns it unchanged, validated outside production. */
-export function defineDojo(dojo: Dojo): Dojo {
-  if (process.env.NODE_ENV !== "production") {
-    assertValid(DojoSchema, dojo, `dojo "${dojo.id}"`);
-  }
-  return dojo;
+/** Declare a dojo. Validated and normalised the same way as `defineScenario`. */
+export function defineDojo(dojo: DojoInput): Dojo {
+  return parseOrThrow(DojoSchema, dojo, `dojo "${dojo.id}"`);
 }

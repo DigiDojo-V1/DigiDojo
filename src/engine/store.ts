@@ -3,7 +3,7 @@ import { create } from "zustand";
 import { createJSONStorage, persist, type StateStorage } from "zustand/middleware";
 import { z } from "zod";
 import { DEFAULT_LOCALE, LOCALES, type Locale } from "@/i18n/locale";
-import type { Choice, Scenario } from "./schema";
+import type { Choice, LocalizedText, Scenario } from "./schema";
 
 /* ------------------------------------------------------------------ */
 /* Current run (in memory only)                                        */
@@ -14,7 +14,7 @@ export type RunPhase = "primer" | "playing" | "debrief";
 /** One node on the path the player has taken, with the reply they chose there. */
 export interface TrailStep {
   nodeId: string;
-  choiceLabel?: string;
+  choiceLabel?: LocalizedText;
 }
 
 interface RunState {

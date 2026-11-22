@@ -1,6 +1,7 @@
 "use client";
 
-import { useT } from "./hooks";
+import type { LocalizedText } from "@/engine/schema";
+import { useT, useText } from "./hooks";
 import type { UiDict, UiKey } from "./ui";
 
 type ArgsOf<K extends UiKey> = UiDict[K] extends (...args: infer A) => string ? A : never;
@@ -16,4 +17,9 @@ export function T<K extends UiKey>({ k, args }: { k: K; args?: ArgsOf<K> }) {
     return <>{(value as (...a: readonly unknown[]) => string)(...(args ?? []))}</>;
   }
   return <>{value as string}</>;
+}
+
+/** Scenario or dojo text as a tiny client component, for server components. `<L text={dojo.name} />` */
+export function L({ text }: { text: LocalizedText }) {
+  return <>{useText()(text)}</>;
 }

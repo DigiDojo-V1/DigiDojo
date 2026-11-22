@@ -6,7 +6,9 @@ import { CompletedTick } from "@/components/progress/CompletedTick";
 import { Badge } from "@/components/ui/badge";
 import { DOJOS, getDojo } from "@/dojos/registry";
 import { scenarioKey } from "@/engine/keys";
-import { T } from "@/i18n/T";
+import { DEFAULT_LOCALE } from "@/i18n/locale";
+import { L, T } from "@/i18n/T";
+import { resolveText } from "@/i18n/text";
 
 /** Only ids in the registry exist. Anything else is a 404. */
 export const dynamicParams = false;
@@ -17,7 +19,9 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: PageProps<"/dojo/[dojoId]">): Promise<Metadata> {
   const { dojoId } = await params;
-  return { title: `${getDojo(dojoId)?.name ?? "Dojo"} · DigiDojo` };
+  const dojo = getDojo(dojoId);
+  const name = dojo === undefined ? "Dojo" : resolveText(dojo.name, DEFAULT_LOCALE);
+  return { title: `${name} · DigiDojo` };
 }
 
 export default async function DojoPage({ params }: PageProps<"/dojo/[dojoId]">) {
@@ -39,8 +43,12 @@ export default async function DojoPage({ params }: PageProps<"/dojo/[dojoId]">) 
         <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
           <T k="dojo.eyebrow" args={[dojo.order]} />
         </p>
-        <h1 className="text-2xl font-bold tracking-tight">{dojo.name}</h1>
-        <p className="mt-1 text-muted-foreground">{dojo.tagline}</p>
+        <h1 className="text-2xl font-bold tracking-tight">
+          <L text={dojo.name} />
+        </h1>
+        <p className="mt-1 text-muted-foreground">
+          <L text={dojo.tagline} />
+        </p>
       </header>
 
       {dojo.scenarios.length === 0 ? (
@@ -57,8 +65,12 @@ export default async function DojoPage({ params }: PageProps<"/dojo/[dojoId]">) 
               >
                 <CompletedTick scenarioKey={scenarioKey(dojo.id, scenario.id)} />
                 <div className="min-w-0 flex-1">
-                  <h2 className="font-medium">{scenario.title}</h2>
-                  <p className="text-sm text-muted-foreground">{scenario.summary}</p>
+                  <h2 className="font-medium">
+                    <L text={scenario.title} />
+                  </h2>
+                  <p className="text-sm text-muted-foreground">
+                    <L text={scenario.summary} />
+                  </p>
                   {(scenario.legit || scenario.coldRun === true) && (
                     <div className="mt-2 flex gap-1.5">
                       {scenario.legit && (

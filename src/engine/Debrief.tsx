@@ -7,11 +7,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { useT } from "@/i18n/hooks";
+import { useT, useText } from "@/i18n/hooks";
 import { cn } from "@/lib/utils";
 import { computeDebrief, type DebriefFlag } from "./scoring";
 import { OUTCOME_STYLE } from "./outcome-style";
-import type { OutcomeNode, Scenario } from "./schema";
+import type { LocalizedText, OutcomeNode, Scenario } from "./schema";
 import { scenarioKey } from "./keys";
 import { useProgressStore } from "./store";
 
@@ -26,6 +26,7 @@ interface DebriefProps {
 
 export function Debrief({ scenario, outcome, seen, flagged, backHref, onReplay }: DebriefProps) {
   const t = useT();
+  const text = useText();
   const markComplete = useProgressStore((s) => s.markComplete);
   const key = scenarioKey(scenario.dojoId, scenario.id);
 
@@ -50,7 +51,7 @@ export function Debrief({ scenario, outcome, seen, flagged, backHref, onReplay }
           <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
             {t("debrief.eyebrow")}
           </p>
-          <h1 className="truncate text-lg font-semibold">{scenario.title}</h1>
+          <h1 className="truncate text-lg font-semibold">{text(scenario.title)}</h1>
         </div>
         {outcome !== undefined && style !== undefined && (
           <Badge variant="outline" className={cn("ml-auto", style.tone)}>
@@ -123,14 +124,14 @@ export function Debrief({ scenario, outcome, seen, flagged, backHref, onReplay }
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-lg leading-snug font-semibold">{scenario.debrief.rule}</p>
+          <p className="text-lg leading-snug font-semibold">{text(scenario.debrief.rule)}</p>
         </CardContent>
       </Card>
 
       <Card size="sm">
         <CardContent className="flex gap-2 text-sm">
           <Phone className="mt-0.5 size-4 shrink-0" />
-          <p>{scenario.debrief.realWorldAction}</p>
+          <p>{text(scenario.debrief.realWorldAction)}</p>
         </CardContent>
       </Card>
 
@@ -160,6 +161,7 @@ function FlagSection({
   muted?: boolean;
 }) {
   const t = useT();
+  const text = useText();
   if (flags.length === 0 && empty === undefined) return null;
   return (
     <section className={cn("space-y-2", muted && "opacity-70")}>
@@ -171,11 +173,11 @@ function FlagSection({
         <Card key={flag.redFlagId} size="sm">
           <CardContent className="space-y-1.5">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="font-medium">{flag.label}</span>
+              <span className="font-medium">{text(flag.label)}</span>
               <Badge variant="secondary">{t(`tactic.${flag.tactic}.label`)}</Badge>
             </div>
             <Quote text={flag.messageText} />
-            <p className="text-sm">{flag.explanation}</p>
+            <p className="text-sm">{text(flag.explanation)}</p>
             <p className="text-xs text-muted-foreground">
               {t(`tactic.${flag.tactic}.explanation`)}
             </p>
@@ -186,10 +188,11 @@ function FlagSection({
   );
 }
 
-function Quote({ text }: { text: string }) {
+function Quote({ text }: { text: LocalizedText }) {
+  const resolve = useText();
   return (
     <blockquote className="border-l-2 pl-2 text-sm text-muted-foreground italic">
-      “{text}”
+      “{resolve(text)}”
     </blockquote>
   );
 }

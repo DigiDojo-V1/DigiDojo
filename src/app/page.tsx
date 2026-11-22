@@ -3,7 +3,7 @@ import { ChevronRight } from "lucide-react";
 import { DojoProgress } from "@/components/progress/DojoProgress";
 import { DOJOS } from "@/dojos/registry";
 import { scenarioKey } from "@/engine/keys";
-import { T } from "@/i18n/T";
+import { L, T } from "@/i18n/T";
 
 export default function HomePage() {
   return (
@@ -31,8 +31,12 @@ export default function HomePage() {
             >
               <div className="flex items-start justify-between gap-2">
                 <div>
-                  <h2 className="font-semibold">{dojo.name}</h2>
-                  <p className="text-sm text-muted-foreground">{dojo.tagline}</p>
+                  <h2 className="font-semibold">
+                    <L text={dojo.name} />
+                  </h2>
+                  <p className="text-sm text-muted-foreground">
+                    <L text={dojo.tagline} />
+                  </p>
                 </div>
                 <ChevronRight className="mt-0.5 size-5 shrink-0 text-muted-foreground transition group-hover:translate-x-0.5" />
               </div>

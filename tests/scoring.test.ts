@@ -19,11 +19,14 @@ describe("computeDebrief", () => {
 
   it("counts a flagged message with no red flag as a false alarm", () => {
     const result = computeDebrief(validScenario(), ["m1", "m2"], ["m1"]);
-    expect(result.falseAlarms).toEqual([{ messageId: "m1", text: "Hello" }]);
+    expect(result.falseAlarms).toEqual([{ messageId: "m1", text: { en: "Hello" } }]);
   });
 
   it("carries the tactic and the message text", () => {
     const [flag] = computeDebrief(validScenario(), ["m2"], ["m2"]).caught;
-    expect(flag).toMatchObject({ tactic: "pay-to-earn", messageText: "Send ₹500 to earn ₹5,000" });
+    expect(flag).toMatchObject({
+      tactic: "pay-to-earn",
+      messageText: { en: "Send ₹500 to earn ₹5,000" },
+    });
   });
 });

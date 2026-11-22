@@ -1,6 +1,8 @@
 import { useCallback } from "react";
+import type { LocalizedText } from "@/engine/schema";
 import { useHydrated, useProgressStore } from "@/engine/store";
 import { DEFAULT_LOCALE, type Locale } from "./locale";
+import { resolveText } from "./text";
 import { translate, type UiDict, type UiKey } from "./ui";
 
 /**
@@ -17,4 +19,10 @@ export function useLocale(): Locale {
 export function useT(): <K extends UiKey>(key: K) => UiDict[K] {
   const locale = useLocale();
   return useCallback(<K extends UiKey>(key: K) => translate(locale, key), [locale]);
+}
+
+/** `text(scenario.title)` for scenario and dojo text, in the player's language with English fallback. */
+export function useText(): (text: LocalizedText) => string {
+  const locale = useLocale();
+  return useCallback((text: LocalizedText) => resolveText(text, locale), [locale]);
 }

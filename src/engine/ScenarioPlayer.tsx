@@ -6,7 +6,7 @@ import { motion } from "motion/react";
 import { ChevronLeft, RotateCcw, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useT } from "@/i18n/hooks";
+import { useLocale, useT, useText } from "@/i18n/hooks";
 import { formatRupees } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { CallShell } from "@/shells/CallShell";
@@ -108,6 +108,7 @@ function PrimerCard({
   onStart: () => void;
 }) {
   const t = useT();
+  const text = useText();
   return (
     <main className="flex flex-1 flex-col p-4">
       <Link
@@ -127,10 +128,10 @@ function PrimerCard({
             <CardDescription className="flex items-center gap-1.5">
               <Sparkles className="size-4" /> {t("primer.eyebrow")}
             </CardDescription>
-            <CardTitle className="text-xl">{primer.title}</CardTitle>
+            <CardTitle className="text-xl">{text(primer.title)}</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="leading-relaxed">{primer.body}</p>
+            <p className="leading-relaxed">{text(primer.body)}</p>
           </CardContent>
         </Card>
         <Button size="lg" className="mt-4 h-11" onClick={onStart}>
@@ -158,6 +159,8 @@ function ThreadView({
   const toggleFlag = useRunStore((s) => s.toggleFlag);
   const choose = useRunStore((s) => s.choose);
   const t = useT();
+  const text = useText();
+  const locale = useLocale();
 
   // Messages seen before this visit (after a rewind) appear without waiting.
   const [seenBefore] = useState(() => new Set(useRunStore.getState().seen));
@@ -174,10 +177,11 @@ function ThreadView({
     return () => clearTimeout(timer);
   }, [next, seenBefore, markSeen]);
 
-  const prior = useMemo(() => priorTranscript(scenario, trail), [scenario, trail]);
+  // Text is resolved on every render, so switching language mid-run just re-renders this screen.
+  const prior = useMemo(() => priorTranscript(scenario, trail, locale), [scenario, trail, locale]);
   const messages = useMemo(
-    () => [...prior, ...node.messages.slice(0, revealed).map(toBubble)],
-    [prior, node.messages, revealed],
+    () => [...prior, ...node.messages.slice(0, revealed).map((m) => toBubble(m, locale))],
+    [prior, node.messages, revealed, locale],
   );
 
   const typing = next !== undefined && next.from === "them" && !seenBefore.has(next.id);
@@ -194,24 +198,28 @@ function ThreadView({
       className="sticky bottom-0 z-30 space-y-2 border-t bg-white/95 p-3 backdrop-blur"
     >
       <p className="text-xs font-medium text-muted-foreground">{t("thread.prompt")}</p>
-      {node.choices.map((choice) => (
+      {node.choices.map((choice, i) => (
         <Button
-          key={choice.nextNodeId + choice.label}
+          key={`${i}-${choice.nextNodeId}`}
           variant="outline"
           className="h-auto w-full justify-start py-2.5 text-left text-[15px] whitespace-normal"
           onClick={() => choose(choice)}
         >
-          {choice.label}
+          {text(choice.label)}
         </Button>
       ))}
     </motion.div>
   ) : undefined;
 
   const shellProps: ShellProps = {
-    contact: node.contact,
+    contact: {
+      name: text(node.contact.name),
+      subtitle: node.contact.subtitle === undefined ? undefined : text(node.contact.subtitle),
+      avatar: node.contact.avatar,
+    },
     messages,
     typing,
-    typingSender: typing ? next?.sender : undefined,
+    typingSender: typing && next?.sender !== undefined ? text(next.sender) : undefined,
     flaggedIds: flagged,
     onToggleFlag: toggleFlag,
     backHref,
@@ -253,6 +261,7 @@ function OutcomeView({
   onDebrief: () => void;
 }) {
   const t = useT();
+  const text = useText();
   const style = OUTCOME_STYLE[outcome.result];
   const Icon = style.icon;
   return (
@@ -266,7 +275,7 @@ function OutcomeView({
         <p className={cn("mt-3 text-xs font-semibold tracking-wide uppercase", style.tone)}>
           {t(`outcome.${outcome.result}`)}
         </p>
-        <h1 className="mt-1 text-2xl font-bold">{outcome.title}</h1>
+        <h1 className="mt-1 text-2xl font-bold">{text(outcome.title)}</h1>
         {outcome.moneyDelta !== undefined && outcome.moneyDelta !== 0 && (
           <p
             className={cn(
@@ -277,7 +286,7 @@ function OutcomeView({
             {formatRupees(outcome.moneyDelta, { signed: true })}
           </p>
         )}
-        <p className="mt-3 leading-relaxed text-neutral-700">{outcome.body}</p>
+        <p className="mt-3 leading-relaxed text-neutral-700">{text(outcome.body)}</p>
       </motion.div>
 
       {onRewind !== undefined && (

@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { defineDojo, defineScenario } from "@/engine/define";
-import { DojoSchema, ScenarioSchema, type Scenario } from "@/engine/schema";
-import { validScenario } from "./fixtures";
+import { DojoSchema, ScenarioSchema, type ScenarioInput } from "@/engine/schema";
+import { validScenarioInput as validScenario } from "./fixtures";
 
-function thread(s: Scenario, id: string) {
+function thread(s: ScenarioInput, id: string) {
   const node = s.nodes[id];
   if (node?.kind !== "thread") throw new Error(`fixture node ${id} is not a thread`);
   return node;
@@ -125,9 +125,32 @@ describe("DojoSchema", () => {
 });
 
 describe("defineScenario / defineDojo", () => {
-  it("returns a valid scenario unchanged", () => {
+  it("returns the scenario with plain strings normalised to { en }", () => {
     const s = validScenario();
-    expect(defineScenario(s)).toBe(s);
+    const defined = defineScenario(s);
+    expect(defined.title).toEqual({ en: "Fixture" });
+    expect(defined.startNodeId).toBe(s.startNodeId);
+    expect(Object.keys(defined.nodes)).toEqual(Object.keys(s.nodes));
+  });
+
+  it("keeps Hinglish when the author provides it", () => {
+    const s = { ...validScenario(), title: { en: "Fixture", hinglish: "Fixture wala" } };
+    expect(defineScenario(s).title).toEqual({ en: "Fixture", hinglish: "Fixture wala" });
+  });
+
+  it("parses already-normalised text the same way (idempotent)", () => {
+    const once = defineScenario(validScenario());
+    expect(defineScenario(once)).toEqual(once);
+  });
+
+  it("rejects empty text and unknown text keys", () => {
+    expect(errorsFor({ ...validScenario(), title: "" }).length).toBeGreaterThan(0);
+    expect(
+      errorsFor({ ...validScenario(), title: { hinglish: "Sirf hinglish" } }).length,
+    ).toBeGreaterThan(0);
+    expect(
+      errorsFor({ ...validScenario(), title: { en: "x", hindi: "y" } }).length,
+    ).toBeGreaterThan(0);
   });
 
   it("throws a readable error for an invalid scenario", () => {

@@ -9,6 +9,28 @@ const kebabCase = z
   .string()
   .regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, "must be kebab-case (lowercase letters, digits and dashes)");
 
+/**
+ * Player-facing text. Authors write a plain string (English) or `{ en, hinglish }`; parsing
+ * turns both into `{ en, hinglish? }`. Components never read the fields directly: they use
+ * `useText()` from `@/i18n/hooks`, which falls back to English when Hinglish is missing.
+ */
+const LocalizedTextObjectSchema = z.strictObject({
+  en: z.string().min(1),
+  hinglish: z.string().min(1).optional(),
+});
+/** Parsed form: always an object. */
+export type LocalizedText = z.output<typeof LocalizedTextObjectSchema>;
+
+export const LocalizedTextSchema = z.union([
+  z
+    .string()
+    .min(1)
+    .transform((en): LocalizedText => ({ en })),
+  LocalizedTextObjectSchema,
+]);
+/** What an author may write: a plain English string or `{ en, hinglish? }`. */
+export type LocalizedTextInput = z.input<typeof LocalizedTextSchema>;
+
 export const APP_THEMES = ["whatsapp", "telegram", "instagram", "sms", "upi", "call"] as const;
 export const AppThemeSchema = z.enum(APP_THEMES);
 export type AppTheme = z.infer<typeof AppThemeSchema>;
@@ -38,28 +60,28 @@ export const MessageSchema = z.strictObject({
   /** `system` = credit alerts, "X joined the group", etc. */
   from: z.enum(["them", "me", "system"]),
   /** Display name inside group chats. */
-  sender: z.string().min(1).optional(),
-  text: z.string().min(1),
+  sender: LocalizedTextSchema.optional(),
+  text: LocalizedTextSchema,
   /** Wait before this message appears. Default 800. */
   delayMs: z.number().int().nonnegative().optional(),
   /** Set only if this message carries a red flag. */
   redFlagId: kebabCase.optional(),
 });
-export type Message = z.infer<typeof MessageSchema>;
+export type Message = z.output<typeof MessageSchema>;
 
 export const ChoiceSchema = z.strictObject({
-  label: z.string().min(1),
+  label: LocalizedTextSchema,
   nextNodeId: kebabCase,
 });
-export type Choice = z.infer<typeof ChoiceSchema>;
+export type Choice = z.output<typeof ChoiceSchema>;
 
 export const ContactSchema = z.strictObject({
-  name: z.string().min(1),
-  subtitle: z.string().min(1).optional(),
+  name: LocalizedTextSchema,
+  subtitle: LocalizedTextSchema.optional(),
   /** Image path under /public. Without it the shell shows the first letter of the name. */
   avatar: z.string().min(1).optional(),
 });
-export type Contact = z.infer<typeof ContactSchema>;
+export type Contact = z.output<typeof ContactSchema>;
 
 export const ThreadNodeSchema = z.strictObject({
   kind: z.literal("thread"),
@@ -68,7 +90,7 @@ export const ThreadNodeSchema = z.strictObject({
   messages: z.array(MessageSchema).min(1),
   choices: z.array(ChoiceSchema).min(1),
 });
-export type ThreadNode = z.infer<typeof ThreadNodeSchema>;
+export type ThreadNode = z.output<typeof ThreadNodeSchema>;
 
 export const OUTCOME_RESULTS = ["safe", "loss", "partial-loss", "missed-opportunity"] as const;
 export const OutcomeResultSchema = z.enum(OUTCOME_RESULTS);
@@ -77,46 +99,46 @@ export type OutcomeResult = z.infer<typeof OutcomeResultSchema>;
 export const OutcomeNodeSchema = z.strictObject({
   kind: z.literal("outcome"),
   result: OutcomeResultSchema,
-  title: z.string().min(1),
-  body: z.string().min(1),
+  title: LocalizedTextSchema,
+  body: LocalizedTextSchema,
   /** Rupees. Negative = lost. */
   moneyDelta: z.number().int().optional(),
   /** The decision node the player can rewind to. */
   rewindToNodeId: kebabCase.optional(),
 });
-export type OutcomeNode = z.infer<typeof OutcomeNodeSchema>;
+export type OutcomeNode = z.output<typeof OutcomeNodeSchema>;
 
 export const ScenarioNodeSchema = z.discriminatedUnion("kind", [
   ThreadNodeSchema,
   OutcomeNodeSchema,
 ]);
-export type ScenarioNode = z.infer<typeof ScenarioNodeSchema>;
+export type ScenarioNode = z.output<typeof ScenarioNodeSchema>;
 
 export const RedFlagSchema = z.strictObject({
-  label: z.string().min(1),
+  label: LocalizedTextSchema,
   tactic: TacticSchema,
-  explanation: z.string().min(1),
+  explanation: LocalizedTextSchema,
 });
-export type RedFlag = z.infer<typeof RedFlagSchema>;
+export type RedFlag = z.output<typeof RedFlagSchema>;
 
 const ScenarioShape = z.strictObject({
   id: kebabCase,
   dojoId: DojoIdSchema,
-  title: z.string().min(1),
+  title: LocalizedTextSchema,
   /** One line for the dojo page. */
-  summary: z.string().min(1),
+  summary: LocalizedTextSchema,
   /** true = a real message the player should trust. */
   legit: z.boolean(),
   /** true = no primer, no hints. */
   coldRun: z.boolean().optional(),
-  primer: z.strictObject({ title: z.string().min(1), body: z.string().min(1) }).optional(),
+  primer: z.strictObject({ title: LocalizedTextSchema, body: LocalizedTextSchema }).optional(),
   startNodeId: kebabCase,
   nodes: z.record(kebabCase, ScenarioNodeSchema),
   redFlags: z.record(kebabCase, RedFlagSchema),
-  debrief: z.strictObject({ rule: z.string().min(1), realWorldAction: z.string().min(1) }),
+  debrief: z.strictObject({ rule: LocalizedTextSchema, realWorldAction: LocalizedTextSchema }),
 });
 
-type ScenarioShapeT = z.infer<typeof ScenarioShape>;
+type ScenarioShapeT = z.output<typeof ScenarioShape>;
 
 /** Cross-field rules from CONTEXT.md §5 that a plain object schema can't express. */
 function checkScenarioGraph(s: ScenarioShapeT, ctx: z.RefinementCtx): void {
@@ -203,15 +225,18 @@ function canReachOutcome(s: ScenarioShapeT): boolean {
 }
 
 export const ScenarioSchema = ScenarioShape.superRefine(checkScenarioGraph);
-export type Scenario = z.infer<typeof ScenarioSchema>;
+/** A parsed scenario: every text field is `{ en, hinglish? }`. */
+export type Scenario = z.output<typeof ScenarioSchema>;
+/** What a scenario file passes to `defineScenario()`: text fields may be plain strings. */
+export type ScenarioInput = z.input<typeof ScenarioSchema>;
 
 export const DojoSchema = z
   .strictObject({
     id: DojoIdSchema,
     /** Position on the home path, starting at 1. */
     order: z.number().int().positive(),
-    name: z.string().min(1),
-    tagline: z.string().min(1),
+    name: LocalizedTextSchema,
+    tagline: LocalizedTextSchema,
     scenarios: z.array(ScenarioSchema),
   })
   .superRefine((dojo, ctx) => {
@@ -234,4 +259,5 @@ export const DojoSchema = z
       ids.add(scenario.id);
     });
   });
-export type Dojo = z.infer<typeof DojoSchema>;
+export type Dojo = z.output<typeof DojoSchema>;
+export type DojoInput = z.input<typeof DojoSchema>;
