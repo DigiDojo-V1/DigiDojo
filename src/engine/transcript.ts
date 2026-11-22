@@ -1,19 +1,23 @@
+import type { Locale } from "@/i18n/locale";
+import { resolveText } from "@/i18n/text";
 import type { ChatBubble } from "@/shells/types";
 import type { Message, Scenario, ScenarioNode, ThreadNode } from "./schema";
 import type { TrailStep } from "./store";
 
-export function toBubble(message: Message): ChatBubble {
+/** A message as the shell draws it, with its text in `locale`. */
+export function toBubble(message: Message, locale: Locale): ChatBubble {
   return {
     id: message.id,
     from: message.from,
-    sender: message.sender,
-    text: message.text,
+    sender: message.sender === undefined ? undefined : resolveText(message.sender, locale),
+    text: resolveText(message.text, locale),
     flaggable: message.from !== "me",
   };
 }
 
+/** Same app and same contact (compared by the English name, which never changes with locale). */
 function sameConversation(a: ScenarioNode | undefined, b: ThreadNode): a is ThreadNode {
-  return a?.kind === "thread" && a.app === b.app && a.contact.name === b.contact.name;
+  return a?.kind === "thread" && a.app === b.app && a.contact.name.en === b.contact.name.en;
 }
 
 /**
@@ -21,7 +25,11 @@ function sameConversation(a: ScenarioNode | undefined, b: ThreadNode): a is Thre
  * Walks back along the trail while the nodes share the same app and contact, and adds the
  * player's chosen reply after each one as a "me" bubble. So `dm` → `task` reads as one chat.
  */
-export function priorTranscript(scenario: Scenario, trail: readonly TrailStep[]): ChatBubble[] {
+export function priorTranscript(
+  scenario: Scenario,
+  trail: readonly TrailStep[],
+  locale: Locale,
+): ChatBubble[] {
   const current = trail.at(-1);
   const node = current === undefined ? undefined : scenario.nodes[current.nodeId];
   if (node?.kind !== "thread") return [];
@@ -34,9 +42,14 @@ export function priorTranscript(scenario: Scenario, trail: readonly TrailStep[])
     const step = trail[i]!;
     const stepNode = scenario.nodes[step.nodeId];
     if (stepNode?.kind !== "thread") continue;
-    bubbles.push(...stepNode.messages.map(toBubble));
+    bubbles.push(...stepNode.messages.map((m) => toBubble(m, locale)));
     if (step.choiceLabel !== undefined) {
-      bubbles.push({ id: `reply-${i}`, from: "me", text: step.choiceLabel, flaggable: false });
+      bubbles.push({
+        id: `reply-${i}`,
+        from: "me",
+        text: resolveText(step.choiceLabel, locale),
+        flaggable: false,
+      });
     }
   }
   return bubbles;

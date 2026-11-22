@@ -1,5 +1,12 @@
 import type { ReactNode } from "react";
-import type { Contact } from "@/engine/schema";
+
+/** The contact in a shell's header, with text already in the player's language. */
+export interface ShellContact {
+  name: string;
+  subtitle?: string;
+  /** Image path under /public. */
+  avatar?: string;
+}
 
 /** One message as a shell draws it. */
 export interface ChatBubble {
@@ -14,7 +21,7 @@ export interface ChatBubble {
 
 /** The props every fake-app shell accepts, so the player can swap shells by `app`. */
 export interface ShellProps {
-  contact: Contact;
+  contact: ShellContact;
   messages: ChatBubble[];
   /** Show the typing indicator. */
   typing: boolean;

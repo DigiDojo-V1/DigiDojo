@@ -1,11 +1,12 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "motion/react";
-import { ChevronLeft, RotateCcw, Sparkles } from "lucide-react";
+import { RotateCcw, Sparkles } from "lucide-react";
+import { TopBar } from "@/components/TopBar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useLocale, useT, useText } from "@/i18n/hooks";
 import { formatRupees } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { CallShell } from "@/shells/CallShell";
@@ -78,6 +79,7 @@ export function ScenarioPlayer({ scenario, backHref }: ScenarioPlayerProps) {
     return (
       <OutcomeView
         outcome={node}
+        backHref={backHref}
         onRewind={rewindTarget !== undefined ? () => rewind(rewindTarget) : undefined}
         onDebrief={openDebrief}
       />
@@ -106,15 +108,11 @@ function PrimerCard({
   backHref: string;
   onStart: () => void;
 }) {
+  const t = useT();
+  const text = useText();
   return (
     <main className="flex flex-1 flex-col p-4">
-      <Link
-        href={backHref}
-        aria-label="Back to dojo"
-        className="self-start rounded-full p-1.5 hover:bg-muted"
-      >
-        <ChevronLeft className="size-5" />
-      </Link>
+      <TopBar back={{ href: backHref, label: "nav.backToDojo" }} />
       <motion.div
         className="flex flex-1 flex-col justify-center"
         initial={{ opacity: 0, y: 12 }}
@@ -123,16 +121,16 @@ function PrimerCard({
         <Card>
           <CardHeader>
             <CardDescription className="flex items-center gap-1.5">
-              <Sparkles className="size-4" /> The trick
+              <Sparkles className="size-4" /> {t("primer.eyebrow")}
             </CardDescription>
-            <CardTitle className="text-xl">{primer.title}</CardTitle>
+            <CardTitle className="text-xl">{text(primer.title)}</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="leading-relaxed">{primer.body}</p>
+            <p className="leading-relaxed">{text(primer.body)}</p>
           </CardContent>
         </Card>
         <Button size="lg" className="mt-4 h-11" onClick={onStart}>
-          Start simulation
+          {t("primer.start")}
         </Button>
       </motion.div>
     </main>
@@ -155,6 +153,9 @@ function ThreadView({
   const markSeen = useRunStore((s) => s.markSeen);
   const toggleFlag = useRunStore((s) => s.toggleFlag);
   const choose = useRunStore((s) => s.choose);
+  const t = useT();
+  const text = useText();
+  const locale = useLocale();
 
   // Messages seen before this visit (after a rewind) appear without waiting.
   const [seenBefore] = useState(() => new Set(useRunStore.getState().seen));
@@ -171,10 +172,11 @@ function ThreadView({
     return () => clearTimeout(timer);
   }, [next, seenBefore, markSeen]);
 
-  const prior = useMemo(() => priorTranscript(scenario, trail), [scenario, trail]);
+  // Text is resolved on every render, so switching language mid-run just re-renders this screen.
+  const prior = useMemo(() => priorTranscript(scenario, trail, locale), [scenario, trail, locale]);
   const messages = useMemo(
-    () => [...prior, ...node.messages.slice(0, revealed).map(toBubble)],
-    [prior, node.messages, revealed],
+    () => [...prior, ...node.messages.slice(0, revealed).map((m) => toBubble(m, locale))],
+    [prior, node.messages, revealed, locale],
   );
 
   const typing = next !== undefined && next.from === "them" && !seenBefore.has(next.id);
@@ -190,29 +192,33 @@ function ThreadView({
       animate={{ opacity: 1, y: 0 }}
       className="sticky bottom-0 z-30 space-y-2 border-t bg-white/95 p-3 backdrop-blur"
     >
-      <p className="text-xs font-medium text-muted-foreground">What do you do?</p>
-      {node.choices.map((choice) => (
+      <p className="text-xs font-medium text-muted-foreground">{t("thread.prompt")}</p>
+      {node.choices.map((choice, i) => (
         <Button
-          key={choice.nextNodeId + choice.label}
+          key={`${i}-${choice.nextNodeId}`}
           variant="outline"
           className="h-auto w-full justify-start py-2.5 text-left text-[15px] whitespace-normal"
           onClick={() => choose(choice)}
         >
-          {choice.label}
+          {text(choice.label)}
         </Button>
       ))}
     </motion.div>
   ) : undefined;
 
   const shellProps: ShellProps = {
-    contact: node.contact,
+    contact: {
+      name: text(node.contact.name),
+      subtitle: node.contact.subtitle === undefined ? undefined : text(node.contact.subtitle),
+      avatar: node.contact.avatar,
+    },
     messages,
     typing,
-    typingSender: typing ? next?.sender : undefined,
+    typingSender: typing && next?.sender !== undefined ? text(next.sender) : undefined,
     flaggedIds: flagged,
     onToggleFlag: toggleFlag,
     backHref,
-    hint: showHint ? "Tap any message to flag it as suspicious" : undefined,
+    hint: showHint ? t("thread.hint") : undefined,
     footer,
   };
 
@@ -242,48 +248,55 @@ function Shell({ app, ...props }: ShellProps & { app: AppTheme }) {
 
 function OutcomeView({
   outcome,
+  backHref,
   onRewind,
   onDebrief,
 }: {
   outcome: OutcomeNode;
+  backHref: string;
   onRewind?: () => void;
   onDebrief: () => void;
 }) {
+  const t = useT();
+  const text = useText();
   const style = OUTCOME_STYLE[outcome.result];
   const Icon = style.icon;
   return (
-    <main className="flex flex-1 flex-col justify-center gap-4 p-4">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.96 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className={cn("rounded-2xl p-6 text-center ring-1", style.soft)}
-      >
-        <Icon className={cn("mx-auto size-12", style.tone)} aria-hidden />
-        <p className={cn("mt-3 text-xs font-semibold tracking-wide uppercase", style.tone)}>
-          {style.label}
-        </p>
-        <h1 className="mt-1 text-2xl font-bold">{outcome.title}</h1>
-        {outcome.moneyDelta !== undefined && outcome.moneyDelta !== 0 && (
-          <p
-            className={cn(
-              "mt-3 text-3xl font-bold tabular-nums",
-              outcome.moneyDelta < 0 ? "text-red-700" : "text-emerald-700",
-            )}
-          >
-            {formatRupees(outcome.moneyDelta, { signed: true })}
+    <main className="flex flex-1 flex-col gap-4 p-4">
+      <TopBar back={{ href: backHref, label: "nav.backToDojo" }} />
+      <div className="flex flex-1 flex-col justify-center gap-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.96 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className={cn("rounded-2xl p-6 text-center ring-1", style.soft)}
+        >
+          <Icon className={cn("mx-auto size-12", style.tone)} aria-hidden />
+          <p className={cn("mt-3 text-xs font-semibold tracking-wide uppercase", style.tone)}>
+            {t(`outcome.${outcome.result}`)}
           </p>
-        )}
-        <p className="mt-3 leading-relaxed text-neutral-700">{outcome.body}</p>
-      </motion.div>
+          <h1 className="mt-1 text-2xl font-bold">{text(outcome.title)}</h1>
+          {outcome.moneyDelta !== undefined && outcome.moneyDelta !== 0 && (
+            <p
+              className={cn(
+                "mt-3 text-3xl font-bold tabular-nums",
+                outcome.moneyDelta < 0 ? "text-red-700" : "text-emerald-700",
+              )}
+            >
+              {formatRupees(outcome.moneyDelta, { signed: true })}
+            </p>
+          )}
+          <p className="mt-3 leading-relaxed text-neutral-700">{text(outcome.body)}</p>
+        </motion.div>
 
-      {onRewind !== undefined && (
-        <Button variant="outline" size="lg" className="h-11" onClick={onRewind}>
-          <RotateCcw /> Rewind to where you could have stopped
+        {onRewind !== undefined && (
+          <Button variant="outline" size="lg" className="h-11" onClick={onRewind}>
+            <RotateCcw /> {t("outcome.rewind")}
+          </Button>
+        )}
+        <Button size="lg" className="h-11" onClick={onDebrief}>
+          {t("outcome.seeDebrief")}
         </Button>
-      )}
-      <Button size="lg" className="h-11" onClick={onDebrief}>
-        See debrief
-      </Button>
+      </div>
     </main>
   );
 }

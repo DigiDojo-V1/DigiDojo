@@ -1,12 +1,12 @@
-import type { Message, RedFlag, Scenario, Tactic } from "./schema";
+import type { LocalizedText, Message, RedFlag, Scenario, Tactic } from "./schema";
 
 export interface DebriefFlag {
   redFlagId: string;
-  label: string;
+  label: LocalizedText;
   tactic: Tactic;
-  explanation: string;
+  explanation: LocalizedText;
   /** Text of the first message carrying this red flag. */
-  messageText: string;
+  messageText: LocalizedText;
 }
 
 export interface DebriefResult {
@@ -17,7 +17,7 @@ export interface DebriefResult {
   /** Red flags on messages the player never reached on this path. */
   notReached: DebriefFlag[];
   /** Flagged messages that carry no red flag. */
-  falseAlarms: { messageId: string; text: string }[];
+  falseAlarms: { messageId: string; text: LocalizedText }[];
 }
 
 /** Every message in the scenario, keyed by id. */
@@ -52,7 +52,7 @@ export function computeDebrief(
       label: redFlag.label,
       tactic: redFlag.tactic,
       explanation: redFlag.explanation,
-      messageText: carriers[0]?.text ?? "",
+      messageText: carriers[0]?.text ?? { en: "" },
     };
     if (carriers.some((m) => flagged.has(m.id))) result.caught.push(entry);
     else if (carriers.some((m) => seen.has(m.id))) result.missed.push(entry);

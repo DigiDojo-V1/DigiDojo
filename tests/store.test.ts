@@ -18,8 +18,11 @@ describe("run store", () => {
   });
 
   it("records the choice and moves to the next node", () => {
-    run().choose({ label: "Pay", nextNodeId: "follow-up" });
-    expect(run().trail).toEqual([{ nodeId: "start", choiceLabel: "Pay" }, { nodeId: "follow-up" }]);
+    run().choose({ label: { en: "Pay" }, nextNodeId: "follow-up" });
+    expect(run().trail).toEqual([
+      { nodeId: "start", choiceLabel: { en: "Pay" } },
+      { nodeId: "follow-up" },
+    ]);
   });
 
   it("toggles flags", () => {
@@ -32,8 +35,8 @@ describe("run store", () => {
   it("rewinds to the target node and keeps flags and seen messages", () => {
     run().markSeen("m2");
     run().toggleFlag("m2");
-    run().choose({ label: "Pay", nextNodeId: "follow-up" });
-    run().choose({ label: "Pay again", nextNodeId: "lost" });
+    run().choose({ label: { en: "Pay" }, nextNodeId: "follow-up" });
+    run().choose({ label: { en: "Pay again" }, nextNodeId: "lost" });
     run().rewind("start");
     expect(run().trail).toEqual([{ nodeId: "start" }]);
     expect(run().flagged).toEqual(["m2"]);

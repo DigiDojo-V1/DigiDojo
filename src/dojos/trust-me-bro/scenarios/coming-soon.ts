@@ -5,7 +5,7 @@ export const comingSoon = defineScenario({
   id: "coming-soon",
   dojoId: "trust-me-bro",
   title: "Coming soon",
-  summary: "Is dojo ke scenarios abhi ban rahe hain.",
+  summary: "Scenarios for this dojo are being built.",
   legit: false,
   startNodeId: "coming-soon",
   nodes: {
@@ -13,12 +13,12 @@ export const comingSoon = defineScenario({
       kind: "outcome",
       result: "safe",
       title: "Coming soon",
-      body: "Yeh dojo abhi ban raha hai. Jald hi wapas aana!",
+      body: "This dojo is still being built. Check back soon!",
     },
   },
   redFlags: {},
   debrief: {
-    rule: "Jab bhi koi paise ya OTP maange, ruko aur socho.",
-    realWorldAction: "Fraud hua? Turant 1930 pe call karo aur cybercrime.gov.in pe report karo.",
+    rule: "Whenever someone asks for money or an OTP, stop and think.",
+    realWorldAction: "Scammed? Call 1930 right away and report at cybercrime.gov.in.",
   },
 });

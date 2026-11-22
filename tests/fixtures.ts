@@ -1,7 +1,10 @@
-import type { Scenario } from "@/engine/schema";
+import { ScenarioSchema, type Scenario, type ScenarioInput } from "@/engine/schema";
 
-/** A small valid scenario. Tests clone it and break one rule at a time. */
-export function validScenario(): Scenario {
+/**
+ * A small valid scenario as an author writes it: plain English strings, no Hinglish.
+ * Schema tests clone it and break one rule at a time.
+ */
+export function validScenarioInput(): ScenarioInput {
   return {
     id: "fixture",
     dojoId: "easy-money",
@@ -47,4 +50,9 @@ export function validScenario(): Scenario {
     },
     debrief: { rule: "Never pay to earn.", realWorldAction: "Call 1930." },
   };
+}
+
+/** The same scenario after parsing: every text field is `{ en }`. */
+export function validScenario(): Scenario {
+  return ScenarioSchema.parse(validScenarioInput());
 }

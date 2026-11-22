@@ -69,7 +69,7 @@ Copy one block per ending.
 
 ## Before you hand it to Claude
 
-- [ ] It reads like a real scam: casual, a bit sloppy, Hinglish in Roman script, trust built slowly
+- [ ] Written in English; it reads like a real scam: casual, a bit sloppy, trust built slowly (Hinglish comes later with `/translate-hinglish`)
 - [ ] 3 to 4 decision points, at least 3 red flags
 - [ ] Every choice leads somewhere, and every path ends in an outcome
 - [ ] Losses have a rewind point

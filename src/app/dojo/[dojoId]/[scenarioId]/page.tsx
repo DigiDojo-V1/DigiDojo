@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { DOJOS, getScenario } from "@/dojos/registry";
 import { ScenarioPlayer } from "@/engine/ScenarioPlayer";
+import { DEFAULT_LOCALE } from "@/i18n/locale";
+import { resolveText } from "@/i18n/text";
 
 /** Only ids in the registry exist. Anything else is a 404. */
 export const dynamicParams = false;
@@ -16,7 +18,9 @@ export async function generateMetadata({
   params,
 }: PageProps<"/dojo/[dojoId]/[scenarioId]">): Promise<Metadata> {
   const { dojoId, scenarioId } = await params;
-  return { title: `${getScenario(dojoId, scenarioId)?.title ?? "Scenario"} · DigiDojo` };
+  const scenario = getScenario(dojoId, scenarioId);
+  const title = scenario === undefined ? "Scenario" : resolveText(scenario.title, DEFAULT_LOCALE);
+  return { title: `${title} · DigiDojo` };
 }
 
 export default async function ScenarioPage({ params }: PageProps<"/dojo/[dojoId]/[scenarioId]">) {
