@@ -6,6 +6,7 @@ import { motion } from "motion/react";
 import { ChevronLeft, RotateCcw, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useT } from "@/i18n/hooks";
 import { formatRupees } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { CallShell } from "@/shells/CallShell";
@@ -106,11 +107,12 @@ function PrimerCard({
   backHref: string;
   onStart: () => void;
 }) {
+  const t = useT();
   return (
     <main className="flex flex-1 flex-col p-4">
       <Link
         href={backHref}
-        aria-label="Back to dojo"
+        aria-label={t("nav.backToDojo")}
         className="self-start rounded-full p-1.5 hover:bg-muted"
       >
         <ChevronLeft className="size-5" />
@@ -123,7 +125,7 @@ function PrimerCard({
         <Card>
           <CardHeader>
             <CardDescription className="flex items-center gap-1.5">
-              <Sparkles className="size-4" /> The trick
+              <Sparkles className="size-4" /> {t("primer.eyebrow")}
             </CardDescription>
             <CardTitle className="text-xl">{primer.title}</CardTitle>
           </CardHeader>
@@ -132,7 +134,7 @@ function PrimerCard({
           </CardContent>
         </Card>
         <Button size="lg" className="mt-4 h-11" onClick={onStart}>
-          Start simulation
+          {t("primer.start")}
         </Button>
       </motion.div>
     </main>
@@ -155,6 +157,7 @@ function ThreadView({
   const markSeen = useRunStore((s) => s.markSeen);
   const toggleFlag = useRunStore((s) => s.toggleFlag);
   const choose = useRunStore((s) => s.choose);
+  const t = useT();
 
   // Messages seen before this visit (after a rewind) appear without waiting.
   const [seenBefore] = useState(() => new Set(useRunStore.getState().seen));
@@ -190,7 +193,7 @@ function ThreadView({
       animate={{ opacity: 1, y: 0 }}
       className="sticky bottom-0 z-30 space-y-2 border-t bg-white/95 p-3 backdrop-blur"
     >
-      <p className="text-xs font-medium text-muted-foreground">What do you do?</p>
+      <p className="text-xs font-medium text-muted-foreground">{t("thread.prompt")}</p>
       {node.choices.map((choice) => (
         <Button
           key={choice.nextNodeId + choice.label}
@@ -212,7 +215,7 @@ function ThreadView({
     flaggedIds: flagged,
     onToggleFlag: toggleFlag,
     backHref,
-    hint: showHint ? "Tap any message to flag it as suspicious" : undefined,
+    hint: showHint ? t("thread.hint") : undefined,
     footer,
   };
 
@@ -249,6 +252,7 @@ function OutcomeView({
   onRewind?: () => void;
   onDebrief: () => void;
 }) {
+  const t = useT();
   const style = OUTCOME_STYLE[outcome.result];
   const Icon = style.icon;
   return (
@@ -260,7 +264,7 @@ function OutcomeView({
       >
         <Icon className={cn("mx-auto size-12", style.tone)} aria-hidden />
         <p className={cn("mt-3 text-xs font-semibold tracking-wide uppercase", style.tone)}>
-          {style.label}
+          {t(`outcome.${outcome.result}`)}
         </p>
         <h1 className="mt-1 text-2xl font-bold">{outcome.title}</h1>
         {outcome.moneyDelta !== undefined && outcome.moneyDelta !== 0 && (
@@ -278,11 +282,11 @@ function OutcomeView({
 
       {onRewind !== undefined && (
         <Button variant="outline" size="lg" className="h-11" onClick={onRewind}>
-          <RotateCcw /> Rewind to where you could have stopped
+          <RotateCcw /> {t("outcome.rewind")}
         </Button>
       )}
       <Button size="lg" className="h-11" onClick={onDebrief}>
-        See debrief
+        {t("outcome.seeDebrief")}
       </Button>
     </main>
   );

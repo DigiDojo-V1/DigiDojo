@@ -6,6 +6,7 @@ import { CompletedTick } from "@/components/progress/CompletedTick";
 import { Badge } from "@/components/ui/badge";
 import { DOJOS, getDojo } from "@/dojos/registry";
 import { scenarioKey } from "@/engine/keys";
+import { T } from "@/i18n/T";
 
 /** Only ids in the registry exist. Anything else is a 404. */
 export const dynamicParams = false;
@@ -36,7 +37,7 @@ export default async function DojoPage({ params }: PageProps<"/dojo/[dojoId]">) 
 
       <header>
         <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-          Dojo {dojo.order}
+          <T k="dojo.eyebrow" args={[dojo.order]} />
         </p>
         <h1 className="text-2xl font-bold tracking-tight">{dojo.name}</h1>
         <p className="mt-1 text-muted-foreground">{dojo.tagline}</p>
@@ -44,7 +45,7 @@ export default async function DojoPage({ params }: PageProps<"/dojo/[dojoId]">) 
 
       {dojo.scenarios.length === 0 ? (
         <p className="rounded-xl border border-dashed p-6 text-center text-sm text-muted-foreground">
-          No scenarios yet.
+          <T k="dojo.empty" />
         </p>
       ) : (
         <ul className="flex flex-col gap-3">
@@ -60,8 +61,16 @@ export default async function DojoPage({ params }: PageProps<"/dojo/[dojoId]">) 
                   <p className="text-sm text-muted-foreground">{scenario.summary}</p>
                   {(scenario.legit || scenario.coldRun === true) && (
                     <div className="mt-2 flex gap-1.5">
-                      {scenario.legit && <Badge variant="secondary">Legit</Badge>}
-                      {scenario.coldRun === true && <Badge variant="outline">Cold run</Badge>}
+                      {scenario.legit && (
+                        <Badge variant="secondary">
+                          <T k="dojo.legit" />
+                        </Badge>
+                      )}
+                      {scenario.coldRun === true && (
+                        <Badge variant="outline">
+                          <T k="dojo.coldRun" />
+                        </Badge>
+                      )}
                     </div>
                   )}
                 </div>

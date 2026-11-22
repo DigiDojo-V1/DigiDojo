@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { ChevronLeft, EllipsisVertical, Flag, Phone } from "lucide-react";
+import { useT } from "@/i18n/hooks";
 import { cn } from "@/lib/utils";
 import { SimulationBadge } from "./SimulationBadge";
 import type { ChatBubble, ShellProps } from "./types";
@@ -68,6 +69,7 @@ export function ChatShell({
   footer,
 }: ShellProps & { theme: ChatTheme }) {
   const t = THEMES[theme];
+  const tr = useT();
   const endRef = useRef<HTMLDivElement>(null);
   const hasFooter = footer !== undefined;
 
@@ -79,14 +81,18 @@ export function ChatShell({
   return (
     <div className={cn("flex min-h-dvh flex-col", t.wallpaper)}>
       <header className={cn("sticky top-0 z-40 flex h-14 items-center gap-2 px-2", t.header)}>
-        <Link href={backHref} aria-label="Back" className="rounded-full p-1.5 hover:bg-black/10">
+        <Link
+          href={backHref}
+          aria-label={tr("nav.back")}
+          className="rounded-full p-1.5 hover:bg-black/10"
+        >
           <ChevronLeft className="size-5" />
         </Link>
         <Avatar name={contact.name} src={contact.avatar} className={t.avatar} />
         <div className="min-w-0 flex-1 leading-tight">
           <div className="truncate text-[15px] font-semibold">{contact.name}</div>
           <div className={cn("truncate text-xs", t.headerMuted)}>
-            {typing ? `${typingSender ? `${typingSender} is ` : ""}typing…` : contact.subtitle}
+            {typing ? tr("chat.typing")(typingSender) : contact.subtitle}
           </div>
         </div>
         <SimulationBadge />
@@ -150,6 +156,7 @@ function Bubble({
   flagged: boolean;
   onToggleFlag: (id: string) => void;
 }) {
+  const t = useT();
   const isMe = message.from === "me";
   const isSystem = message.from === "system";
 
@@ -192,7 +199,7 @@ function Bubble({
           type="button"
           onClick={() => onToggleFlag(message.id)}
           aria-pressed={flagged}
-          aria-label={`${flagged ? "Unflag" : "Flag"} message: ${message.text}`}
+          aria-label={t(flagged ? "chat.unflagAria" : "chat.flagAria")(message.text)}
           className={cn(bubbleClass, "cursor-pointer transition-transform active:scale-[0.98]")}
         >
           {body}
@@ -205,6 +212,7 @@ function Bubble({
 }
 
 function TypingIndicator({ className }: { className: string }) {
+  const t = useT();
   return (
     <motion.div
       initial={{ opacity: 0, y: 6 }}
@@ -212,7 +220,7 @@ function TypingIndicator({ className }: { className: string }) {
       exit={{ opacity: 0 }}
       transition={{ duration: 0.15 }}
       className={cn("mr-auto flex gap-1 rounded-2xl rounded-bl-sm px-3 py-3 shadow-sm", className)}
-      aria-label="typing"
+      aria-label={t("chat.typingAria")}
     >
       {[0, 1, 2].map((i) => (
         <motion.span
