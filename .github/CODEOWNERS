@@ -1,5 +1,4 @@
 # Who must review changes to each path. Later lines win.
-# TODO: replace the @PAIR... placeholders with real GitHub usernames.
 
 # Lead owns everything by default, plus the shared core, tooling and docs.
 *                              @Vasumitra-Gajbhiye
@@ -11,12 +10,12 @@
 /.github/                      @Vasumitra-Gajbhiye
 /docs/                         @Vasumitra-Gajbhiye
 
-# Each pair owns its dojo folder and its scenario scripts.
-/src/dojos/easy-money/         @PAIR1-MEMBER-A @PAIR1-MEMBER-B
-/docs/scenarios/easy-money/    @PAIR1-MEMBER-A @PAIR1-MEMBER-B
-/src/dojos/dream-job/          @PAIR2-MEMBER-A @PAIR2-MEMBER-B
-/docs/scenarios/dream-job/     @PAIR2-MEMBER-A @PAIR2-MEMBER-B
-/src/dojos/trust-me-bro/       @PAIR3-MEMBER-A @PAIR3-MEMBER-B
-/docs/scenarios/trust-me-bro/  @PAIR3-MEMBER-A @PAIR3-MEMBER-B
-/src/dojos/authority/          @PAIR4-MEMBER-A @PAIR4-MEMBER-B
-/docs/scenarios/authority/     @PAIR4-MEMBER-A @PAIR4-MEMBER-B
+# Each pair owns its dojo folder and its scenario scripts. The lead is on every line as a fallback.
+/src/dojos/easy-money/         @real-sreeram @abhinay-n95 @Vasumitra-Gajbhiye
+/docs/scenarios/easy-money/    @real-sreeram @abhinay-n95 @Vasumitra-Gajbhiye
+/src/dojos/dream-job/          @Vasumitra-Gajbhiye @anirudh255
+/docs/scenarios/dream-job/     @Vasumitra-Gajbhiye @anirudh255
+/src/dojos/trust-me-bro/       @Mahabu-Subhani @ishaankarthikm-pixel @Vasumitra-Gajbhiye
+/docs/scenarios/trust-me-bro/  @Mahabu-Subhani @ishaankarthikm-pixel @Vasumitra-Gajbhiye
+/src/dojos/authority/          @8crsk @thomasjt2008 @Vasumitra-Gajbhiye
+/docs/scenarios/authority/     @8crsk @thomasjt2008 @Vasumitra-Gajbhiye
