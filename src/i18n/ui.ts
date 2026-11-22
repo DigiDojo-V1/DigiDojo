@@ -1,0 +1,148 @@
+import type { Tactic } from "@/engine/schema";
+import type { Locale } from "./locale";
+
+/**
+ * Every player-facing string the components show, outside scenario data.
+ *
+ * `en` is the source of truth: it must have every key, and a key it lacks is a type error
+ * wherever it's used. `hinglish` may be partial; missing keys fall back to `en`.
+ * Values are plain strings, or small functions when the text needs a number or a name.
+ */
+
+type TacticKey = `tactic.${Tactic}.label` | `tactic.${Tactic}.explanation`;
+type UiValue = string | ((...args: never[]) => string);
+
+const en = {
+  // Shared
+  "nav.back": "Back",
+  "nav.backToHome": "Back to home",
+  "nav.backToDojo": "Back to dojo",
+  "language.label": "Language",
+  "simulation.badge": "Simulation",
+  "simulation.badgeAria": "This is a simulation",
+
+  // Home
+  "home.title": "DigiDojo",
+  "home.tagline": "Real scams, fake apps. Practise here, lose nothing.",
+  "home.scenarioCount": (n: number) => `${n} scenario${n === 1 ? "" : "s"}`,
+
+  // Progress
+  "progress.completed": "Completed",
+  "progress.notCompleted": "Not completed",
+  "progress.dojoAria": "Dojo progress",
+
+  // Dojo page
+  "dojo.eyebrow": (order: number) => `Dojo ${order}`,
+  "dojo.empty": "No scenarios yet.",
+  "dojo.legit": "Legit",
+  "dojo.coldRun": "Cold run",
+
+  // 404
+  "notFound.body": "We couldn't find this page.",
+
+  // Primer
+  "primer.eyebrow": "The trick",
+  "primer.start": "Start simulation",
+
+  // Thread
+  "thread.prompt": "What do you do?",
+  "thread.hint": "Tap any message to flag it as suspicious",
+  "chat.typing": (sender?: string) => (sender ? `${sender} is typing…` : "typing…"),
+  "chat.typingAria": "typing",
+  "chat.flagAria": (text: string) => `Flag message: ${text}`,
+  "chat.unflagAria": (text: string) => `Unflag message: ${text}`,
+  "shell.comingSoon": (name: string) => `Coming soon: ${name} shell`,
+
+  // Outcome
+  "outcome.safe": "Safe",
+  "outcome.loss": "Money lost",
+  "outcome.partial-loss": "Partial loss",
+  "outcome.missed-opportunity": "Missed opportunity",
+  "outcome.rewind": "Rewind to where you could have stopped",
+  "outcome.seeDebrief": "See debrief",
+
+  // Debrief
+  "debrief.eyebrow": "Debrief",
+  "debrief.caughtSummary": (caught: number, seen: number) =>
+    `You caught ${caught} of ${seen} red flags you saw.`,
+  "debrief.noFlags": "There were no red flags on the path you took.",
+  "debrief.falseAlarmSummary": (n: number) =>
+    `${n} false alarm${n === 1 ? "" : "s"}: you flagged messages that were fine.`,
+  "debrief.caught": "Caught",
+  "debrief.missed": "Missed",
+  "debrief.missedNone": "None. You spotted every red flag you saw.",
+  "debrief.falseAlarms": "False alarms",
+  "debrief.falseAlarmNote":
+    "This one was fine. Being careful is good, but suspecting everything means missing real chances.",
+  "debrief.notReached": "On paths you didn't take",
+  "debrief.rule": "Rule to remember",
+  "debrief.playAgain": "Play again",
+
+  // Tactics: a short label and one line the debrief shows under each red flag.
+  "tactic.small-win-first.label": "Small win first",
+  "tactic.small-win-first.explanation":
+    "They pay you a little first, so you'll trust them with a lot.",
+  "tactic.pay-to-earn.label": "Pay to earn",
+  "tactic.pay-to-earn.explanation":
+    "They ask you to pay before you can earn. Real work never works like that.",
+  "tactic.urgency.label": "Urgency",
+  "tactic.urgency.explanation": "They rush you so you don't stop to think or ask anyone.",
+  "tactic.social-proof.label": "Social proof",
+  "tactic.social-proof.explanation":
+    "Fake members and screenshots make it look like everyone is earning.",
+  "tactic.sunk-cost.label": "Sunk cost",
+  "tactic.sunk-cost.explanation":
+    "Once you've paid, they ask for more to 'unlock' the money you already put in.",
+  "tactic.authority.label": "Authority",
+  "tactic.authority.explanation":
+    "They pose as police, a bank or an officer to scare you into obeying without checking.",
+  "tactic.isolation.label": "Isolation",
+  "tactic.isolation.explanation": "They tell you to keep it secret, so nobody can warn you.",
+  "tactic.too-good-to-be-true.label": "Too good to be true",
+  "tactic.too-good-to-be-true.explanation":
+    "The money or prize is far more than the work is worth.",
+  "tactic.flattery.label": "Flattery",
+  "tactic.flattery.explanation":
+    "Praise and 'you've been specially selected' make you drop your guard.",
+  "tactic.impersonation.label": "Impersonation",
+  "tactic.impersonation.explanation": "They pretend to be someone you know or trust.",
+} satisfies Record<string, UiValue> & Record<TacticKey, string>;
+
+export type UiDict = typeof en;
+export type UiKey = keyof UiDict;
+
+const hinglish: Partial<UiDict> = {
+  "home.tagline": "Asli scams, nakli apps. Practice yahin karo, nuksaan kahin nahi.",
+  "notFound.body": "Yeh page nahi mila.",
+
+  "tactic.small-win-first.explanation":
+    "Pehle thode paise dete hain, taaki tum unpe bada bharosa kar lo.",
+  "tactic.pay-to-earn.explanation":
+    "Kamane se pehle paise bharne ko kehte hain. Asli kaam mein aisa kabhi nahi hota.",
+  "tactic.urgency.explanation":
+    "Time ka pressure daalte hain taaki tum soch na sako ya kisi se pooch na sako.",
+  "tactic.social-proof.explanation":
+    "Fake members aur screenshots se lagta hai ki sab kama rahe hain.",
+  "tactic.sunk-cost.explanation":
+    "Ek baar paise de diye, toh woh 'unlock' karne ke naam pe aur maangte hain.",
+  "tactic.authority.explanation":
+    "Police, bank ya officer ban ke darate hain taaki tum bina check kiye maan lo.",
+  "tactic.isolation.explanation":
+    "Kehte hain kisi ko mat batana, taaki koi tumhe warn na kar sake.",
+  "tactic.too-good-to-be-true.explanation": "Kaam ke hisaab se paisa ya inaam bahut zyada hai.",
+  "tactic.flattery.explanation":
+    "Tareef aur 'aap special selected ho' sun ke guard neeche aa jaata hai.",
+  "tactic.impersonation.explanation":
+    "Kisi jaan-pehchaan wale ya bharosemand insaan ki nakal karte hain.",
+};
+
+export const UI_STRINGS: { en: UiDict; hinglish: Partial<UiDict> } = { en, hinglish };
+
+/** The string (or string function) for `key` in `locale`, falling back to English. */
+export function translate<K extends UiKey>(locale: Locale, key: K): UiDict[K] {
+  if (locale !== "en") {
+    const value = UI_STRINGS[locale][key];
+    if (value !== undefined) return value as UiDict[K];
+  }
+  return UI_STRINGS.en[key];
+}

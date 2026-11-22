@@ -1,6 +1,8 @@
 import { useSyncExternalStore } from "react";
 import { create } from "zustand";
 import { createJSONStorage, persist, type StateStorage } from "zustand/middleware";
+import { z } from "zod";
+import { DEFAULT_LOCALE, LOCALES, type Locale } from "@/i18n/locale";
 import type { Choice, Scenario } from "./schema";
 
 /* ------------------------------------------------------------------ */
@@ -101,15 +103,24 @@ export function currentNodeId(state: Pick<RunState, "trail">): string | undefine
 }
 
 /* ------------------------------------------------------------------ */
-/* Persisted progress (localStorage)                                   */
+/* Persisted progress and settings (localStorage)                      */
 /* ------------------------------------------------------------------ */
 
 interface ProgressState {
   /** Keys are `dojoId/scenarioId`. */
   completed: Record<string, true>;
+  /** The player's language. Read it with `useLocale()` from `@/i18n/hooks`, not directly. */
+  locale: Locale;
   markComplete: (key: string) => void;
   resetProgress: () => void;
+  setLocale: (locale: Locale) => void;
 }
+
+/** What we accept back from localStorage. Anything malformed falls back to the default. */
+const PersistedProgressSchema = z.object({
+  completed: z.record(z.string(), z.literal(true)).catch({}),
+  locale: z.enum(LOCALES).catch(DEFAULT_LOCALE),
+});
 
 const noopStorage: StateStorage = {
   getItem: () => null,
@@ -121,8 +132,10 @@ export const useProgressStore = create<ProgressState>()(
   persist(
     (set) => ({
       completed: {},
+      locale: DEFAULT_LOCALE,
       markComplete: (key) => set((s) => ({ completed: { ...s.completed, [key]: true } })),
       resetProgress: () => set({ completed: {} }),
+      setLocale: (locale) => set({ locale }),
     }),
     {
       name: "digidojo-progress",
@@ -130,7 +143,12 @@ export const useProgressStore = create<ProgressState>()(
       storage: createJSONStorage(() =>
         typeof window === "undefined" ? noopStorage : window.localStorage,
       ),
-      partialize: (s) => ({ completed: s.completed }),
+      partialize: (s) => ({ completed: s.completed, locale: s.locale }),
+      // Version 1 saves had no locale; the schema fills it in, so no version bump is needed.
+      merge: (persisted, current) => {
+        const parsed = PersistedProgressSchema.safeParse(persisted);
+        return parsed.success ? { ...current, ...parsed.data } : current;
+      },
     },
   ),
 );
