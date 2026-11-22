@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { computeDebrief } from "@/engine/debrief";
+import { computeDebrief } from "@/engine/scoring";
 import { validScenario } from "./fixtures";
 
 describe("computeDebrief", () => {

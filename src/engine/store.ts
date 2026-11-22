@@ -35,6 +35,8 @@ interface RunActions {
   choose: (choice: Choice) => void;
   rewind: (nodeId: string) => void;
   openDebrief: () => void;
+  /** Clear the run, e.g. when the player leaves the scenario. */
+  reset: () => void;
 }
 
 const initialRun: RunState = {
@@ -90,6 +92,8 @@ export const useRunStore = create<RunState & RunActions>()((set) => ({
     }),
 
   openDebrief: () => set({ phase: "debrief" }),
+
+  reset: () => set(initialRun),
 }));
 
 export function currentNodeId(state: Pick<RunState, "trail">): string | undefined {
