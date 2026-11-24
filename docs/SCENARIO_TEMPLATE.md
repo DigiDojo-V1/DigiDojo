@@ -21,7 +21,7 @@ Skip if this is a cold run.
 
 ## Red flags
 
-Tactics to choose from: small-win-first, pay-to-earn, urgency, social-proof, sunk-cost, authority, isolation, too-good-to-be-true, flattery, impersonation.
+Tactics to choose from: small-win-first, pay-to-earn, urgency, social-proof, sunk-cost, authority, isolation, too-good-to-be-true, flattery, impersonation, no-real-process, data-harvest, malicious-file, disguised-link.
 
 | Flag id | What the player should notice | Tactic | Why it's a red flag (one sentence) |
 | ------- | ----------------------------- | ------ | ---------------------------------- |
@@ -48,13 +48,37 @@ Choices:
 - "choice text" → `<scene-id or outcome-id>`
 - "choice text" → `<scene-id or outcome-id>`
 
+### Email scene: `<scene-id>` (optional)
+
+**Display name:** · **From:** (address) · show From without tapping? yes / no
+**Reply-To:** · **To:** · **Date:** · **Subject:** · **Inbox preview:**
+Body (mark phrases with `[flag: <flag id>]`):
+
+- ...
+
+Attachments: shown name · full name · actual type · preview panel id · `[flag: ...]`
+Buttons / links: text · actual destination (never opened) · `[flag: ...]`
+Evidence buttons: panel ids
+Choices: as above. A "Reply" choice can lead to a **compose** scene that shows the To field.
+
+### Evidence panel: `<panel-id>` (optional)
+
+**Kind:** profile / company / web-page / document · **Title:**
+Fields (one per line, `label: value`, mark `[flag: ...]`, mark buried clauses `(fine print)`):
+
+- ...
+
+### Inbox triage (optional)
+
+One row per email: email (as above) · correct label: legit / scam / needs-checking · why (one sentence).
+
 ## Outcomes
 
 Copy one block per ending.
 
 ### Outcome: `<outcome-id>`
 
-**Result:** safe / loss / partial-loss / missed-opportunity
+**Result:** safe / loss / partial-loss / compromised / missed-opportunity
 **Title:**
 **Text:** (what happened, in 1 to 2 sentences)
 **Money:** (e.g. −₹4,550; leave blank if none)

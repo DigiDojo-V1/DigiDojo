@@ -85,6 +85,21 @@ export default async function DojoPage({ params }: PageProps<"/dojo/[dojoId]">) 
           ))}
         </ul>
       )}
+
+      {dojo.takeaways !== undefined && (
+        <section className="rounded-xl bg-card p-4 ring-1 ring-foreground/10">
+          <h2 className="mb-2 font-semibold">
+            <T k="dojo.takeaways" />
+          </h2>
+          <ul className="list-disc space-y-1.5 pl-5 text-sm">
+            {dojo.takeaways.map((takeaway, i) => (
+              <li key={i}>
+                <L text={takeaway} />
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
     </main>
   );
 }

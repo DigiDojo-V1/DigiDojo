@@ -151,12 +151,53 @@ interface Choice {
 }
 ```
 
+### Evidence, email and triage (added for Dream Job)
+
+Scenarios can do more than chat. All of it is data, checked by the same schema.
+
+```ts
+// A message can be split into phrases, each flaggable on its own (exactly one of text / segments).
+interface Message { /* … */ text?: LocalizedText; segments?: Segment[] }
+interface Segment { id?: string; text: LocalizedText; redFlagId?: string } // redFlagId needs an id
+
+// Panels the player can open and inspect. A PDF is a "document"; each page is a section.
+scenario.evidence: Record<string, {
+  kind: "profile" | "company" | "web-page" | "document";
+  title: LocalizedText; subtitle?: LocalizedText;
+  sections: { heading?: LocalizedText; fields: Field[] }[];
+}>;
+interface Field { id: string; label?: LocalizedText; value: LocalizedText; redFlagId?: string; finePrint?: boolean }
+
+// Extra node kinds next to "thread" and "outcome".
+| { kind: "email"; app: "gmail"; email: Email; evidence?: string[]; choices: Choice[] }
+| { kind: "compose"; app: "gmail"; to: Address; subject: LocalizedText; body: LocalizedText; choices: Choice[] } // reply preview
+| { kind: "triage"; app: "gmail"; items: { id; email: Email; correct: "legit" | "scam" | "needs-checking"; explanation }[]; nextNodeId: string }
+
+interface Email {
+  displayName: LocalizedText;
+  from: Address; showFromAddress?: boolean; // otherwise tap the sender to see it
+  replyTo?: Address; to: Address;
+  date; subject; preview: LocalizedText;
+  body: Segment[][];                       // paragraphs of phrases
+  attachments?: { id; shownName; fullName; actualType; sizeLabel?; documentId?; redFlagId? }[];
+  links?: { id; text: LocalizedText; actualUrl: string; redFlagId? }[]; // inert, never opened
+}
+interface Address { id: string; address: string; redFlagId?: string }
+```
+
+- Threads and email nodes take `evidence: [panelId, …]`: buttons such as "View profile" or "Check careers page".
+- Every flaggable item (message, phrase, address, attachment, link, panel field) shares one id space per scenario. `src/engine/evidence.ts` (`collectFlaggables`) is the one place that lists them.
+- New tactics: `no-real-process`, `data-harvest`, `malicious-file`, `disguised-link`. New outcome result: `compromised` (identity, device or account harm with no money moved).
+- A dojo may set `takeaways: LocalizedText[]`, shown on the dojo page.
+- **Seen** means revealed: a message appeared, the sender was tapped, a panel or attachment was opened. The debrief splits red flags into **caught**, **missed** (seen, not flagged), **didn't check** (on a screen the player reached but behind an inspection they skipped), **not reached**, plus false alarms and a per-email triage table.
+
 Validation (in `defineScenario` during dev and in `tests/scenarios.test.ts`):
 
-- `startNodeId`, every `nextNodeId` and every `rewindToNodeId` points to an existing node.
-- Every `redFlagId` exists in `redFlags`, and every red flag is used by at least one message.
+- `startNodeId`, every `nextNodeId` and every `rewindToNodeId` points to an existing node (rewinds point to a non-outcome node).
+- Every `redFlagId` exists in `redFlags`, and every red flag is used by at least one flaggable item.
+- Every `evidence` id and attachment `documentId` is a panel.
 - Every scenario can reach at least one outcome.
-- Message ids are unique within a scenario.
+- Flaggable ids (messages, phrases, addresses, attachments, links, panel fields) are unique within a scenario.
 
 Engine behaviour:
 
@@ -226,6 +267,7 @@ Not in the scaffold (later phases): database and auth, the AI voice call (Vapi),
 ## 8. Guardrails
 
 - All people, companies, agencies and apps in scenarios are fictional. No real logos or brand names.
+  - Exception agreed by the lead: Dream Job's player-facing text keeps the blueprint's platform names (LinkedIn, Gmail, WhatsApp, `@gmail.com` addresses, an `@okaxis` UPI handle), because spotting a free-mail sender is the lesson. The shells still use our own look and no logos. All companies, people and domains stay fictional (`*.example`).
 - Never ask players for real OTPs, PINs, card numbers or passwords.
 - No "play the scammer" mode. Sextortion appears only as a text guidance card, never a simulation.
 - No political content.
