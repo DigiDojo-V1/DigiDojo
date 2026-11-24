@@ -1,4 +1,11 @@
-import { CircleSlash, ShieldAlert, ShieldCheck, ShieldX, type LucideIcon } from "lucide-react";
+import {
+  CircleSlash,
+  ShieldAlert,
+  ShieldOff,
+  ShieldCheck,
+  ShieldX,
+  type LucideIcon,
+} from "lucide-react";
 import type { OutcomeResult } from "./schema";
 
 /** Icon and colours per outcome. The label is the UI string `outcome.<result>`. */
@@ -20,6 +27,11 @@ export const OUTCOME_STYLE: Record<
     icon: ShieldAlert,
     tone: "text-amber-700",
     soft: "bg-amber-50 ring-amber-200",
+  },
+  compromised: {
+    icon: ShieldOff,
+    tone: "text-rose-700",
+    soft: "bg-rose-50 ring-rose-200",
   },
   "missed-opportunity": {
     icon: CircleSlash,

@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import { SimulationBar } from "./SimulationBar";
 import type { ChatBubble, ShellProps } from "./types";
 
-export type ChatTheme = "whatsapp" | "telegram" | "instagram";
+export type ChatTheme = "whatsapp" | "telegram" | "instagram" | "linkedin";
 
 interface ThemeStyle {
   header: string;
@@ -54,6 +54,16 @@ const THEMES: Record<ChatTheme, ThemeStyle> = {
     system: "bg-neutral-100 text-neutral-600",
     sender: "text-violet-700",
   },
+  linkedin: {
+    header: "border-b bg-white text-neutral-900",
+    headerMuted: "text-neutral-500",
+    avatar: "bg-blue-200 text-blue-900",
+    wallpaper: "bg-neutral-50",
+    them: "bg-white text-neutral-900 ring-1 ring-neutral-200",
+    me: "bg-blue-50 text-neutral-900 ring-1 ring-blue-100",
+    system: "bg-neutral-200/70 text-neutral-700",
+    sender: "text-blue-800",
+  },
 };
 
 export function ChatShell({
@@ -66,6 +76,7 @@ export function ChatShell({
   onToggleFlag,
   backHref,
   hint,
+  toolbar,
   footer,
 }: ShellProps & { theme: ChatTheme }) {
   const t = THEMES[theme];
@@ -100,6 +111,7 @@ export function ChatShell({
           <Phone className="size-5 shrink-0 opacity-80" aria-hidden />
           <EllipsisVertical className="size-5 shrink-0 opacity-80" aria-hidden />
         </header>
+        {toolbar}
       </div>
 
       <div className="flex flex-1 flex-col gap-1.5 px-3 pt-4 pb-3">
@@ -115,6 +127,7 @@ export function ChatShell({
               message={m}
               style={t}
               flagged={flaggedIds.includes(m.id)}
+              flaggedIds={flaggedIds}
               onToggleFlag={onToggleFlag}
             />
           ))}
@@ -147,15 +160,46 @@ function Avatar({ name, src, className }: { name: string; src?: string; classNam
   );
 }
 
+/** A tappable phrase inside a message or email. Shared with the mail shell. */
+export function SegmentButton({
+  id,
+  text,
+  flagged,
+  onToggleFlag,
+}: {
+  id: string;
+  text: string;
+  flagged: boolean;
+  onToggleFlag: (id: string) => void;
+}) {
+  const t = useT();
+  return (
+    <button
+      type="button"
+      onClick={() => onToggleFlag(id)}
+      aria-pressed={flagged}
+      aria-label={t(flagged ? "chat.unflagAria" : "chat.flagAria")(text)}
+      className={cn(
+        "inline cursor-pointer rounded-sm text-left underline decoration-neutral-400 decoration-dotted underline-offset-2",
+        flagged && "bg-red-100 decoration-red-500 decoration-solid",
+      )}
+    >
+      {text}
+    </button>
+  );
+}
+
 function Bubble({
   message,
   style,
   flagged,
+  flaggedIds,
   onToggleFlag,
 }: {
   message: ChatBubble;
   style: ThemeStyle;
   flagged: boolean;
+  flaggedIds: readonly string[];
   onToggleFlag: (id: string) => void;
 }) {
   const t = useT();
@@ -169,7 +213,25 @@ function Bubble({
           {message.sender}
         </span>
       )}
-      <span className="whitespace-pre-line">{message.text}</span>
+      {message.segments === undefined ? (
+        <span className="whitespace-pre-line">{message.text}</span>
+      ) : (
+        <span className="whitespace-pre-line">
+          {message.segments.map((segment, i) =>
+            segment.flaggable && segment.id !== undefined ? (
+              <SegmentButton
+                key={segment.id}
+                id={segment.id}
+                text={segment.text}
+                flagged={flaggedIds.includes(segment.id)}
+                onToggleFlag={onToggleFlag}
+              />
+            ) : (
+              <span key={i}>{segment.text}</span>
+            ),
+          )}
+        </span>
+      )}
       {flagged && (
         <span className="absolute -top-2 -right-2 flex size-5 items-center justify-center rounded-full bg-red-500 text-white shadow">
           <Flag className="size-3" aria-hidden />

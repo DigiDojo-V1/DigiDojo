@@ -1,6 +1,21 @@
 import { describe, expect, it } from "vitest";
-import { priorTranscript } from "@/engine/transcript";
-import { validScenario } from "./fixtures";
+import { priorTranscript, toBubble } from "@/engine/transcript";
+import { richScenario, validScenario } from "./fixtures";
+
+describe("toBubble with segments", () => {
+  it("joins the phrases into the text and makes only phrases with an id flaggable", () => {
+    const dm = richScenario().nodes.dm;
+    if (dm?.kind !== "thread") throw new Error("fixture");
+    const bubble = toBubble(dm.messages[0]!, "en");
+    expect(bubble.text).toBe("Hi! Pay ₹999 to register. The role is in Bengaluru.");
+    expect(bubble.flaggable).toBe(false);
+    expect(bubble.segments?.map((s) => [s.id, s.flaggable])).toEqual([
+      [undefined, false],
+      ["dm-pay", true],
+      ["dm-role", true],
+    ]);
+  });
+});
 
 describe("priorTranscript", () => {
   it("is empty on the first node", () => {

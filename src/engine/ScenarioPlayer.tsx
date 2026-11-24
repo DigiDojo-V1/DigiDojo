@@ -15,8 +15,17 @@ import { SmsShell } from "@/shells/SmsShell";
 import type { ShellProps } from "@/shells/types";
 import { UpiShell } from "@/shells/UpiShell";
 import { Debrief } from "./Debrief";
+import { messageRevealIds } from "./evidence";
+import {
+  ChoiceFooter,
+  ComposeView,
+  EmailView,
+  EvidenceToolbar,
+  TriageView,
+  useEvidence,
+} from "./PlayViews";
 import { OUTCOME_STYLE } from "./outcome-style";
-import type { AppTheme, OutcomeNode, Scenario, ThreadNode } from "./schema";
+import type { OutcomeNode, Scenario, ThreadApp, ThreadNode } from "./schema";
 import { scenarioKey } from "./keys";
 import { currentNodeId, useRunStore } from "./store";
 import { priorTranscript, toBubble } from "./transcript";
@@ -37,6 +46,8 @@ export function ScenarioPlayer({ scenario, backHref }: ScenarioPlayerProps) {
   const trail = useRunStore((s) => s.trail);
   const seen = useRunStore((s) => s.seen);
   const flagged = useRunStore((s) => s.flagged);
+  const visited = useRunStore((s) => s.visited);
+  const classifications = useRunStore((s) => s.classifications);
   const rewinds = useRunStore((s) => s.rewinds);
   const start = useRunStore((s) => s.start);
   const reset = useRunStore((s) => s.reset);
@@ -64,8 +75,7 @@ export function ScenarioPlayer({ scenario, backHref }: ScenarioPlayerProps) {
       <Debrief
         scenario={scenario}
         outcome={node?.kind === "outcome" ? node : undefined}
-        seen={seen}
-        flagged={flagged}
+        run={{ seen, flagged, visited, classifications }}
         backHref={backHref}
         onReplay={() => start(key, scenario)}
       />
@@ -86,15 +96,18 @@ export function ScenarioPlayer({ scenario, backHref }: ScenarioPlayerProps) {
     );
   }
 
-  return (
-    <ThreadView
-      // Remount for every visit so messages reveal again (instantly if already seen).
-      key={`${trail.length}-${rewinds}`}
-      scenario={scenario}
-      node={node}
-      backHref={backHref}
-    />
-  );
+  // Remount for every visit so each screen starts fresh (messages reveal again, instantly if seen).
+  const visitKey = `${trail.length}-${rewinds}`;
+  switch (node.kind) {
+    case "thread":
+      return <ThreadView key={visitKey} scenario={scenario} node={node} backHref={backHref} />;
+    case "email":
+      return <EmailView key={visitKey} scenario={scenario} node={node} backHref={backHref} />;
+    case "compose":
+      return <ComposeView key={visitKey} node={node} backHref={backHref} />;
+    case "triage":
+      return <TriageView key={visitKey} scenario={scenario} node={node} backHref={backHref} />;
+  }
 }
 
 /* ------------------------------------------------------------------ */
@@ -150,9 +163,8 @@ function ThreadView({
 }) {
   const trail = useRunStore((s) => s.trail);
   const flagged = useRunStore((s) => s.flagged);
-  const markSeen = useRunStore((s) => s.markSeen);
+  const reveal = useRunStore((s) => s.reveal);
   const toggleFlag = useRunStore((s) => s.toggleFlag);
-  const choose = useRunStore((s) => s.choose);
   const t = useT();
   const text = useText();
   const locale = useLocale();
@@ -166,11 +178,11 @@ function ThreadView({
     if (next === undefined) return;
     const delay = seenBefore.has(next.id) ? 0 : (next.delayMs ?? DEFAULT_DELAY_MS);
     const timer = setTimeout(() => {
-      markSeen(next.id);
+      reveal(messageRevealIds(next));
       setRevealed((r) => r + 1);
     }, delay);
     return () => clearTimeout(timer);
-  }, [next, seenBefore, markSeen]);
+  }, [next, seenBefore, reveal]);
 
   // Text is resolved on every render, so switching language mid-run just re-renders this screen.
   const prior = useMemo(() => priorTranscript(scenario, trail, locale), [scenario, trail, locale]);
@@ -186,25 +198,8 @@ function ThreadView({
     () => scenario.coldRun !== true && useRunStore.getState().flagged.length === 0,
   );
 
-  const footer = done ? (
-    <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="sticky bottom-0 z-30 space-y-2 border-t bg-white/95 p-3 backdrop-blur"
-    >
-      <p className="text-xs font-medium text-muted-foreground">{t("thread.prompt")}</p>
-      {node.choices.map((choice, i) => (
-        <Button
-          key={`${i}-${choice.nextNodeId}`}
-          variant="outline"
-          className="h-auto w-full justify-start py-2.5 text-left text-[15px] whitespace-normal"
-          onClick={() => choose(choice)}
-        >
-          {text(choice.label)}
-        </Button>
-      ))}
-    </motion.div>
-  ) : undefined;
+  const evidence = useEvidence(scenario);
+  const footer = done ? <ChoiceFooter choices={node.choices} /> : undefined;
 
   const shellProps: ShellProps = {
     contact: {
@@ -219,21 +214,26 @@ function ThreadView({
     onToggleFlag: toggleFlag,
     backHref,
     hint: showHint ? t("thread.hint") : undefined,
+    toolbar: (
+      <EvidenceToolbar scenario={scenario} panelIds={node.evidence} onOpen={evidence.open} />
+    ),
     footer,
   };
 
   return (
     <div className="flex flex-1 flex-col">
       <Shell app={node.app} {...shellProps} />
+      {evidence.sheet}
     </div>
   );
 }
 
-function Shell({ app, ...props }: ShellProps & { app: AppTheme }) {
+function Shell({ app, ...props }: ShellProps & { app: ThreadApp }) {
   switch (app) {
     case "whatsapp":
     case "telegram":
     case "instagram":
+    case "linkedin":
       return <ChatShell theme={app} {...props} />;
     case "sms":
       return <SmsShell {...props} />;

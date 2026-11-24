@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { collectFlaggables, nextNodeIds } from "./evidence";
 
 /**
  * Scenario and dojo schemas. The TypeScript types are inferred from these, so the
@@ -31,9 +32,21 @@ export const LocalizedTextSchema = z.union([
 /** What an author may write: a plain English string or `{ en, hinglish? }`. */
 export type LocalizedTextInput = z.input<typeof LocalizedTextSchema>;
 
-export const APP_THEMES = ["whatsapp", "telegram", "instagram", "sms", "upi", "call"] as const;
+export const APP_THEMES = [
+  "whatsapp",
+  "telegram",
+  "instagram",
+  "linkedin",
+  "sms",
+  "upi",
+  "call",
+  "gmail",
+] as const;
 export const AppThemeSchema = z.enum(APP_THEMES);
 export type AppTheme = z.infer<typeof AppThemeSchema>;
+/** Apps a chat-style `thread` node can use. Email lives in `email`, `compose` and `triage` nodes. */
+export const ThreadAppSchema = AppThemeSchema.exclude(["gmail"]);
+export type ThreadApp = z.infer<typeof ThreadAppSchema>;
 
 export const TACTICS = [
   "small-win-first",
@@ -46,6 +59,10 @@ export const TACTICS = [
   "too-good-to-be-true",
   "flattery",
   "impersonation",
+  "no-real-process",
+  "data-harvest",
+  "malicious-file",
+  "disguised-link",
 ] as const;
 export const TacticSchema = z.enum(TACTICS);
 export type Tactic = z.infer<typeof TacticSchema>;
@@ -54,17 +71,31 @@ export const DOJO_IDS = ["easy-money", "dream-job", "trust-me-bro", "authority"]
 export const DojoIdSchema = z.enum(DOJO_IDS);
 export type DojoId = z.infer<typeof DojoIdSchema>;
 
+/**
+ * Part of a message or email paragraph. Give it an `id` to make it flaggable on its own
+ * (phrase-level flagging); a segment with a `redFlagId` must have an `id`.
+ */
+export const SegmentSchema = z.strictObject({
+  id: kebabCase.optional(),
+  text: LocalizedTextSchema,
+  redFlagId: kebabCase.optional(),
+});
+export type Segment = z.output<typeof SegmentSchema>;
+
 export const MessageSchema = z.strictObject({
-  /** Unique within the scenario. */
+  /** Unique within the scenario, across every flaggable item. */
   id: kebabCase,
   /** `system` = credit alerts, "X joined the group", etc. */
   from: z.enum(["them", "me", "system"]),
   /** Display name inside group chats. */
   sender: LocalizedTextSchema.optional(),
-  text: LocalizedTextSchema,
+  /** The whole message. Write exactly one of `text` or `segments`. */
+  text: LocalizedTextSchema.optional(),
+  /** The message in parts, so the player can flag single phrases. The message itself is then not flaggable. */
+  segments: z.array(SegmentSchema).min(1).optional(),
   /** Wait before this message appears. Default 800. */
   delayMs: z.number().int().nonnegative().optional(),
-  /** Set only if this message carries a red flag. */
+  /** Set only if this message carries a red flag. Not allowed with `segments`. */
   redFlagId: kebabCase.optional(),
 });
 export type Message = z.output<typeof MessageSchema>;
@@ -83,16 +114,150 @@ export const ContactSchema = z.strictObject({
 });
 export type Contact = z.output<typeof ContactSchema>;
 
+/** One inspectable fact in an evidence panel: a profile line, a company record entry, a PDF clause. */
+export const FieldSchema = z.strictObject({
+  id: kebabCase,
+  label: LocalizedTextSchema.optional(),
+  value: LocalizedTextSchema,
+  redFlagId: kebabCase.optional(),
+  /** Small print, e.g. a buried clause in a PDF. */
+  finePrint: z.boolean().optional(),
+});
+export type Field = z.output<typeof FieldSchema>;
+
+export const EVIDENCE_KINDS = ["profile", "company", "web-page", "document"] as const;
+
+/** Something the player can open and inspect: a profile, a company page, a web page, a PDF. */
+export const EvidencePanelSchema = z.strictObject({
+  kind: z.enum(EVIDENCE_KINDS),
+  title: LocalizedTextSchema,
+  subtitle: LocalizedTextSchema.optional(),
+  /** For a document, one section per page. */
+  sections: z
+    .array(
+      z.strictObject({
+        heading: LocalizedTextSchema.optional(),
+        fields: z.array(FieldSchema).min(1),
+      }),
+    )
+    .min(1),
+});
+export type EvidencePanel = z.output<typeof EvidencePanelSchema>;
+
+/** An email address the player can inspect and flag. Addresses are never translated. */
+export const AddressSchema = z.strictObject({
+  id: kebabCase,
+  address: z.string().min(1),
+  redFlagId: kebabCase.optional(),
+});
+export type Address = z.output<typeof AddressSchema>;
+
+export const AttachmentSchema = z.strictObject({
+  id: kebabCase,
+  /** The name on the chip, possibly cut short. */
+  shownName: z.string().min(1),
+  /** The full filename, shown when the player taps the chip. */
+  fullName: z.string().min(1),
+  /** What the file really is, e.g. "PDF document" or "Android application (.apk)". */
+  actualType: LocalizedTextSchema,
+  sizeLabel: z.string().min(1).optional(),
+  /** The evidence panel that previews it. */
+  documentId: kebabCase.optional(),
+  redFlagId: kebabCase.optional(),
+});
+export type Attachment = z.output<typeof AttachmentSchema>;
+
+/** A button or link in an email. Inert: the destination is shown as text, never opened. */
+export const LinkSchema = z.strictObject({
+  id: kebabCase,
+  text: LocalizedTextSchema,
+  actualUrl: z.string().min(1),
+  redFlagId: kebabCase.optional(),
+});
+export type Link = z.output<typeof LinkSchema>;
+
+export const EmailSchema = z.strictObject({
+  displayName: LocalizedTextSchema,
+  from: AddressSchema,
+  /** Show the From address next to the name. Otherwise the player taps the name to see it. */
+  showFromAddress: z.boolean().optional(),
+  replyTo: AddressSchema.optional(),
+  to: AddressSchema,
+  date: LocalizedTextSchema,
+  subject: LocalizedTextSchema,
+  /** One line for the inbox list. */
+  preview: LocalizedTextSchema,
+  /** Paragraphs, each a list of segments. */
+  body: z.array(z.array(SegmentSchema).min(1)).min(1),
+  attachments: z.array(AttachmentSchema).optional(),
+  links: z.array(LinkSchema).optional(),
+});
+export type Email = z.output<typeof EmailSchema>;
+export type EmailInput = z.input<typeof EmailSchema>;
+
+/** Ids of evidence panels the player can open from a screen (view profile, check company page). */
+const EvidenceRefsSchema = z.array(kebabCase).min(1).optional();
+
 export const ThreadNodeSchema = z.strictObject({
   kind: z.literal("thread"),
-  app: AppThemeSchema,
+  app: ThreadAppSchema,
   contact: ContactSchema,
   messages: z.array(MessageSchema).min(1),
+  evidence: EvidenceRefsSchema,
   choices: z.array(ChoiceSchema).min(1),
 });
 export type ThreadNode = z.output<typeof ThreadNodeSchema>;
 
-export const OUTCOME_RESULTS = ["safe", "loss", "partial-loss", "missed-opportunity"] as const;
+/** One email, open in the reading pane. */
+export const EmailNodeSchema = z.strictObject({
+  kind: z.literal("email"),
+  app: z.literal("gmail"),
+  email: EmailSchema,
+  evidence: EvidenceRefsSchema,
+  choices: z.array(ChoiceSchema).min(1),
+});
+export type EmailNode = z.output<typeof EmailNodeSchema>;
+
+/** The reply composer, shown before sending, so the player can check the To field. */
+export const ComposeNodeSchema = z.strictObject({
+  kind: z.literal("compose"),
+  app: z.literal("gmail"),
+  to: AddressSchema,
+  subject: LocalizedTextSchema,
+  body: LocalizedTextSchema,
+  choices: z.array(ChoiceSchema).min(1),
+});
+export type ComposeNode = z.output<typeof ComposeNodeSchema>;
+
+export const TRIAGE_LABELS = ["legit", "scam", "needs-checking"] as const;
+export const TriageLabelSchema = z.enum(TRIAGE_LABELS);
+export type TriageLabel = z.infer<typeof TriageLabelSchema>;
+
+export const TriageItemSchema = z.strictObject({
+  id: kebabCase,
+  email: EmailSchema,
+  correct: TriageLabelSchema,
+  /** Why the correct label is correct. Shown in the debrief. */
+  explanation: LocalizedTextSchema,
+});
+export type TriageItem = z.output<typeof TriageItemSchema>;
+
+/** An inbox where the player labels every email Legit, Scam or Needs checking. */
+export const TriageNodeSchema = z.strictObject({
+  kind: z.literal("triage"),
+  app: z.literal("gmail"),
+  items: z.array(TriageItemSchema).min(1),
+  nextNodeId: kebabCase,
+});
+export type TriageNode = z.output<typeof TriageNodeSchema>;
+
+export const OUTCOME_RESULTS = [
+  "safe",
+  "loss",
+  "partial-loss",
+  "compromised",
+  "missed-opportunity",
+] as const;
 export const OutcomeResultSchema = z.enum(OUTCOME_RESULTS);
 export type OutcomeResult = z.infer<typeof OutcomeResultSchema>;
 
@@ -110,9 +275,14 @@ export type OutcomeNode = z.output<typeof OutcomeNodeSchema>;
 
 export const ScenarioNodeSchema = z.discriminatedUnion("kind", [
   ThreadNodeSchema,
+  EmailNodeSchema,
+  ComposeNodeSchema,
+  TriageNodeSchema,
   OutcomeNodeSchema,
 ]);
 export type ScenarioNode = z.output<typeof ScenarioNodeSchema>;
+/** Every node the player plays (everything but an outcome). */
+export type PlayNode = Exclude<ScenarioNode, OutcomeNode>;
 
 export const RedFlagSchema = z.strictObject({
   label: LocalizedTextSchema,
@@ -134,73 +304,130 @@ const ScenarioShape = z.strictObject({
   primer: z.strictObject({ title: LocalizedTextSchema, body: LocalizedTextSchema }).optional(),
   startNodeId: kebabCase,
   nodes: z.record(kebabCase, ScenarioNodeSchema),
+  /** Panels the player can open: profiles, company pages, web pages, PDFs. */
+  evidence: z.record(kebabCase, EvidencePanelSchema).optional(),
   redFlags: z.record(kebabCase, RedFlagSchema),
   debrief: z.strictObject({ rule: LocalizedTextSchema, realWorldAction: LocalizedTextSchema }),
 });
 
-type ScenarioShapeT = z.output<typeof ScenarioShape>;
+/** A parsed scenario before the graph checks. Same shape as `Scenario`. */
+export type ScenarioData = z.output<typeof ScenarioShape>;
 
 /** Cross-field rules from CONTEXT.md §5 that a plain object schema can't express. */
-function checkScenarioGraph(s: ScenarioShapeT, ctx: z.RefinementCtx): void {
+function checkScenarioGraph(s: ScenarioData, ctx: z.RefinementCtx): void {
   const issue = (path: PropertyKey[], message: string) =>
     ctx.addIssue({ code: "custom", path, message });
 
   const nodeIds = new Set(Object.keys(s.nodes));
+  const panelIds = new Set(Object.keys(s.evidence ?? {}));
 
   if (!nodeIds.has(s.startNodeId)) {
     issue(["startNodeId"], `startNodeId "${s.startNodeId}" is not a node`);
   }
 
-  const seenMessageIds = new Set<string>();
-  const usedRedFlags = new Set<string>();
-
   for (const [nodeId, node] of Object.entries(s.nodes)) {
+    const at = ["nodes", nodeId];
+    if (node.kind === "outcome") {
+      if (node.rewindToNodeId !== undefined) {
+        const target = s.nodes[node.rewindToNodeId];
+        if (target === undefined) {
+          issue([...at, "rewindToNodeId"], `rewindToNodeId "${node.rewindToNodeId}" is not a node`);
+        } else if (target.kind === "outcome") {
+          issue(
+            [...at, "rewindToNodeId"],
+            `rewindToNodeId "${node.rewindToNodeId}" must point to a thread, email, compose or triage node`,
+          );
+        }
+      }
+      continue;
+    }
+
+    for (const next of nextNodeIds(node)) {
+      if (!nodeIds.has(next)) issue(at, `nextNodeId "${next}" is not a node`);
+    }
+
+    if (node.kind === "thread" || node.kind === "email") {
+      for (const panelId of node.evidence ?? []) {
+        if (!panelIds.has(panelId))
+          issue([...at, "evidence"], `evidence "${panelId}" is not a panel`);
+      }
+    }
+
     if (node.kind === "thread") {
-      node.choices.forEach((choice, i) => {
-        if (!nodeIds.has(choice.nextNodeId)) {
-          issue(
-            ["nodes", nodeId, "choices", i, "nextNodeId"],
-            `nextNodeId "${choice.nextNodeId}" is not a node`,
-          );
-        }
-      });
       node.messages.forEach((message, i) => {
-        if (seenMessageIds.has(message.id)) {
+        const hasText = message.text !== undefined;
+        const hasSegments = message.segments !== undefined;
+        if (hasText === hasSegments) {
           issue(
-            ["nodes", nodeId, "messages", i, "id"],
-            `message id "${message.id}" is used more than once in this scenario`,
+            [...at, "messages", i],
+            `message "${message.id}" needs exactly one of text or segments`,
           );
         }
-        seenMessageIds.add(message.id);
-        if (message.redFlagId !== undefined) {
-          usedRedFlags.add(message.redFlagId);
-          if (!(message.redFlagId in s.redFlags)) {
-            issue(
-              ["nodes", nodeId, "messages", i, "redFlagId"],
-              `redFlagId "${message.redFlagId}" is not defined in redFlags`,
-            );
-          }
+        if (hasSegments && message.redFlagId !== undefined) {
+          issue(
+            [...at, "messages", i, "redFlagId"],
+            `message "${message.id}" has segments: put redFlagId on a segment instead`,
+          );
         }
       });
-    } else if (node.rewindToNodeId !== undefined) {
-      const target = s.nodes[node.rewindToNodeId];
-      if (target === undefined) {
-        issue(
-          ["nodes", nodeId, "rewindToNodeId"],
-          `rewindToNodeId "${node.rewindToNodeId}" is not a node`,
-        );
-      } else if (target.kind !== "thread") {
-        issue(
-          ["nodes", nodeId, "rewindToNodeId"],
-          `rewindToNodeId "${node.rewindToNodeId}" must point to a thread node`,
-        );
+    }
+
+    const emails =
+      node.kind === "email"
+        ? [node.email]
+        : node.kind === "triage"
+          ? node.items.map((i) => i.email)
+          : [];
+    for (const email of emails) {
+      for (const attachment of email.attachments ?? []) {
+        if (attachment.documentId !== undefined && !panelIds.has(attachment.documentId)) {
+          issue(
+            at,
+            `attachment "${attachment.id}" documentId "${attachment.documentId}" is not a panel`,
+          );
+        }
+      }
+    }
+
+    if (node.kind === "triage") {
+      const itemIds = new Set<string>();
+      for (const item of node.items) {
+        if (itemIds.has(item.id)) issue(at, `triage item id "${item.id}" is used more than once`);
+        itemIds.add(item.id);
+      }
+    }
+
+    const segmentLists =
+      node.kind === "thread"
+        ? node.messages.map((m) => m.segments ?? [])
+        : emails.flatMap((e) => e.body);
+    for (const segments of segmentLists) {
+      for (const segment of segments) {
+        if (segment.redFlagId !== undefined && segment.id === undefined) {
+          issue(at, `a segment with redFlagId "${segment.redFlagId}" needs an id`);
+        }
+      }
+    }
+  }
+
+  const seenIds = new Set<string>();
+  const usedRedFlags = new Set<string>();
+  for (const item of collectFlaggables(s)) {
+    if (seenIds.has(item.id)) {
+      issue([], `flaggable id "${item.id}" is used more than once in this scenario`);
+    }
+    seenIds.add(item.id);
+    if (item.redFlagId !== undefined) {
+      usedRedFlags.add(item.redFlagId);
+      if (!(item.redFlagId in s.redFlags)) {
+        issue([], `redFlagId "${item.redFlagId}" on "${item.id}" is not defined in redFlags`);
       }
     }
   }
 
   for (const redFlagId of Object.keys(s.redFlags)) {
     if (!usedRedFlags.has(redFlagId)) {
-      issue(["redFlags", redFlagId], `red flag "${redFlagId}" is not used by any message`);
+      issue(["redFlags", redFlagId], `red flag "${redFlagId}" is not used by any message or field`);
     }
   }
 
@@ -209,7 +436,7 @@ function checkScenarioGraph(s: ScenarioShapeT, ctx: z.RefinementCtx): void {
   }
 }
 
-function canReachOutcome(s: ScenarioShapeT): boolean {
+function canReachOutcome(s: ScenarioData): boolean {
   const visited = new Set<string>();
   const queue = [s.startNodeId];
   while (queue.length > 0) {
@@ -219,7 +446,7 @@ function canReachOutcome(s: ScenarioShapeT): boolean {
     const node = s.nodes[id];
     if (node === undefined) continue;
     if (node.kind === "outcome") return true;
-    for (const choice of node.choices) queue.push(choice.nextNodeId);
+    queue.push(...nextNodeIds(node));
   }
   return false;
 }
@@ -238,6 +465,8 @@ export const DojoSchema = z
     name: LocalizedTextSchema,
     tagline: LocalizedTextSchema,
     scenarios: z.array(ScenarioSchema),
+    /** The short list of lessons shown on the dojo page. */
+    takeaways: z.array(LocalizedTextSchema).min(1).optional(),
   })
   .superRefine((dojo, ctx) => {
     const ids = new Set<string>();

@@ -88,9 +88,14 @@ describe("a scenario written in plain English strings", () => {
     expect(resolveText(lost.title, locale)).toBe("Lost");
     expect(resolveText(lost.body, locale)).toBe("You lost ₹1,000.");
 
-    const debrief = computeDebrief(scenario, ["m1", "m2", "m3"], ["m2", "m1"]);
+    const debrief = computeDebrief(scenario, {
+      seen: ["m1", "m2", "m3"],
+      flagged: ["m2", "m1"],
+      visited: ["start", "follow-up", "lost"],
+      classifications: {},
+    });
     expect(debrief.caught.map((f) => resolveText(f.label, locale))).toEqual(["Pay first"]);
-    expect(debrief.missed.map((f) => resolveText(f.messageText, locale))).toEqual([
+    expect(debrief.missed.map((f) => resolveText(f.evidenceText, locale))).toEqual([
       "Only 2 minutes left!",
     ]);
     expect(debrief.falseAlarms.map((a) => resolveText(a.text, locale))).toEqual(["Hello"]);

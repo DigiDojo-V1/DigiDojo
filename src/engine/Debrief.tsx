@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, type ReactNode } from "react";
-import { Check, Flag, Lightbulb, Phone, RotateCcw, X } from "lucide-react";
+import { Check, Eye, Flag, Inbox, Lightbulb, Phone, RotateCcw, X } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { useT, useText } from "@/i18n/hooks";
 import { cn } from "@/lib/utils";
-import { computeDebrief, type DebriefFlag } from "./scoring";
+import { computeDebrief, type DebriefFlag, type DebriefTriageRow, type RunRecord } from "./scoring";
 import { OUTCOME_STYLE } from "./outcome-style";
 import type { LocalizedText, OutcomeNode, Scenario } from "./schema";
 import { scenarioKey } from "./keys";
@@ -19,13 +19,12 @@ import { useProgressStore } from "./store";
 interface DebriefProps {
   scenario: Scenario;
   outcome: OutcomeNode | undefined;
-  seen: readonly string[];
-  flagged: readonly string[];
+  run: RunRecord;
   backHref: string;
   onReplay: () => void;
 }
 
-export function Debrief({ scenario, outcome, seen, flagged, backHref, onReplay }: DebriefProps) {
+export function Debrief({ scenario, outcome, run, backHref, onReplay }: DebriefProps) {
   const t = useT();
   const text = useText();
   const markComplete = useProgressStore((s) => s.markComplete);
@@ -34,7 +33,7 @@ export function Debrief({ scenario, outcome, seen, flagged, backHref, onReplay }
   // Reaching the debrief completes the scenario.
   useEffect(() => markComplete(key), [key, markComplete]);
 
-  const result = useMemo(() => computeDebrief(scenario, seen, flagged), [scenario, seen, flagged]);
+  const result = useMemo(() => computeDebrief(scenario, run), [scenario, run]);
   const seenCount = result.caught.length + result.missed.length;
   const style = outcome !== undefined ? OUTCOME_STYLE[outcome.result] : undefined;
 
@@ -93,7 +92,7 @@ export function Debrief({ scenario, outcome, seen, flagged, backHref, onReplay }
             <Flag className="size-4 text-amber-600" /> {t("debrief.falseAlarms")}
           </h2>
           {result.falseAlarms.map((alarm) => (
-            <Card key={alarm.messageId} size="sm">
+            <Card key={alarm.id} size="sm">
               <CardContent className="space-y-1">
                 <Quote text={alarm.text} />
                 <p className="text-sm text-muted-foreground">{t("debrief.falseAlarmNote")}</p>
@@ -102,6 +101,17 @@ export function Debrief({ scenario, outcome, seen, flagged, backHref, onReplay }
           ))}
         </section>
       )}
+
+      {result.notInspected.length > 0 && (
+        <FlagSection
+          title={t("debrief.notInspected")}
+          icon={<Eye className="size-4 text-amber-600" />}
+          flags={result.notInspected}
+          note={t("debrief.notInspectedNote")}
+        />
+      )}
+
+      {result.triage.length > 0 && <TriageSection rows={result.triage} />}
 
       {result.notReached.length > 0 && (
         <FlagSection
@@ -147,12 +157,14 @@ function FlagSection({
   icon,
   flags,
   empty,
+  note,
   muted = false,
 }: {
   title: string;
   icon: ReactNode;
   flags: DebriefFlag[];
   empty?: string;
+  note?: string;
   muted?: boolean;
 }) {
   const t = useT();
@@ -164,6 +176,9 @@ function FlagSection({
         {icon} {title}
       </h2>
       {flags.length === 0 && <p className="text-sm text-muted-foreground">{empty}</p>}
+      {note !== undefined && flags.length > 0 && (
+        <p className="text-sm text-muted-foreground">{note}</p>
+      )}
       {flags.map((flag) => (
         <Card key={flag.redFlagId} size="sm">
           <CardContent className="space-y-1.5">
@@ -171,7 +186,10 @@ function FlagSection({
               <span className="font-medium">{text(flag.label)}</span>
               <Badge variant="secondary">{t(`tactic.${flag.tactic}.label`)}</Badge>
             </div>
-            <Quote text={flag.messageText} />
+            <p className="text-xs font-medium text-muted-foreground">
+              {t(`debrief.where.${flag.where}`)}
+            </p>
+            <Quote text={flag.evidenceText} />
             <p className="text-sm">{text(flag.explanation)}</p>
             <p className="text-xs text-muted-foreground">
               {t(`tactic.${flag.tactic}.explanation`)}
@@ -189,5 +207,39 @@ function Quote({ text }: { text: LocalizedText }) {
     <blockquote className="border-l-2 pl-2 text-sm text-muted-foreground italic">
       “{resolve(text)}”
     </blockquote>
+  );
+}
+
+function TriageSection({ rows }: { rows: DebriefTriageRow[] }) {
+  const t = useT();
+  const text = useText();
+  const right = rows.filter((r) => r.isCorrect).length;
+  return (
+    <section className="space-y-2">
+      <h2 className="flex items-center gap-1.5 text-sm font-semibold">
+        <Inbox className="size-4" /> {t("debrief.triage")}
+      </h2>
+      <p className="text-sm">{t("debrief.triageScore")(right, rows.length)}</p>
+      {rows.map((row) => (
+        <Card key={row.itemId} size="sm">
+          <CardContent className="space-y-1.5">
+            <div className="flex items-start gap-2">
+              {row.isCorrect ? (
+                <Check className="mt-0.5 size-4 shrink-0 text-emerald-600" />
+              ) : (
+                <X className="mt-0.5 size-4 shrink-0 text-red-600" />
+              )}
+              <span className="font-medium">{text(row.subject)}</span>
+            </div>
+            <p className="text-sm">
+              {t("debrief.triageYouSaid")}:{" "}
+              {row.chosen === undefined ? t("triage.unlabelled") : t(`triage.${row.chosen}`)} ·{" "}
+              {t("debrief.triageAnswer")}: {t(`triage.${row.correct}`)}
+            </p>
+            <p className="text-sm text-muted-foreground">{text(row.explanation)}</p>
+          </CardContent>
+        </Card>
+      ))}
+    </section>
   );
 }

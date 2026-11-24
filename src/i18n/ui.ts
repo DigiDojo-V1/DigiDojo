@@ -36,6 +36,7 @@ const en = {
   "dojo.empty": "No scenarios yet.",
   "dojo.legit": "Legit",
   "dojo.coldRun": "Cold run",
+  "dojo.takeaways": "What to remember",
 
   // 404
   "notFound.body": "We couldn't find this page.",
@@ -52,11 +53,47 @@ const en = {
   "chat.flagAria": (text: string) => `Flag message: ${text}`,
   "chat.unflagAria": (text: string) => `Unflag message: ${text}`,
   "shell.comingSoon": (name: string) => `Coming soon: ${name} shell`,
+  "thread.evidenceHint": "Check before you decide:",
+
+  // Mail
+  "mail.inbox": "Inbox",
+  "mail.reply": "Reply",
+  "mail.hint": "Tap a phrase or a detail to flag it as suspicious",
+  "mail.from": "From",
+  "mail.replyTo": "Reply-To",
+  "mail.to": "To",
+  "mail.toMe": "to me",
+  "mail.tapSender": "Tap the sender to see the full details",
+  "mail.inspectLinkHint": "Tap the button to see where it really goes (nothing will open)",
+  "mail.fileName": "File",
+  "mail.fileType": "Actual type:",
+  "mail.openDocument": "Open preview",
+  "compose.subject": "Subject",
+
+  // Evidence panels
+  "evidence.close": "Close",
+  "evidence.hint": "Tap the flag next to anything that looks wrong.",
+  "evidence.kind.profile": "Profile",
+  "evidence.kind.company": "Company",
+  "evidence.kind.web-page": "Web page",
+  "evidence.kind.document": "Document",
+
+  // Inbox triage
+  "triage.hint": "Open each email and label it. You can inspect senders and attachments first.",
+  "triage.prompt": "How would you label this email?",
+  "triage.legit": "Legit",
+  "triage.scam": "Scam",
+  "triage.needs-checking": "Needs checking",
+  "triage.unlabelled": "Not labelled",
+  "triage.backToInbox": "Back to inbox",
+  "triage.submit": "Submit labels",
+  "triage.progress": (done: number, total: number) => `${done} of ${total} labelled`,
 
   // Outcome
   "outcome.safe": "Safe",
   "outcome.loss": "Money lost",
   "outcome.partial-loss": "Partial loss",
+  "outcome.compromised": "Compromised",
   "outcome.missed-opportunity": "Missed opportunity",
   "outcome.rewind": "Rewind to where you could have stopped",
   "outcome.seeDebrief": "See debrief",
@@ -75,6 +112,22 @@ const en = {
   "debrief.falseAlarmNote":
     "This one was fine. Being careful is good, but suspecting everything means missing real chances.",
   "debrief.notReached": "On paths you didn't take",
+  "debrief.notInspected": "You didn't check",
+  "debrief.notInspectedNote": "These were one tap away. Inspect before you decide.",
+  "debrief.triage": "Inbox labels",
+  "debrief.triageScore": (right: number, total: number) =>
+    `You labelled ${right} of ${total} emails correctly.`,
+  "debrief.triageYouSaid": "You said",
+  "debrief.triageAnswer": "Answer",
+  "debrief.where.message": "Message",
+  "debrief.where.email-body": "Email text",
+  "debrief.where.from": "From address",
+  "debrief.where.reply-to": "Reply-To address",
+  "debrief.where.to": "Reply goes to",
+  "debrief.where.attachment": "Attachment",
+  "debrief.where.link": "Button or link",
+  "debrief.where.panel-field": "Profile or record",
+  "debrief.where.fine-print": "Fine print",
   "debrief.rule": "Rule to remember",
   "debrief.playAgain": "Play again",
 
@@ -106,6 +159,18 @@ const en = {
     "Praise and 'you've been specially selected' make you drop your guard.",
   "tactic.impersonation.label": "Impersonation",
   "tactic.impersonation.explanation": "They pretend to be someone you know or trust.",
+  "tactic.no-real-process.label": "No real process",
+  "tactic.no-real-process.explanation":
+    "No interview, no named people, vague duties: a real employer actually selects you.",
+  "tactic.data-harvest.label": "Data harvesting",
+  "tactic.data-harvest.explanation":
+    "They want your ID, bank details or selfie, which can be misused for fraud or loans.",
+  "tactic.malicious-file.label": "Disguised file",
+  "tactic.malicious-file.explanation":
+    "A file dressed up as a document is really an app that can take over your phone.",
+  "tactic.disguised-link.label": "Disguised link",
+  "tactic.disguised-link.explanation":
+    "The link looks familiar but goes somewhere else. Check the real destination.",
 } satisfies Record<string, UiValue> & Record<TacticKey, string>;
 
 export type UiDict = typeof en;

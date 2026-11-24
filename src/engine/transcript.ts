@@ -1,6 +1,7 @@
 import type { Locale } from "@/i18n/locale";
 import { resolveText } from "@/i18n/text";
 import type { ChatBubble } from "@/shells/types";
+import { messageText } from "./evidence";
 import type { Message, Scenario, ScenarioNode, ThreadNode } from "./schema";
 import type { TrailStep } from "./store";
 
@@ -10,8 +11,14 @@ export function toBubble(message: Message, locale: Locale): ChatBubble {
     id: message.id,
     from: message.from,
     sender: message.sender === undefined ? undefined : resolveText(message.sender, locale),
-    text: resolveText(message.text, locale),
-    flaggable: message.from !== "me",
+    text: resolveText(messageText(message), locale),
+    // A message written in segments is flagged phrase by phrase, never as a whole.
+    flaggable: message.from !== "me" && message.segments === undefined,
+    segments: message.segments?.map((segment) => ({
+      id: segment.id,
+      text: resolveText(segment.text, locale),
+      flaggable: segment.id !== undefined && message.from !== "me",
+    })),
   };
 }
 

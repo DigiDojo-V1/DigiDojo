@@ -56,3 +56,135 @@ export function validScenarioInput(): ScenarioInput {
 export function validScenario(): Scenario {
   return ScenarioSchema.parse(validScenarioInput());
 }
+
+/**
+ * A scenario that uses every evidence feature: a segmented message, an evidence panel,
+ * an email with hidden details, a link and an attachment, a reply composer and an inbox triage.
+ */
+export function richScenarioInput(): ScenarioInput {
+  const email = {
+    displayName: "Acme HR",
+    from: { id: "e-from", address: "hr@acme-jobs.example", redFlagId: "lookalike" },
+    replyTo: { id: "e-reply-to", address: "desk@free.example", redFlagId: "reply-to" },
+    to: { id: "e-to", address: "me@example.com" },
+    date: "1 Jan",
+    subject: "Your offer",
+    preview: "Please review",
+    body: [[{ text: "Dear " }, { id: "e-greeting", text: "Candidate", redFlagId: "generic" }]],
+    attachments: [
+      {
+        id: "e-file",
+        shownName: "Offer.pdf",
+        fullName: "Offer.pdf.apk",
+        actualType: "Android app",
+        documentId: "offer-pdf",
+        redFlagId: "apk",
+      },
+    ],
+    links: [{ id: "e-link", text: "Open offer", actualUrl: "https://x.example/login" }],
+  };
+  return {
+    id: "rich",
+    dojoId: "dream-job",
+    title: "Rich",
+    summary: "Every feature.",
+    legit: false,
+    startNodeId: "dm",
+    nodes: {
+      dm: {
+        kind: "thread",
+        app: "linkedin",
+        contact: { name: "Recruiter" },
+        messages: [
+          {
+            id: "dm-1",
+            from: "them",
+            segments: [
+              { text: "Hi! " },
+              { id: "dm-pay", text: "Pay ₹999 to register.", redFlagId: "fee" },
+              { id: "dm-role", text: " The role is in Bengaluru." },
+            ],
+          },
+        ],
+        evidence: ["profile"],
+        choices: [
+          { label: "Check email", nextNodeId: "mail" },
+          { label: "Pay", nextNodeId: "lost" },
+        ],
+      },
+      mail: {
+        kind: "email",
+        app: "gmail",
+        email,
+        choices: [
+          { label: "Reply", nextNodeId: "reply" },
+          { label: "Report", nextNodeId: "safe" },
+        ],
+      },
+      reply: {
+        kind: "compose",
+        app: "gmail",
+        to: { id: "reply-to-field", address: "desk@free.example", redFlagId: "reply-to" },
+        subject: "Re: Your offer",
+        body: "I accept.",
+        choices: [{ label: "Send", nextNodeId: "inbox" }],
+      },
+      inbox: {
+        kind: "triage",
+        app: "gmail",
+        items: [
+          {
+            id: "t-real",
+            email: {
+              displayName: "Real Co",
+              from: { id: "t-real-from", address: "hr@real.example" },
+              to: { id: "t-real-to", address: "me@example.com" },
+              date: "2 Jan",
+              subject: "Interview",
+              preview: "Hello",
+              body: [[{ id: "t-real-body", text: "See you Monday." }]],
+            },
+            correct: "legit",
+            explanation: "Official domain.",
+          },
+        ],
+        nextNodeId: "safe",
+      },
+      safe: { kind: "outcome", result: "safe", title: "Safe", body: "Done." },
+      lost: {
+        kind: "outcome",
+        result: "compromised",
+        title: "Hacked",
+        body: "They took over.",
+        rewindToNodeId: "mail",
+      },
+    },
+    evidence: {
+      profile: {
+        kind: "profile",
+        title: "Recruiter profile",
+        sections: [
+          { fields: [{ id: "p-joined", label: "Joined", value: "2019", redFlagId: "dates" }] },
+        ],
+      },
+      "offer-pdf": {
+        kind: "document",
+        title: "Offer.pdf",
+        sections: [{ fields: [{ id: "pdf-clause", value: "Pay a deposit.", finePrint: true }] }],
+      },
+    },
+    redFlags: {
+      fee: { label: "Fee", tactic: "pay-to-earn", explanation: "x" },
+      lookalike: { label: "Lookalike", tactic: "impersonation", explanation: "x" },
+      "reply-to": { label: "Reply-To", tactic: "impersonation", explanation: "x" },
+      generic: { label: "Generic", tactic: "no-real-process", explanation: "x" },
+      apk: { label: "APK", tactic: "malicious-file", explanation: "x" },
+      dates: { label: "Dates", tactic: "impersonation", explanation: "x" },
+    },
+    debrief: { rule: "Check everything.", realWorldAction: "Call 1930." },
+  };
+}
+
+export function richScenario(): Scenario {
+  return ScenarioSchema.parse(richScenarioInput());
+}
