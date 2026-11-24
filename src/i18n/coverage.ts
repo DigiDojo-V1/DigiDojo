@@ -85,6 +85,7 @@ export function collectTexts(scenario: Scenario): TextField[] {
   }
 
   add("debrief.rule", scenario.debrief.rule);
+  add("debrief.summary", scenario.debrief.summary);
   add("debrief.realWorldAction", scenario.debrief.realWorldAction);
   return out;
 }

@@ -143,6 +143,7 @@ export const EvidencePanelSchema = z.strictObject({
     .min(1),
 });
 export type EvidencePanel = z.output<typeof EvidencePanelSchema>;
+export type EvidencePanelInput = z.input<typeof EvidencePanelSchema>;
 
 /** An email address the player can inspect and flag. Addresses are never translated. */
 export const AddressSchema = z.strictObject({
@@ -290,6 +291,7 @@ export const RedFlagSchema = z.strictObject({
   explanation: LocalizedTextSchema,
 });
 export type RedFlag = z.output<typeof RedFlagSchema>;
+export type RedFlagInput = z.input<typeof RedFlagSchema>;
 
 const ScenarioShape = z.strictObject({
   id: kebabCase,
@@ -307,7 +309,12 @@ const ScenarioShape = z.strictObject({
   /** Panels the player can open: profiles, company pages, web pages, PDFs. */
   evidence: z.record(kebabCase, EvidencePanelSchema).optional(),
   redFlags: z.record(kebabCase, RedFlagSchema),
-  debrief: z.strictObject({ rule: LocalizedTextSchema, realWorldAction: LocalizedTextSchema }),
+  debrief: z.strictObject({
+    rule: LocalizedTextSchema,
+    /** A short paragraph under the rule, explaining the pattern. */
+    summary: LocalizedTextSchema.optional(),
+    realWorldAction: LocalizedTextSchema,
+  }),
 });
 
 /** A parsed scenario before the graph checks. Same shape as `Scenario`. */
