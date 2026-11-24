@@ -185,6 +185,7 @@ interface Email {
 interface Address { id: string; address: string; redFlagId?: string }
 ```
 
+- Display hints (optional, visual only, never scored): `Message.time` ("09:14") shows next to the sender in card-style chats; `Field.slot` (`name | headline | location | connections`, profile panels only) draws a field in the profile header; `EvidencePanel.variant: "official-record"` (company panels only) draws a registry record card; `ThreadNode.layout: "split"` shows the messages and the node's evidence panels as two panes with a switch.
 - Threads and email nodes take `evidence: [panelId, …]`: buttons such as "View profile" or "Check careers page".
 - Every flaggable item (message, phrase, address, attachment, link, panel field) shares one id space per scenario. `src/engine/evidence.ts` (`collectFlaggables`) is the one place that lists them.
 - New tactics: `no-real-process`, `data-harvest`, `malicious-file`, `disguised-link`. New outcome result: `compromised` (identity, device or account harm with no money moved).

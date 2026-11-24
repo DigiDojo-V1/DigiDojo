@@ -1,0 +1,1980 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Dream Job scoring inputs > easy-too-good has the same flaggable items 1`] = `
+[
+  {
+    "hidden": false,
+    "id": "li-easy-date",
+    "nodeIds": [
+      "li-dm",
+    ],
+    "panelId": null,
+    "redFlagId": null,
+    "text": "19 November 2026, 09:12",
+    "where": "message",
+  },
+  {
+    "hidden": false,
+    "id": "li-easy-offer",
+    "nodeIds": [
+      "li-dm",
+    ],
+    "panelId": null,
+    "redFlagId": null,
+    "text": "Hi Ananya! Congratulations! We have reviewed your profile and you have been selected for our Work-From-Home Business Research Internship at Nexora Technologies. You will receive ₹40,000 per month for just two hours of work per day. No interview is needed because the hiring team has already shortlisted you from LinkedIn.
+
+The role involves basic online research, spreadsheet updates and data entry; the complete job description will be shared after registration. To reserve your seat, pay a refundable registration and verification fee of ₹1,499 by 8:00 PM today to our HR coordinator’s UPI ID: karan.sethi@okaxis.
+
+Only two seats are left, and the offer will automatically expire tonight. Reply “YES” and send the payment screenshot to receive your offer letter.",
+    "where": "message",
+  },
+  {
+    "hidden": false,
+    "id": "li-easy-selected",
+    "nodeIds": [
+      "li-dm",
+    ],
+    "panelId": null,
+    "redFlagId": "li-never-applied",
+    "text": "Congratulations! We have reviewed your profile and you have been selected for our Work-From-Home Business Research Internship at Nexora Technologies.",
+    "where": "message",
+  },
+  {
+    "hidden": false,
+    "id": "li-easy-pay",
+    "nodeIds": [
+      "li-dm",
+    ],
+    "panelId": null,
+    "redFlagId": "li-pay-too-high",
+    "text": "You will receive ₹40,000 per month for just two hours of work per day.",
+    "where": "message",
+  },
+  {
+    "hidden": false,
+    "id": "li-easy-no-interview",
+    "nodeIds": [
+      "li-dm",
+    ],
+    "panelId": null,
+    "redFlagId": "li-no-interview",
+    "text": "No interview is needed because the hiring team has already shortlisted you from LinkedIn.",
+    "where": "message",
+  },
+  {
+    "hidden": false,
+    "id": "li-easy-vague",
+    "nodeIds": [
+      "li-dm",
+    ],
+    "panelId": null,
+    "redFlagId": "li-vague-duties",
+    "text": "the complete job description will be shared after registration.",
+    "where": "message",
+  },
+  {
+    "hidden": false,
+    "id": "li-easy-fee",
+    "nodeIds": [
+      "li-dm",
+    ],
+    "panelId": null,
+    "redFlagId": "li-fee",
+    "text": "pay a refundable registration and verification fee of ₹1,499",
+    "where": "message",
+  },
+  {
+    "hidden": false,
+    "id": "li-easy-deadline",
+    "nodeIds": [
+      "li-dm",
+    ],
+    "panelId": null,
+    "redFlagId": "li-urgency",
+    "text": "by 8:00 PM today",
+    "where": "message",
+  },
+  {
+    "hidden": false,
+    "id": "li-easy-upi",
+    "nodeIds": [
+      "li-dm",
+    ],
+    "panelId": null,
+    "redFlagId": "li-personal-upi",
+    "text": "HR coordinator’s UPI ID: karan.sethi@okaxis",
+    "where": "message",
+  },
+  {
+    "hidden": false,
+    "id": "li-easy-seats",
+    "nodeIds": [
+      "li-dm",
+    ],
+    "panelId": null,
+    "redFlagId": "li-urgency",
+    "text": "Only two seats are left, and the offer will automatically expire tonight.",
+    "where": "message",
+  },
+  {
+    "hidden": false,
+    "id": "ge-from",
+    "nodeIds": [
+      "gmail-easy",
+    ],
+    "panelId": null,
+    "redFlagId": "mail-free-sender",
+    "text": "nexorahr.careers@gmail.com",
+    "where": "from",
+  },
+  {
+    "hidden": true,
+    "id": "ge-reply-to",
+    "nodeIds": [
+      "gmail-easy",
+    ],
+    "panelId": null,
+    "redFlagId": null,
+    "text": "nexorahr.careers@gmail.com",
+    "where": "reply-to",
+  },
+  {
+    "hidden": true,
+    "id": "ge-to",
+    "nodeIds": [
+      "gmail-easy",
+    ],
+    "panelId": null,
+    "redFlagId": null,
+    "text": "ananya.rao@example.com",
+    "where": "to",
+  },
+  {
+    "hidden": false,
+    "id": "ge-greeting",
+    "nodeIds": [
+      "gmail-easy",
+    ],
+    "panelId": null,
+    "redFlagId": "mail-generic-greeting",
+    "text": "Dear Candidate,",
+    "where": "email-body",
+  },
+  {
+    "hidden": false,
+    "id": "ge-selected",
+    "nodeIds": [
+      "gmail-easy",
+    ],
+    "panelId": null,
+    "redFlagId": "mail-never-applied",
+    "text": "You have been selected for the Business Research Intern position at Nexora Technologies.",
+    "where": "email-body",
+  },
+  {
+    "hidden": false,
+    "id": "ge-no-interview",
+    "nodeIds": [
+      "gmail-easy",
+    ],
+    "panelId": null,
+    "redFlagId": "mail-no-interview",
+    "text": "You do not need to attend any further interview.",
+    "where": "email-body",
+  },
+  {
+    "hidden": false,
+    "id": "ge-salary",
+    "nodeIds": [
+      "gmail-easy",
+    ],
+    "panelId": null,
+    "redFlagId": "mail-high-salary",
+    "text": "Your monthly salary will be ₹40,000.",
+    "where": "email-body",
+  },
+  {
+    "hidden": false,
+    "id": "ge-fee",
+    "nodeIds": [
+      "gmail-easy",
+    ],
+    "panelId": null,
+    "redFlagId": "mail-fee",
+    "text": "pay ₹2,999 today",
+    "where": "email-body",
+  },
+  {
+    "hidden": false,
+    "id": "ge-upi",
+    "nodeIds": [
+      "gmail-easy",
+    ],
+    "panelId": null,
+    "redFlagId": "mail-personal-upi",
+    "text": "HR coordinator’s UPI ID: karan.sethi@okaxis",
+    "where": "email-body",
+  },
+  {
+    "hidden": false,
+    "id": "ge-deadline",
+    "nodeIds": [
+      "gmail-easy",
+    ],
+    "panelId": null,
+    "redFlagId": "mail-urgency",
+    "text": "Please complete the process within 24 hours because only a few seats remain.",
+    "where": "email-body",
+  },
+  {
+    "hidden": true,
+    "id": "ge-file",
+    "nodeIds": [
+      "gmail-easy",
+    ],
+    "panelId": null,
+    "redFlagId": null,
+    "text": "Ananya_Rao_Offer_Letter.pdf",
+    "where": "attachment",
+  },
+  {
+    "hidden": true,
+    "id": "karan-name",
+    "nodeIds": [
+      "li-dm",
+    ],
+    "panelId": "karan-profile",
+    "redFlagId": null,
+    "text": "Name: Karan Sethi",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "karan-headline",
+    "nodeIds": [
+      "li-dm",
+    ],
+    "panelId": "karan-profile",
+    "redFlagId": null,
+    "text": "Headline: HR Associate | Nexora Technologies",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "karan-company",
+    "nodeIds": [
+      "li-dm",
+    ],
+    "panelId": "karan-profile",
+    "redFlagId": null,
+    "text": "Company shown: Nexora Technologies",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "company-name",
+    "nodeIds": [
+      "li-dm",
+    ],
+    "panelId": "nexora-company",
+    "redFlagId": null,
+    "text": "Company page: Nexora Technologies Pvt. Ltd.",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "company-location",
+    "nodeIds": [
+      "li-dm",
+    ],
+    "panelId": "nexora-company",
+    "redFlagId": null,
+    "text": "Location: Bengaluru, Karnataka, India",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "company-industry",
+    "nodeIds": [
+      "li-dm",
+    ],
+    "panelId": "nexora-company",
+    "redFlagId": null,
+    "text": "Industry: Software / business analytics",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "company-website",
+    "nodeIds": [
+      "li-dm",
+    ],
+    "panelId": "nexora-company",
+    "redFlagId": null,
+    "text": "Official website: nexora.example",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "careers-role",
+    "nodeIds": [
+      "li-dm",
+      "gmail-easy",
+    ],
+    "panelId": "nexora-careers",
+    "redFlagId": null,
+    "text": "Business Research Intern — NX-BRI-026: 3 months; ₹18,000/month; Bengaluru hybrid; reporting manager Priya Nair",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "easy-pdf-greeting",
+    "nodeIds": [
+      "gmail-easy",
+    ],
+    "panelId": "easy-offer-pdf",
+    "redFlagId": "mail-generic-greeting",
+    "text": "Greeting: Dear Candidate",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "easy-pdf-role",
+    "nodeIds": [
+      "gmail-easy",
+    ],
+    "panelId": "easy-offer-pdf",
+    "redFlagId": "mail-high-salary",
+    "text": "Role / salary: Business Research Intern; ₹40,000/month",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "easy-pdf-manager",
+    "nodeIds": [
+      "gmail-easy",
+    ],
+    "panelId": "easy-offer-pdf",
+    "redFlagId": "mail-missing-details",
+    "text": "Manager / office: No reporting manager or office address",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "easy-pdf-signatory",
+    "nodeIds": [
+      "gmail-easy",
+    ],
+    "panelId": "easy-offer-pdf",
+    "redFlagId": "mail-missing-details",
+    "text": "Signatory: “HR Manager” (no named person)",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "easy-pdf-payment",
+    "nodeIds": [
+      "gmail-easy",
+    ],
+    "panelId": "easy-offer-pdf",
+    "redFlagId": "mail-fee",
+    "text": "Payment clause: ₹2,999 registration and verification fee payable before onboarding to the coordinator’s UPI ID.",
+    "where": "panel-field",
+  },
+]
+`;
+
+exports[`Dream Job scoring inputs > hard-dates has the same flaggable items 1`] = `
+[
+  {
+    "hidden": false,
+    "id": "li-hard-date",
+    "nodeIds": [
+      "li-nisha",
+    ],
+    "panelId": null,
+    "redFlagId": null,
+    "text": "22 November 2026, 15:20",
+    "where": "message",
+  },
+  {
+    "hidden": false,
+    "id": "li-hard-m1",
+    "nodeIds": [
+      "li-nisha",
+    ],
+    "panelId": null,
+    "redFlagId": null,
+    "text": "Hi Ananya, I reviewed your profile and the academic project you listed on inflation trends. Our research team is hiring a Business Research Intern for a three-month hybrid role in Bengaluru. The work includes competitor research, spreadsheet analysis and preparing a weekly insight summary. The stipend is ₹18,000 per month.
+
+The selection process is a 20-minute video discussion with the Research Manager, Priya Nair, on 25 November at 3:30 PM. The role is listed under reference NX-BRI-026. Please let me know whether you would like me to reserve the slot.",
+    "where": "message",
+  },
+  {
+    "hidden": true,
+    "id": "gh-from",
+    "nodeIds": [
+      "gmail-hard",
+    ],
+    "panelId": null,
+    "redFlagId": "mail-deceptive-subdomain",
+    "text": "nisha.rao@nexora.example.onboard-hr.example",
+    "where": "from",
+  },
+  {
+    "hidden": true,
+    "id": "gh-reply-to",
+    "nodeIds": [
+      "gmail-hard",
+    ],
+    "panelId": null,
+    "redFlagId": "mail-reply-to-other-domain",
+    "text": "payroll-verification@nexora-payroll.example",
+    "where": "reply-to",
+  },
+  {
+    "hidden": true,
+    "id": "gh-to",
+    "nodeIds": [
+      "gmail-hard",
+    ],
+    "panelId": null,
+    "redFlagId": null,
+    "text": "ananya.rao@example.com",
+    "where": "to",
+  },
+  {
+    "hidden": false,
+    "id": "gh-progress",
+    "nodeIds": [
+      "gmail-hard",
+    ],
+    "panelId": null,
+    "redFlagId": null,
+    "text": "Congratulations on progressing for the Business Research Intern role (Reference NX-BRI-026). Your candidate details and proposed role have been added to our onboarding workflow.",
+    "where": "email-body",
+  },
+  {
+    "hidden": false,
+    "id": "gh-id-request",
+    "nodeIds": [
+      "gmail-hard",
+    ],
+    "panelId": null,
+    "redFlagId": "mail-id-request",
+    "text": "please upload the following before we issue the final written offer:
+• Aadhaar card
+• PAN card
+• Bank account details
+• A recent selfie for identity matching",
+    "where": "email-body",
+  },
+  {
+    "hidden": false,
+    "id": "gh-no-payment",
+    "nodeIds": [
+      "gmail-hard",
+    ],
+    "panelId": null,
+    "redFlagId": null,
+    "text": "There is no payment required at this stage.",
+    "where": "email-body",
+  },
+  {
+    "hidden": false,
+    "id": "gh-install",
+    "nodeIds": [
+      "gmail-hard",
+    ],
+    "panelId": null,
+    "redFlagId": "mail-apk",
+    "text": "Please install the attached Nexora offer document package to view and sign the letter and complete the verification process.",
+    "where": "email-body",
+  },
+  {
+    "hidden": true,
+    "id": "gh-file",
+    "nodeIds": [
+      "gmail-hard",
+    ],
+    "panelId": null,
+    "redFlagId": "mail-apk",
+    "text": "Offer_Letter.pdf.apk",
+    "where": "attachment",
+  },
+  {
+    "hidden": true,
+    "id": "gh-button",
+    "nodeIds": [
+      "gmail-hard",
+    ],
+    "panelId": null,
+    "redFlagId": "mail-button-destination",
+    "text": "Open Offer Letter → https://nexora.example.onboard-hr.example/verify",
+    "where": "link",
+  },
+  {
+    "hidden": true,
+    "id": "nisha-name",
+    "nodeIds": [
+      "li-nisha",
+    ],
+    "panelId": "nisha-profile",
+    "redFlagId": null,
+    "text": "Name: Nisha Rao",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "nisha-headline",
+    "nodeIds": [
+      "li-nisha",
+    ],
+    "panelId": "nisha-profile",
+    "redFlagId": null,
+    "text": "Headline: Senior Talent Acquisition Partner | Nexora Technologies Pvt. Ltd.",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "nisha-location",
+    "nodeIds": [
+      "li-nisha",
+    ],
+    "panelId": "nisha-profile",
+    "redFlagId": null,
+    "text": "Location: Bengaluru, Karnataka, India",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "nisha-connections",
+    "nodeIds": [
+      "li-nisha",
+    ],
+    "panelId": "nisha-profile",
+    "redFlagId": null,
+    "text": "Connections: 1,184 connections · 4 mutual connections",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "nisha-about",
+    "nodeIds": [
+      "li-nisha",
+    ],
+    "panelId": "nisha-profile",
+    "redFlagId": "li-timeline-conflict",
+    "text": "Talent acquisition professional with 10 years of experience building research and analytics teams. “I joined Nexora in July 2019 and have helped build its talent function from the beginning.”",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "nisha-exp-nexora",
+    "nodeIds": [
+      "li-nisha",
+    ],
+    "panelId": "nisha-profile",
+    "redFlagId": "li-timeline-conflict",
+    "text": "Nexora Technologies Pvt. Ltd. — Senior Talent Acquisition Partner — 1 July 2019 to Present",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "nisha-exp-apex",
+    "nodeIds": [
+      "li-nisha",
+    ],
+    "panelId": "nisha-profile",
+    "redFlagId": null,
+    "text": "Apex People Advisory — HR Consultant — June 2016 to June 2019",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "nisha-education",
+    "nodeIds": [
+      "li-nisha",
+    ],
+    "panelId": "nisha-profile",
+    "redFlagId": null,
+    "text": "BBA, Eastview Institute — 2012 to 2015",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "company-name",
+    "nodeIds": [
+      "li-nisha",
+      "gmail-hard",
+    ],
+    "panelId": "nexora-company",
+    "redFlagId": null,
+    "text": "Company page: Nexora Technologies Pvt. Ltd.",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "company-location",
+    "nodeIds": [
+      "li-nisha",
+      "gmail-hard",
+    ],
+    "panelId": "nexora-company",
+    "redFlagId": null,
+    "text": "Location: Bengaluru, Karnataka, India",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "company-industry",
+    "nodeIds": [
+      "li-nisha",
+      "gmail-hard",
+    ],
+    "panelId": "nexora-company",
+    "redFlagId": null,
+    "text": "Industry: Software / business analytics",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "company-website",
+    "nodeIds": [
+      "li-nisha",
+      "gmail-hard",
+    ],
+    "panelId": "nexora-company",
+    "redFlagId": null,
+    "text": "Official website: nexora.example",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "record-incorporated",
+    "nodeIds": [
+      "li-nisha",
+    ],
+    "panelId": "nexora-record",
+    "redFlagId": "li-timeline-conflict",
+    "text": "Company record: Incorporated on 17 May 2021",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "careers-role",
+    "nodeIds": [
+      "gmail-hard",
+    ],
+    "panelId": "nexora-careers",
+    "redFlagId": null,
+    "text": "Business Research Intern — NX-BRI-026: 3 months; ₹18,000/month; Bengaluru hybrid; reporting manager Priya Nair",
+    "where": "panel-field",
+  },
+]
+`;
+
+exports[`Dream Job scoring inputs > inbox-triage has the same flaggable items 1`] = `
+[
+  {
+    "hidden": true,
+    "id": "ge-from",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": null,
+    "redFlagId": "mail-free-sender",
+    "text": "nexorahr.careers@gmail.com",
+    "where": "from",
+  },
+  {
+    "hidden": true,
+    "id": "ge-reply-to",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": null,
+    "redFlagId": null,
+    "text": "nexorahr.careers@gmail.com",
+    "where": "reply-to",
+  },
+  {
+    "hidden": true,
+    "id": "ge-to",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": null,
+    "redFlagId": null,
+    "text": "ananya.rao@example.com",
+    "where": "to",
+  },
+  {
+    "hidden": true,
+    "id": "ge-greeting",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": null,
+    "redFlagId": "mail-generic-greeting",
+    "text": "Dear Candidate,",
+    "where": "email-body",
+  },
+  {
+    "hidden": true,
+    "id": "ge-selected",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": null,
+    "redFlagId": "mail-never-applied",
+    "text": "You have been selected for the Business Research Intern position at Nexora Technologies.",
+    "where": "email-body",
+  },
+  {
+    "hidden": true,
+    "id": "ge-no-interview",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": null,
+    "redFlagId": "mail-no-interview",
+    "text": "You do not need to attend any further interview.",
+    "where": "email-body",
+  },
+  {
+    "hidden": true,
+    "id": "ge-salary",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": null,
+    "redFlagId": "mail-high-salary",
+    "text": "Your monthly salary will be ₹40,000.",
+    "where": "email-body",
+  },
+  {
+    "hidden": true,
+    "id": "ge-fee",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": null,
+    "redFlagId": "mail-fee",
+    "text": "pay ₹2,999 today",
+    "where": "email-body",
+  },
+  {
+    "hidden": true,
+    "id": "ge-upi",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": null,
+    "redFlagId": "mail-personal-upi",
+    "text": "HR coordinator’s UPI ID: karan.sethi@okaxis",
+    "where": "email-body",
+  },
+  {
+    "hidden": true,
+    "id": "ge-deadline",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": null,
+    "redFlagId": "mail-urgency",
+    "text": "Please complete the process within 24 hours because only a few seats remain.",
+    "where": "email-body",
+  },
+  {
+    "hidden": true,
+    "id": "ge-file",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": null,
+    "redFlagId": null,
+    "text": "Ananya_Rao_Offer_Letter.pdf",
+    "where": "attachment",
+  },
+  {
+    "hidden": true,
+    "id": "gm-from",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": null,
+    "redFlagId": "mail-lookalike-domain",
+    "text": "aditi.sharma@nex0ra.example",
+    "where": "from",
+  },
+  {
+    "hidden": true,
+    "id": "gm-reply-to",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": null,
+    "redFlagId": "mail-reply-to-mismatch",
+    "text": "nexora.onboarding.desk@gmail.com",
+    "where": "reply-to",
+  },
+  {
+    "hidden": true,
+    "id": "gm-to",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": null,
+    "redFlagId": null,
+    "text": "ananya.rao@example.com",
+    "where": "to",
+  },
+  {
+    "hidden": true,
+    "id": "gm-thanks",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": null,
+    "redFlagId": null,
+    "text": "Thank you for completing the recruitment discussion for the Business Research Intern position. We are pleased to move forward with your candidature.",
+    "where": "email-body",
+  },
+  {
+    "hidden": true,
+    "id": "gm-review",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": null,
+    "redFlagId": null,
+    "text": "Please review the attached offer letter, which outlines your role, stipend and proposed joining date. Reply to confirm acceptance; our onboarding desk will then share the next steps.",
+    "where": "email-body",
+  },
+  {
+    "hidden": true,
+    "id": "gm-file",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": null,
+    "redFlagId": null,
+    "text": "Ananya_Rao_Offer_Letter.pdf",
+    "where": "attachment",
+  },
+  {
+    "hidden": true,
+    "id": "gl-from",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": null,
+    "redFlagId": null,
+    "text": "priya.nair@nexora.example",
+    "where": "from",
+  },
+  {
+    "hidden": true,
+    "id": "gl-reply-to",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": null,
+    "redFlagId": null,
+    "text": "priya.nair@nexora.example",
+    "where": "reply-to",
+  },
+  {
+    "hidden": true,
+    "id": "gl-to",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": null,
+    "redFlagId": null,
+    "text": "ananya.rao@example.com",
+    "where": "to",
+  },
+  {
+    "hidden": true,
+    "id": "gl-intro",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": null,
+    "redFlagId": null,
+    "text": "Following your interview with Research Manager Priya Nair on 21 November and the HR discussion on 22 November, we are pleased to offer you the position of Business Research Intern at Nexora Technologies Pvt. Ltd..",
+    "where": "email-body",
+  },
+  {
+    "hidden": true,
+    "id": "gl-terms",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": null,
+    "redFlagId": null,
+    "text": "Role: Business Research Intern
+Reference: NX-BRI-026
+Location: Bengaluru, Karnataka (hybrid)
+Duration: 3 months
+Stipend: ₹18,000 per month
+Proposed start date: 1 December 2026
+Reporting manager: Priya Nair, Research Manager",
+    "where": "email-body",
+  },
+  {
+    "hidden": true,
+    "id": "gl-portal",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": null,
+    "redFlagId": null,
+    "text": "The attached letter contains the role terms and joining details discussed during your interviews. You may review and accept it through our official careers portal at careers.nexora.example/offers/NX-BRI-026.",
+    "where": "email-body",
+  },
+  {
+    "hidden": true,
+    "id": "gl-no-payment",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": null,
+    "redFlagId": null,
+    "text": "No payment is required at any stage. Identity and payroll documents will be requested only after you accept the written offer, through the verified company process.",
+    "where": "email-body",
+  },
+  {
+    "hidden": true,
+    "id": "gl-file",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": null,
+    "redFlagId": null,
+    "text": "Employment_Offer_Ananya_Rao.pdf",
+    "where": "attachment",
+  },
+  {
+    "hidden": true,
+    "id": "gl-link",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": null,
+    "redFlagId": null,
+    "text": "careers.nexora.example/offers/NX-BRI-026 → https://careers.nexora.example/offers/NX-BRI-026",
+    "where": "link",
+  },
+  {
+    "hidden": true,
+    "id": "gc-from",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": null,
+    "redFlagId": null,
+    "text": "talent@nexora.example",
+    "where": "from",
+  },
+  {
+    "hidden": true,
+    "id": "gc-reply-to",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": null,
+    "redFlagId": null,
+    "text": "talent@nexora.example",
+    "where": "reply-to",
+  },
+  {
+    "hidden": true,
+    "id": "gc-to",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": null,
+    "redFlagId": null,
+    "text": "ananya.rao@example.com",
+    "where": "to",
+  },
+  {
+    "hidden": true,
+    "id": "gc-body",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": null,
+    "redFlagId": null,
+    "text": "We came across your public profile and wanted to check whether you are open to a three-month Business Research Intern opportunity with Nexora Technologies in Bengaluru. If interested, reply with a suitable time for a short introductory call and we can share more details.",
+    "where": "email-body",
+  },
+  {
+    "hidden": true,
+    "id": "gh-from",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": null,
+    "redFlagId": "mail-deceptive-subdomain",
+    "text": "nisha.rao@nexora.example.onboard-hr.example",
+    "where": "from",
+  },
+  {
+    "hidden": true,
+    "id": "gh-reply-to",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": null,
+    "redFlagId": "mail-reply-to-other-domain",
+    "text": "payroll-verification@nexora-payroll.example",
+    "where": "reply-to",
+  },
+  {
+    "hidden": true,
+    "id": "gh-to",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": null,
+    "redFlagId": null,
+    "text": "ananya.rao@example.com",
+    "where": "to",
+  },
+  {
+    "hidden": true,
+    "id": "gh-progress",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": null,
+    "redFlagId": null,
+    "text": "Congratulations on progressing for the Business Research Intern role (Reference NX-BRI-026). Your candidate details and proposed role have been added to our onboarding workflow.",
+    "where": "email-body",
+  },
+  {
+    "hidden": true,
+    "id": "gh-id-request",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": null,
+    "redFlagId": "mail-id-request",
+    "text": "please upload the following before we issue the final written offer:
+• Aadhaar card
+• PAN card
+• Bank account details
+• A recent selfie for identity matching",
+    "where": "email-body",
+  },
+  {
+    "hidden": true,
+    "id": "gh-no-payment",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": null,
+    "redFlagId": null,
+    "text": "There is no payment required at this stage.",
+    "where": "email-body",
+  },
+  {
+    "hidden": true,
+    "id": "gh-install",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": null,
+    "redFlagId": "mail-apk",
+    "text": "Please install the attached Nexora offer document package to view and sign the letter and complete the verification process.",
+    "where": "email-body",
+  },
+  {
+    "hidden": true,
+    "id": "gh-file",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": null,
+    "redFlagId": "mail-apk",
+    "text": "Offer_Letter.pdf.apk",
+    "where": "attachment",
+  },
+  {
+    "hidden": true,
+    "id": "gh-button",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": null,
+    "redFlagId": "mail-button-destination",
+    "text": "Open Offer Letter → https://nexora.example.onboard-hr.example/verify",
+    "where": "link",
+  },
+  {
+    "hidden": true,
+    "id": "easy-pdf-greeting",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": "easy-offer-pdf",
+    "redFlagId": "mail-generic-greeting",
+    "text": "Greeting: Dear Candidate",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "easy-pdf-role",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": "easy-offer-pdf",
+    "redFlagId": "mail-high-salary",
+    "text": "Role / salary: Business Research Intern; ₹40,000/month",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "easy-pdf-manager",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": "easy-offer-pdf",
+    "redFlagId": "mail-missing-details",
+    "text": "Manager / office: No reporting manager or office address",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "easy-pdf-signatory",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": "easy-offer-pdf",
+    "redFlagId": "mail-missing-details",
+    "text": "Signatory: “HR Manager” (no named person)",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "easy-pdf-payment",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": "easy-offer-pdf",
+    "redFlagId": "mail-fee",
+    "text": "Payment clause: ₹2,999 registration and verification fee payable before onboarding to the coordinator’s UPI ID.",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "medium-pdf-role",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": "medium-offer-pdf",
+    "redFlagId": null,
+    "text": "Role: Business Research Intern",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "medium-pdf-terms",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": "medium-offer-pdf",
+    "redFlagId": null,
+    "text": "Terms: 3 months; ₹18,000/month; Bengaluru hybrid",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "medium-pdf-clause-8-4",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": "medium-offer-pdf",
+    "redFlagId": "pdf-deposit",
+    "text": "Clause 8.4: Before the joining date, the candidate must submit a refundable laptop security deposit of ₹2,499 to the equipment allocation partner. The amount will be returned after the device is handed back in working condition.",
+    "where": "fine-print",
+  },
+  {
+    "hidden": true,
+    "id": "legit-pdf-candidate",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": "legit-offer-pdf",
+    "redFlagId": null,
+    "text": "Candidate: Ananya Rao",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "legit-pdf-role",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": "legit-offer-pdf",
+    "redFlagId": null,
+    "text": "Role: Business Research Intern",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "legit-pdf-reference",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": "legit-offer-pdf",
+    "redFlagId": null,
+    "text": "Reference: NX-BRI-026",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "legit-pdf-location",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": "legit-offer-pdf",
+    "redFlagId": null,
+    "text": "Location: Bengaluru, Karnataka (hybrid)",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "legit-pdf-duration",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": "legit-offer-pdf",
+    "redFlagId": null,
+    "text": "Duration: 3 months",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "legit-pdf-stipend",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": "legit-offer-pdf",
+    "redFlagId": null,
+    "text": "Stipend: ₹18,000 per month",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "legit-pdf-start",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": "legit-offer-pdf",
+    "redFlagId": null,
+    "text": "Proposed start date: 1 December 2026",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "legit-pdf-manager",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": "legit-offer-pdf",
+    "redFlagId": null,
+    "text": "Reporting manager: Priya Nair, Research Manager",
+    "where": "panel-field",
+  },
+]
+`;
+
+exports[`Dream Job scoring inputs > legit-offer has the same flaggable items 1`] = `
+[
+  {
+    "hidden": true,
+    "id": "gl-from",
+    "nodeIds": [
+      "gmail-legit",
+    ],
+    "panelId": null,
+    "redFlagId": null,
+    "text": "priya.nair@nexora.example",
+    "where": "from",
+  },
+  {
+    "hidden": true,
+    "id": "gl-reply-to",
+    "nodeIds": [
+      "gmail-legit",
+    ],
+    "panelId": null,
+    "redFlagId": null,
+    "text": "priya.nair@nexora.example",
+    "where": "reply-to",
+  },
+  {
+    "hidden": true,
+    "id": "gl-to",
+    "nodeIds": [
+      "gmail-legit",
+    ],
+    "panelId": null,
+    "redFlagId": null,
+    "text": "ananya.rao@example.com",
+    "where": "to",
+  },
+  {
+    "hidden": false,
+    "id": "gl-intro",
+    "nodeIds": [
+      "gmail-legit",
+    ],
+    "panelId": null,
+    "redFlagId": null,
+    "text": "Following your interview with Research Manager Priya Nair on 21 November and the HR discussion on 22 November, we are pleased to offer you the position of Business Research Intern at Nexora Technologies Pvt. Ltd..",
+    "where": "email-body",
+  },
+  {
+    "hidden": false,
+    "id": "gl-terms",
+    "nodeIds": [
+      "gmail-legit",
+    ],
+    "panelId": null,
+    "redFlagId": null,
+    "text": "Role: Business Research Intern
+Reference: NX-BRI-026
+Location: Bengaluru, Karnataka (hybrid)
+Duration: 3 months
+Stipend: ₹18,000 per month
+Proposed start date: 1 December 2026
+Reporting manager: Priya Nair, Research Manager",
+    "where": "email-body",
+  },
+  {
+    "hidden": false,
+    "id": "gl-portal",
+    "nodeIds": [
+      "gmail-legit",
+    ],
+    "panelId": null,
+    "redFlagId": null,
+    "text": "The attached letter contains the role terms and joining details discussed during your interviews. You may review and accept it through our official careers portal at careers.nexora.example/offers/NX-BRI-026.",
+    "where": "email-body",
+  },
+  {
+    "hidden": false,
+    "id": "gl-no-payment",
+    "nodeIds": [
+      "gmail-legit",
+    ],
+    "panelId": null,
+    "redFlagId": null,
+    "text": "No payment is required at any stage. Identity and payroll documents will be requested only after you accept the written offer, through the verified company process.",
+    "where": "email-body",
+  },
+  {
+    "hidden": true,
+    "id": "gl-file",
+    "nodeIds": [
+      "gmail-legit",
+    ],
+    "panelId": null,
+    "redFlagId": null,
+    "text": "Employment_Offer_Ananya_Rao.pdf",
+    "where": "attachment",
+  },
+  {
+    "hidden": true,
+    "id": "gl-link",
+    "nodeIds": [
+      "gmail-legit",
+    ],
+    "panelId": null,
+    "redFlagId": null,
+    "text": "careers.nexora.example/offers/NX-BRI-026 → https://careers.nexora.example/offers/NX-BRI-026",
+    "where": "link",
+  },
+  {
+    "hidden": true,
+    "id": "careers-role",
+    "nodeIds": [
+      "gmail-legit",
+    ],
+    "panelId": "nexora-careers",
+    "redFlagId": null,
+    "text": "Business Research Intern — NX-BRI-026: 3 months; ₹18,000/month; Bengaluru hybrid; reporting manager Priya Nair",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "company-name",
+    "nodeIds": [
+      "gmail-legit",
+    ],
+    "panelId": "nexora-company",
+    "redFlagId": null,
+    "text": "Company page: Nexora Technologies Pvt. Ltd.",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "company-location",
+    "nodeIds": [
+      "gmail-legit",
+    ],
+    "panelId": "nexora-company",
+    "redFlagId": null,
+    "text": "Location: Bengaluru, Karnataka, India",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "company-industry",
+    "nodeIds": [
+      "gmail-legit",
+    ],
+    "panelId": "nexora-company",
+    "redFlagId": null,
+    "text": "Industry: Software / business analytics",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "company-website",
+    "nodeIds": [
+      "gmail-legit",
+    ],
+    "panelId": "nexora-company",
+    "redFlagId": null,
+    "text": "Official website: nexora.example",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "legit-pdf-candidate",
+    "nodeIds": [
+      "gmail-legit",
+    ],
+    "panelId": "legit-offer-pdf",
+    "redFlagId": null,
+    "text": "Candidate: Ananya Rao",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "legit-pdf-role",
+    "nodeIds": [
+      "gmail-legit",
+    ],
+    "panelId": "legit-offer-pdf",
+    "redFlagId": null,
+    "text": "Role: Business Research Intern",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "legit-pdf-reference",
+    "nodeIds": [
+      "gmail-legit",
+    ],
+    "panelId": "legit-offer-pdf",
+    "redFlagId": null,
+    "text": "Reference: NX-BRI-026",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "legit-pdf-location",
+    "nodeIds": [
+      "gmail-legit",
+    ],
+    "panelId": "legit-offer-pdf",
+    "redFlagId": null,
+    "text": "Location: Bengaluru, Karnataka (hybrid)",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "legit-pdf-duration",
+    "nodeIds": [
+      "gmail-legit",
+    ],
+    "panelId": "legit-offer-pdf",
+    "redFlagId": null,
+    "text": "Duration: 3 months",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "legit-pdf-stipend",
+    "nodeIds": [
+      "gmail-legit",
+    ],
+    "panelId": "legit-offer-pdf",
+    "redFlagId": null,
+    "text": "Stipend: ₹18,000 per month",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "legit-pdf-start",
+    "nodeIds": [
+      "gmail-legit",
+    ],
+    "panelId": "legit-offer-pdf",
+    "redFlagId": null,
+    "text": "Proposed start date: 1 December 2026",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "legit-pdf-manager",
+    "nodeIds": [
+      "gmail-legit",
+    ],
+    "panelId": "legit-offer-pdf",
+    "redFlagId": null,
+    "text": "Reporting manager: Priya Nair, Research Manager",
+    "where": "panel-field",
+  },
+]
+`;
+
+exports[`Dream Job scoring inputs > login-bonus has the same flaggable items 1`] = `
+[
+  {
+    "hidden": true,
+    "id": "gx-from",
+    "nodeIds": [
+      "gmail-login",
+    ],
+    "panelId": null,
+    "redFlagId": null,
+    "text": "onboarding@nexora.example",
+    "where": "from",
+  },
+  {
+    "hidden": true,
+    "id": "gx-reply-to",
+    "nodeIds": [
+      "gmail-login",
+    ],
+    "panelId": null,
+    "redFlagId": null,
+    "text": "onboarding@nexora.example",
+    "where": "reply-to",
+  },
+  {
+    "hidden": true,
+    "id": "gx-to",
+    "nodeIds": [
+      "gmail-login",
+    ],
+    "panelId": null,
+    "redFlagId": null,
+    "text": "ananya.rao@example.com",
+    "where": "to",
+  },
+  {
+    "hidden": false,
+    "id": "gx-password",
+    "nodeIds": [
+      "gmail-login",
+    ],
+    "panelId": null,
+    "redFlagId": "mail-password-request",
+    "text": "sign in with the email address and password you use for your mailbox",
+    "where": "email-body",
+  },
+  {
+    "hidden": true,
+    "id": "gx-button",
+    "nodeIds": [
+      "gmail-login",
+    ],
+    "panelId": null,
+    "redFlagId": "mail-link-mismatch",
+    "text": "Complete onboarding · careers.nexora.example/complete-onboarding → https://nexora.example.candidate-portal.example/login",
+    "where": "link",
+  },
+  {
+    "hidden": true,
+    "id": "careers-role",
+    "nodeIds": [
+      "gmail-login",
+    ],
+    "panelId": "nexora-careers",
+    "redFlagId": null,
+    "text": "Business Research Intern — NX-BRI-026: 3 months; ₹18,000/month; Bengaluru hybrid; reporting manager Priya Nair",
+    "where": "panel-field",
+  },
+]
+`;
+
+exports[`Dream Job scoring inputs > medium-whatsapp has the same flaggable items 1`] = `
+[
+  {
+    "hidden": false,
+    "id": "li-med-date",
+    "nodeIds": [
+      "li-open",
+    ],
+    "panelId": null,
+    "redFlagId": null,
+    "text": "20 November 2026, 11:05",
+    "where": "message",
+  },
+  {
+    "hidden": false,
+    "id": "li-med-m1",
+    "nodeIds": [
+      "li-open",
+    ],
+    "panelId": null,
+    "redFlagId": null,
+    "text": "Hi Ananya, I came across your profile and noticed your economics coursework and Excel-based project. We have an opening for a Business Research Intern at Nexora Technologies in Bengaluru (hybrid). The internship runs for three months and offers ₹18,000 per month. The role involves desk research, cleaning basic data in Excel and preparing short market summaries.
+
+I would like to arrange a short introductory discussion. Are you available tomorrow between 11:00 AM and 2:00 PM? I can share the detailed role description before the call.",
+    "where": "message",
+  },
+  {
+    "hidden": false,
+    "id": "li-med-m2",
+    "nodeIds": [
+      "li-move",
+    ],
+    "panelId": null,
+    "redFlagId": null,
+    "text": "Thanks, Ananya. Our team is handling first-round screening on WhatsApp because our video calendar is full. Please message +91 90000 12345 and mention reference NX-INT-42. The screening will be a short text conversation with three questions. We do not need to schedule a video call at this stage.",
+    "where": "message",
+  },
+  {
+    "hidden": false,
+    "id": "li-med-whatsapp",
+    "nodeIds": [
+      "li-move",
+    ],
+    "panelId": null,
+    "redFlagId": "li-off-platform",
+    "text": "Our team is handling first-round screening on WhatsApp because our video calendar is full.",
+    "where": "message",
+  },
+  {
+    "hidden": false,
+    "id": "li-med-text-only",
+    "nodeIds": [
+      "li-move",
+    ],
+    "panelId": null,
+    "redFlagId": "li-text-only-interview",
+    "text": "The screening will be a short text conversation with three questions. We do not need to schedule a video call at this stage.",
+    "where": "message",
+  },
+  {
+    "hidden": false,
+    "id": "wa-inert",
+    "nodeIds": [
+      "wa-screen",
+    ],
+    "panelId": null,
+    "redFlagId": null,
+    "text": "Simulated chat. This number can't be called or messaged.",
+    "where": "message",
+  },
+  {
+    "hidden": false,
+    "id": "wa-me-hello",
+    "nodeIds": [
+      "wa-screen",
+    ],
+    "panelId": null,
+    "redFlagId": null,
+    "text": "Hello, this is Ananya. I’m here for the Business Research Intern screening.",
+    "where": "message",
+  },
+  {
+    "hidden": false,
+    "id": "wa-questions",
+    "nodeIds": [
+      "wa-screen",
+    ],
+    "panelId": null,
+    "redFlagId": null,
+    "text": "Three screening questions later",
+    "where": "message",
+  },
+  {
+    "hidden": false,
+    "id": "wa-m3",
+    "nodeIds": [
+      "wa-screen",
+    ],
+    "panelId": null,
+    "redFlagId": null,
+    "text": "Your answers were excellent. Congratulations, you are selected! To allocate your company laptop, please pay a refundable security deposit of ₹2,499 to our equipment partner. The amount will be returned with your first stipend or when you return the laptop. Make the payment today so we can dispatch it before onboarding.",
+    "where": "message",
+  },
+  {
+    "hidden": false,
+    "id": "wa-selected",
+    "nodeIds": [
+      "wa-screen",
+    ],
+    "panelId": null,
+    "redFlagId": "wa-thin-selection",
+    "text": "Your answers were excellent. Congratulations, you are selected!",
+    "where": "message",
+  },
+  {
+    "hidden": false,
+    "id": "wa-deposit",
+    "nodeIds": [
+      "wa-screen",
+    ],
+    "panelId": null,
+    "redFlagId": "wa-deposit",
+    "text": "To allocate your company laptop, please pay a refundable security deposit of ₹2,499",
+    "where": "message",
+  },
+  {
+    "hidden": false,
+    "id": "wa-partner",
+    "nodeIds": [
+      "wa-screen",
+    ],
+    "panelId": null,
+    "redFlagId": "wa-unverified-payee",
+    "text": "to our equipment partner.",
+    "where": "message",
+  },
+  {
+    "hidden": true,
+    "id": "gm-from",
+    "nodeIds": [
+      "gmail-medium",
+    ],
+    "panelId": null,
+    "redFlagId": "mail-lookalike-domain",
+    "text": "aditi.sharma@nex0ra.example",
+    "where": "from",
+  },
+  {
+    "hidden": true,
+    "id": "gm-reply-to",
+    "nodeIds": [
+      "gmail-medium",
+    ],
+    "panelId": null,
+    "redFlagId": "mail-reply-to-mismatch",
+    "text": "nexora.onboarding.desk@gmail.com",
+    "where": "reply-to",
+  },
+  {
+    "hidden": true,
+    "id": "gm-to",
+    "nodeIds": [
+      "gmail-medium",
+    ],
+    "panelId": null,
+    "redFlagId": null,
+    "text": "ananya.rao@example.com",
+    "where": "to",
+  },
+  {
+    "hidden": false,
+    "id": "gm-thanks",
+    "nodeIds": [
+      "gmail-medium",
+    ],
+    "panelId": null,
+    "redFlagId": null,
+    "text": "Thank you for completing the recruitment discussion for the Business Research Intern position. We are pleased to move forward with your candidature.",
+    "where": "email-body",
+  },
+  {
+    "hidden": false,
+    "id": "gm-review",
+    "nodeIds": [
+      "gmail-medium",
+    ],
+    "panelId": null,
+    "redFlagId": null,
+    "text": "Please review the attached offer letter, which outlines your role, stipend and proposed joining date. Reply to confirm acceptance; our onboarding desk will then share the next steps.",
+    "where": "email-body",
+  },
+  {
+    "hidden": true,
+    "id": "gm-file",
+    "nodeIds": [
+      "gmail-medium",
+    ],
+    "panelId": null,
+    "redFlagId": null,
+    "text": "Ananya_Rao_Offer_Letter.pdf",
+    "where": "attachment",
+  },
+  {
+    "hidden": false,
+    "id": "reply-to-field",
+    "nodeIds": [
+      "reply",
+    ],
+    "panelId": null,
+    "redFlagId": "mail-reply-to-mismatch",
+    "text": "nexora.onboarding.desk@gmail.com",
+    "where": "to",
+  },
+  {
+    "hidden": true,
+    "id": "aditi-name",
+    "nodeIds": [
+      "li-open",
+      "li-move",
+    ],
+    "panelId": "aditi-profile",
+    "redFlagId": null,
+    "text": "Name: Aditi Sharma",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "aditi-headline",
+    "nodeIds": [
+      "li-open",
+      "li-move",
+    ],
+    "panelId": "aditi-profile",
+    "redFlagId": null,
+    "text": "Headline: Senior Talent Acquisition Executive | Nexora Technologies",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "aditi-connections",
+    "nodeIds": [
+      "li-open",
+      "li-move",
+    ],
+    "panelId": "aditi-profile",
+    "redFlagId": null,
+    "text": "Connections: 640 connections · 3 mutual connections",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "aditi-experience",
+    "nodeIds": [
+      "li-open",
+      "li-move",
+    ],
+    "panelId": "aditi-profile",
+    "redFlagId": null,
+    "text": "Experience: Several years of HR experience",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "company-name",
+    "nodeIds": [
+      "li-open",
+      "li-move",
+      "gmail-medium",
+    ],
+    "panelId": "nexora-company",
+    "redFlagId": null,
+    "text": "Company page: Nexora Technologies Pvt. Ltd.",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "company-location",
+    "nodeIds": [
+      "li-open",
+      "li-move",
+      "gmail-medium",
+    ],
+    "panelId": "nexora-company",
+    "redFlagId": null,
+    "text": "Location: Bengaluru, Karnataka, India",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "company-industry",
+    "nodeIds": [
+      "li-open",
+      "li-move",
+      "gmail-medium",
+    ],
+    "panelId": "nexora-company",
+    "redFlagId": null,
+    "text": "Industry: Software / business analytics",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "company-website",
+    "nodeIds": [
+      "li-open",
+      "li-move",
+      "gmail-medium",
+    ],
+    "panelId": "nexora-company",
+    "redFlagId": null,
+    "text": "Official website: nexora.example",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "careers-role",
+    "nodeIds": [
+      "li-open",
+      "li-move",
+    ],
+    "panelId": "nexora-careers",
+    "redFlagId": null,
+    "text": "Business Research Intern — NX-BRI-026: 3 months; ₹18,000/month; Bengaluru hybrid; reporting manager Priya Nair",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "medium-pdf-role",
+    "nodeIds": [
+      "gmail-medium",
+    ],
+    "panelId": "medium-offer-pdf",
+    "redFlagId": null,
+    "text": "Role: Business Research Intern",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "medium-pdf-terms",
+    "nodeIds": [
+      "gmail-medium",
+    ],
+    "panelId": "medium-offer-pdf",
+    "redFlagId": null,
+    "text": "Terms: 3 months; ₹18,000/month; Bengaluru hybrid",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "medium-pdf-clause-8-4",
+    "nodeIds": [
+      "gmail-medium",
+    ],
+    "panelId": "medium-offer-pdf",
+    "redFlagId": "pdf-deposit",
+    "text": "Clause 8.4: Before the joining date, the candidate must submit a refundable laptop security deposit of ₹2,499 to the equipment allocation partner. The amount will be returned after the device is handed back in working condition.",
+    "where": "fine-print",
+  },
+]
+`;

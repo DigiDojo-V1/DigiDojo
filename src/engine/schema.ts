@@ -95,6 +95,8 @@ export const MessageSchema = z.strictObject({
   segments: z.array(SegmentSchema).min(1).optional(),
   /** Wait before this message appears. Default 800. */
   delayMs: z.number().int().nonnegative().optional(),
+  /** Display only: the time shown next to the sender's name, e.g. "09:14". */
+  time: z.string().min(1).optional(),
   /** Set only if this message carries a red flag. Not allowed with `segments`. */
   redFlagId: kebabCase.optional(),
 });
@@ -114,6 +116,9 @@ export const ContactSchema = z.strictObject({
 });
 export type Contact = z.output<typeof ContactSchema>;
 
+export const PROFILE_SLOTS = ["name", "headline", "location", "connections"] as const;
+export type ProfileSlot = (typeof PROFILE_SLOTS)[number];
+
 /** One inspectable fact in an evidence panel: a profile line, a company record entry, a PDF clause. */
 export const FieldSchema = z.strictObject({
   id: kebabCase,
@@ -122,6 +127,11 @@ export const FieldSchema = z.strictObject({
   redFlagId: kebabCase.optional(),
   /** Small print, e.g. a buried clause in a PDF. */
   finePrint: z.boolean().optional(),
+  /**
+   * Display only, profiles only: draws the field in the profile header under the avatar
+   * instead of in a section card. Still flaggable.
+   */
+  slot: z.enum(PROFILE_SLOTS).optional(),
 });
 export type Field = z.output<typeof FieldSchema>;
 
@@ -130,6 +140,8 @@ export const EVIDENCE_KINDS = ["profile", "company", "web-page", "document"] as 
 /** Something the player can open and inspect: a profile, a company page, a web page, a PDF. */
 export const EvidencePanelSchema = z.strictObject({
   kind: z.enum(EVIDENCE_KINDS),
+  /** Display only: draw a company panel as an official registry record. */
+  variant: z.enum(["official-record"]).optional(),
   title: LocalizedTextSchema,
   subtitle: LocalizedTextSchema.optional(),
   /** For a document, one section per page. */
@@ -205,6 +217,11 @@ export const ThreadNodeSchema = z.strictObject({
   contact: ContactSchema,
   messages: z.array(MessageSchema).min(1),
   evidence: EvidenceRefsSchema,
+  /**
+   * Display only. "split": show the messages and the evidence panels as two panes with a
+   * switch, so the player can compare them (needs `evidence`).
+   */
+  layout: z.enum(["split"]).optional(),
   choices: z.array(ChoiceSchema).min(1),
 });
 export type ThreadNode = z.output<typeof ThreadNodeSchema>;
@@ -360,6 +377,10 @@ function checkScenarioGraph(s: ScenarioData, ctx: z.RefinementCtx): void {
       }
     }
 
+    if (node.kind === "thread" && node.layout === "split" && node.evidence === undefined) {
+      issue([...at, "layout"], `layout "split" needs evidence panels to show`);
+    }
+
     if (node.kind === "thread") {
       node.messages.forEach((message, i) => {
         const hasText = message.text !== undefined;
@@ -415,6 +436,23 @@ function checkScenarioGraph(s: ScenarioData, ctx: z.RefinementCtx): void {
         }
       }
     }
+  }
+
+  for (const [panelId, panel] of Object.entries(s.evidence ?? {})) {
+    if (panel.variant === "official-record" && panel.kind !== "company") {
+      issue(["evidence", panelId, "variant"], `variant "official-record" needs kind "company"`);
+    }
+    if (panel.kind === "profile") continue;
+    panel.sections.forEach((section, i) =>
+      section.fields.forEach((field, j) => {
+        if (field.slot !== undefined) {
+          issue(
+            ["evidence", panelId, "sections", i, "fields", j, "slot"],
+            `field "${field.id}" has slot "${field.slot}", but slots are for profile panels only`,
+          );
+        }
+      }),
+    );
   }
 
   const seenIds = new Set<string>();
