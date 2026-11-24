@@ -130,6 +130,11 @@ export function Debrief({ scenario, outcome, run, backHref, onReplay }: DebriefP
         </CardHeader>
         <CardContent>
           <p className="text-lg leading-snug font-semibold">{text(scenario.debrief.rule)}</p>
+          {scenario.debrief.summary !== undefined && (
+            <p className="mt-2 text-sm leading-relaxed opacity-90">
+              {text(scenario.debrief.summary)}
+            </p>
+          )}
         </CardContent>
       </Card>
 
