@@ -1,6 +1,6 @@
 import type { Locale } from "@/i18n/locale";
 import { resolveText } from "@/i18n/text";
-import type { ChatBubble } from "@/shells/types";
+import type { ChannelTransitionView, ChatBubble } from "@/shells/types";
 import { messageText } from "./evidence";
 import type { Message, Scenario, ScenarioNode, ThreadNode } from "./schema";
 import type { TrailStep } from "./store";
@@ -19,6 +19,7 @@ export function toBubble(message: Message, locale: Locale): ChatBubble {
       text: resolveText(segment.text, locale),
       flaggable: segment.id !== undefined && message.from !== "me",
     })),
+    time: message.time,
   };
 }
 
@@ -60,4 +61,26 @@ export function priorTranscript(
     }
   }
   return bubbles;
+}
+
+/**
+ * The chat moved apps: the thread node before this one on the trail used a different app.
+ * Returns who moved it and from where, or undefined when there's no app change.
+ */
+export function channelTransition(
+  scenario: Scenario,
+  trail: readonly TrailStep[],
+  locale: Locale,
+): ChannelTransitionView | undefined {
+  const current = trail.at(-1);
+  const node = current === undefined ? undefined : scenario.nodes[current.nodeId];
+  if (node?.kind !== "thread") return undefined;
+  const previous = trail.at(-2);
+  const before = previous === undefined ? undefined : scenario.nodes[previous.nodeId];
+  if (before?.kind !== "thread" || before.app === node.app) return undefined;
+  return {
+    fromApp: before.app,
+    toApp: node.app,
+    fromName: resolveText(before.contact.name, locale),
+  };
 }

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { priorTranscript, toBubble } from "@/engine/transcript";
+import { dreamJob } from "@/dojos/dream-job";
+import { channelTransition, priorTranscript, toBubble } from "@/engine/transcript";
 import { richScenario, validScenario } from "./fixtures";
 
 describe("toBubble with segments", () => {
@@ -62,5 +63,38 @@ describe("priorTranscript", () => {
         "en",
       ),
     ).toEqual([]);
+  });
+});
+
+describe("channelTransition", () => {
+  const medium = () => {
+    const s = dreamJob.scenarios.find((x) => x.id === "medium-whatsapp");
+    if (s === undefined) throw new Error("missing medium-whatsapp");
+    return s;
+  };
+
+  it("is undefined while the chat stays in the same app", () => {
+    const trail = [{ nodeId: "li-open", choiceLabel: { en: "Reply" } }, { nodeId: "li-move" }];
+    expect(channelTransition(medium(), trail, "en")).toBeUndefined();
+  });
+
+  it("names the app change and who moved the chat", () => {
+    const trail = [
+      { nodeId: "li-open", choiceLabel: { en: "Reply" } },
+      { nodeId: "li-move", choiceLabel: { en: "Continue" } },
+      { nodeId: "wa-screen" },
+    ];
+    expect(channelTransition(medium(), trail, "en")).toEqual({
+      fromApp: "linkedin",
+      toApp: "whatsapp",
+      fromName: "Aditi Sharma",
+    });
+  });
+
+  it("is undefined on the first node and after a non-thread node", () => {
+    expect(channelTransition(medium(), [{ nodeId: "li-open" }], "en")).toBeUndefined();
+    expect(
+      channelTransition(medium(), [{ nodeId: "gmail-medium" }, { nodeId: "wa-screen" }], "en"),
+    ).toBeUndefined();
   });
 });
