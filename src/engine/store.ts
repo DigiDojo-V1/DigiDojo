@@ -3,7 +3,7 @@ import { create } from "zustand";
 import { createJSONStorage, persist, type StateStorage } from "zustand/middleware";
 import { z } from "zod";
 import { DEFAULT_LOCALE, LOCALES, type Locale } from "@/i18n/locale";
-import type { Choice, LocalizedText, Scenario } from "./schema";
+import type { Choice, LocalizedText, Scenario, TriageLabel } from "./schema";
 
 /* ------------------------------------------------------------------ */
 /* Current run (in memory only)                                        */
@@ -22,19 +22,29 @@ interface RunState {
   phase: RunPhase;
   /** Nodes visited on the current timeline. The last entry is the current node. */
   trail: TrailStep[];
-  /** Message ids the player has seen, across rewinds. */
+  /** Every node entered during the run, across rewinds, in first-visit order. */
+  visited: string[];
+  /** Flaggable ids revealed to the player (messages, phrases, inspected fields), across rewinds. */
   seen: string[];
-  /** Message ids the player has flagged. Kept across nodes and rewinds. */
+  /** Flaggable ids the player has flagged. Kept across nodes and rewinds. */
   flagged: string[];
+  /** Inbox triage labels, keyed by triage item id. */
+  classifications: Record<string, TriageLabel>;
   rewinds: number;
 }
 
 interface RunActions {
   start: (key: string, scenario: Scenario) => void;
   beginSimulation: () => void;
-  markSeen: (messageId: string) => void;
-  toggleFlag: (messageId: string) => void;
+  /** Record flaggable items as seen: a message appeared, a panel opened, the sender was tapped. */
+  reveal: (ids: readonly string[]) => void;
+  /** Same as `reveal([id])`. */
+  markSeen: (id: string) => void;
+  toggleFlag: (id: string) => void;
   choose: (choice: Choice) => void;
+  classify: (itemId: string, label: TriageLabel) => void;
+  /** Leave a triage node for its `nextNodeId`. */
+  submitTriage: (nextNodeId: string) => void;
   rewind: (nodeId: string) => void;
   openDebrief: () => void;
   /** Clear the run, e.g. when the player leaves the scenario. */
@@ -45,10 +55,25 @@ const initialRun: RunState = {
   scenarioKey: null,
   phase: "playing",
   trail: [],
+  visited: [],
   seen: [],
   flagged: [],
+  classifications: {},
   rewinds: 0,
 };
+
+const withVisit = (visited: string[], nodeId: string) =>
+  visited.includes(nodeId) ? visited : [...visited, nodeId];
+
+/** Moves to `nextNodeId`, recording `choiceLabel` (if any) on the step being left. */
+function advance(s: RunState, nextNodeId: string, choiceLabel?: LocalizedText): Partial<RunState> {
+  const last = s.trail.at(-1);
+  if (last === undefined) return {};
+  return {
+    trail: [...s.trail.slice(0, -1), { ...last, choiceLabel }, { nodeId: nextNodeId }],
+    visited: withVisit(s.visited, nextNodeId),
+  };
+}
 
 export const useRunStore = create<RunState & RunActions>()((set) => ({
   ...initialRun,
@@ -59,38 +84,41 @@ export const useRunStore = create<RunState & RunActions>()((set) => ({
       scenarioKey: key,
       phase: scenario.primer !== undefined && scenario.coldRun !== true ? "primer" : "playing",
       trail: [{ nodeId: scenario.startNodeId }],
+      visited: [scenario.startNodeId],
     }),
 
   beginSimulation: () => set({ phase: "playing" }),
 
-  markSeen: (messageId) =>
-    set((s) => (s.seen.includes(messageId) ? s : { seen: [...s.seen, messageId] })),
+  reveal: (ids) =>
+    set((s) => {
+      const fresh = ids.filter((id, i) => !s.seen.includes(id) && ids.indexOf(id) === i);
+      return fresh.length === 0 ? s : { seen: [...s.seen, ...fresh] };
+    }),
 
-  toggleFlag: (messageId) =>
+  markSeen: (id) => set((s) => (s.seen.includes(id) ? s : { seen: [...s.seen, id] })),
+
+  toggleFlag: (id) =>
     set((s) => ({
-      flagged: s.flagged.includes(messageId)
-        ? s.flagged.filter((id) => id !== messageId)
-        : [...s.flagged, messageId],
+      flagged: s.flagged.includes(id) ? s.flagged.filter((f) => f !== id) : [...s.flagged, id],
     })),
 
-  choose: (choice) =>
-    set((s) => {
-      const last = s.trail.at(-1);
-      if (last === undefined) return s;
-      return {
-        trail: [
-          ...s.trail.slice(0, -1),
-          { ...last, choiceLabel: choice.label },
-          { nodeId: choice.nextNodeId },
-        ],
-      };
-    }),
+  choose: (choice) => set((s) => advance(s, choice.nextNodeId, choice.label)),
+
+  classify: (itemId, label) =>
+    set((s) => ({ classifications: { ...s.classifications, [itemId]: label } })),
+
+  submitTriage: (nextNodeId) => set((s) => advance(s, nextNodeId)),
 
   rewind: (nodeId) =>
     set((s) => {
       const index = s.trail.findLastIndex((step) => step.nodeId === nodeId);
       const trail = index === -1 ? [{ nodeId }] : [...s.trail.slice(0, index), { nodeId }];
-      return { trail, phase: "playing", rewinds: s.rewinds + 1 };
+      return {
+        trail,
+        visited: withVisit(s.visited, nodeId),
+        phase: "playing",
+        rewinds: s.rewinds + 1,
+      };
     }),
 
   openDebrief: () => set({ phase: "debrief" }),

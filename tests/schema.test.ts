@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { defineDojo, defineScenario } from "@/engine/define";
 import { DojoSchema, ScenarioSchema, type ScenarioInput } from "@/engine/schema";
-import { validScenarioInput as validScenario } from "./fixtures";
+import { richScenarioInput, validScenarioInput as validScenario } from "./fixtures";
 
 function thread(s: ScenarioInput, id: string) {
   const node = s.nodes[id];
@@ -44,7 +44,7 @@ describe("ScenarioSchema", () => {
     const lost = s.nodes.lost;
     if (lost?.kind !== "outcome") throw new Error("fixture");
     lost.rewindToNodeId = "safe";
-    expect(errorsFor(s)).toContainEqual(expect.stringContaining("must point to a thread node"));
+    expect(errorsFor(s)).toContainEqual(expect.stringContaining("must point to a thread, email"));
   });
 
   it("rejects a redFlagId that isn't defined", () => {
@@ -62,7 +62,7 @@ describe("ScenarioSchema", () => {
   it("rejects duplicate message ids across nodes", () => {
     const s = validScenario();
     thread(s, "follow-up").messages[0]!.id = "m1";
-    expect(errorsFor(s)).toContainEqual(expect.stringContaining('message id "m1"'));
+    expect(errorsFor(s)).toContainEqual(expect.stringContaining('flaggable id "m1"'));
   });
 
   it("rejects a scenario where no outcome is reachable", () => {
@@ -98,6 +98,90 @@ describe("ScenarioSchema", () => {
   });
 });
 
+describe("ScenarioSchema with evidence", () => {
+  type Rich = ReturnType<typeof richScenarioInput>;
+  const node = <K extends string>(s: Rich, id: string, kind: K) => {
+    const n = s.nodes[id];
+    if (n?.kind !== kind) throw new Error(`fixture node ${id} is not ${kind}`);
+    return n as Extract<Rich["nodes"][string], { kind: K }>;
+  };
+
+  it("accepts a scenario using segments, panels, email, compose and triage", () => {
+    expect(errorsFor(richScenarioInput())).toEqual([]);
+  });
+
+  it("needs exactly one of text or segments on a message", () => {
+    const both = richScenarioInput();
+    node(both, "dm", "thread").messages[0]!.text = "Also text";
+    expect(errorsFor(both)).toContainEqual(
+      expect.stringContaining("exactly one of text or segments"),
+    );
+
+    const neither = richScenarioInput();
+    delete node(neither, "dm", "thread").messages[0]!.segments;
+    expect(errorsFor(neither)).toContainEqual(
+      expect.stringContaining("exactly one of text or segments"),
+    );
+  });
+
+  it("rejects a redFlagId on a segmented message", () => {
+    const s = richScenarioInput();
+    node(s, "dm", "thread").messages[0]!.redFlagId = "fee";
+    expect(errorsFor(s)).toContainEqual(expect.stringContaining("put redFlagId on a segment"));
+  });
+
+  it("rejects a flagged segment without an id", () => {
+    const s = richScenarioInput();
+    delete node(s, "dm", "thread").messages[0]!.segments![1]!.id;
+    expect(errorsFor(s)).toContainEqual(expect.stringContaining("needs an id"));
+  });
+
+  it("rejects duplicate ids across kinds of flaggable items", () => {
+    const s = richScenarioInput();
+    node(s, "mail", "email").email.to.id = "p-joined";
+    expect(errorsFor(s)).toContainEqual(expect.stringContaining('flaggable id "p-joined"'));
+  });
+
+  it("rejects evidence and document references that aren't panels", () => {
+    const s = richScenarioInput();
+    node(s, "dm", "thread").evidence = ["nowhere"];
+    node(s, "mail", "email").email.attachments![0]!.documentId = "missing-pdf";
+    const errors = errorsFor(s);
+    expect(errors).toContainEqual(expect.stringContaining('evidence "nowhere"'));
+    expect(errors).toContainEqual(expect.stringContaining('documentId "missing-pdf"'));
+  });
+
+  it("rejects an undefined red flag on an email field and on a panel field", () => {
+    const s = richScenarioInput();
+    node(s, "mail", "email").email.from.redFlagId = "made-up";
+    s.evidence!.profile!.sections[0]!.fields[0]!.redFlagId = "also-made-up";
+    const errors = errorsFor(s);
+    expect(errors).toContainEqual(expect.stringContaining('"made-up"'));
+    expect(errors).toContainEqual(expect.stringContaining('"also-made-up"'));
+  });
+
+  it("rejects a triage nextNodeId that isn't a node", () => {
+    const s = richScenarioInput();
+    node(s, "inbox", "triage").nextNodeId = "nowhere";
+    expect(errorsFor(s)).toContainEqual(expect.stringContaining('nextNodeId "nowhere"'));
+  });
+
+  it("follows email, compose and triage edges when checking an outcome is reachable", () => {
+    const s = richScenarioInput();
+    node(s, "dm", "thread").choices = [{ label: "Email", nextNodeId: "mail" }];
+    node(s, "mail", "email").choices = [{ label: "Reply", nextNodeId: "reply" }];
+    expect(errorsFor(s)).toEqual([]);
+    node(s, "inbox", "triage").nextNodeId = "dm";
+    expect(errorsFor(s)).toContainEqual(expect.stringContaining("no outcome node can be reached"));
+  });
+
+  it("rejects gmail as a thread app", () => {
+    const s = richScenarioInput();
+    (node(s, "dm", "thread") as { app: string }).app = "gmail";
+    expect(errorsFor(s).length).toBeGreaterThan(0);
+  });
+});
+
 describe("DojoSchema", () => {
   const dojo = () => ({
     id: "easy-money" as const,
@@ -115,6 +199,13 @@ describe("DojoSchema", () => {
     const d = dojo();
     d.scenarios[0]!.dojoId = "authority";
     expect(DojoSchema.safeParse(d).success).toBe(false);
+  });
+
+  it("accepts takeaways but not an empty list", () => {
+    expect(
+      DojoSchema.safeParse({ ...dojo(), takeaways: ["Never pay to get a job."] }).success,
+    ).toBe(true);
+    expect(DojoSchema.safeParse({ ...dojo(), takeaways: [] }).success).toBe(false);
   });
 
   it("rejects duplicate scenario ids", () => {
