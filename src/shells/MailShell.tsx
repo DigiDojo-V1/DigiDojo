@@ -57,13 +57,14 @@ export function MailShell({
   );
 }
 
-/** A small flag toggle next to an inspected detail. */
+/** A small flag toggle next to an inspected detail. The tap area is 44 px; the icon stays small. */
 export function FlagToggle({
   id,
   label,
   flaggedIds,
   onToggleFlag,
-}: FlagProps & { id: string; label: string }) {
+  className,
+}: FlagProps & { id: string; label: string; className?: string }) {
   const t = useT();
   const flagged = flaggedIds.includes(id);
   return (
@@ -72,12 +73,18 @@ export function FlagToggle({
       onClick={() => onToggleFlag(id)}
       aria-pressed={flagged}
       aria-label={t(flagged ? "chat.unflagAria" : "chat.flagAria")(label)}
-      className={cn(
-        "shrink-0 rounded-full p-1.5",
-        flagged ? "bg-red-500 text-white" : "text-neutral-400 hover:bg-neutral-100",
-      )}
+      className={cn("group -my-2 flex size-11 shrink-0 items-center justify-center", className)}
     >
-      <Flag className="size-3.5" />
+      <span
+        className={cn(
+          "rounded-full p-1.5 transition-colors",
+          flagged
+            ? "bg-red-500 text-white"
+            : "text-neutral-400 group-hover:bg-neutral-100 group-hover:text-neutral-600",
+        )}
+      >
+        <Flag className="size-3.5" aria-hidden />
+      </span>
     </button>
   );
 }
