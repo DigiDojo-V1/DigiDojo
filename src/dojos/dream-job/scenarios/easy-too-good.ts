@@ -31,6 +31,7 @@ export const easyTooGood = defineScenario({
         {
           id: "li-easy-offer",
           from: "them",
+          time: "09:12",
           delayMs: 1200,
           segments: [
             { text: "Hi Ananya! " },

@@ -14,8 +14,13 @@ export const PANELS = {
     sections: [
       {
         fields: [
-          { id: "karan-name", label: "Name", value: "Karan Sethi" },
-          { id: "karan-headline", label: "Headline", value: "HR Associate | Nexora Technologies" },
+          { id: "karan-name", slot: "name", label: "Name", value: "Karan Sethi" },
+          {
+            id: "karan-headline",
+            slot: "headline",
+            label: "Headline",
+            value: "HR Associate | Nexora Technologies",
+          },
           { id: "karan-company", label: "Company shown", value: NEXORA.name },
         ],
       },
@@ -29,14 +34,16 @@ export const PANELS = {
     sections: [
       {
         fields: [
-          { id: "aditi-name", label: "Name", value: "Aditi Sharma" },
+          { id: "aditi-name", slot: "name", label: "Name", value: "Aditi Sharma" },
           {
             id: "aditi-headline",
+            slot: "headline",
             label: "Headline",
             value: "Senior Talent Acquisition Executive | Nexora Technologies",
           },
           {
             id: "aditi-connections",
+            slot: "connections",
             label: "Connections",
             value: "640 connections · 3 mutual connections",
           },
@@ -53,15 +60,17 @@ export const PANELS = {
     sections: [
       {
         fields: [
-          { id: "nisha-name", label: "Name", value: "Nisha Rao" },
+          { id: "nisha-name", slot: "name", label: "Name", value: "Nisha Rao" },
           {
             id: "nisha-headline",
+            slot: "headline",
             label: "Headline",
             value: `Senior Talent Acquisition Partner | ${NEXORA.legalName}`,
           },
-          { id: "nisha-location", label: "Location", value: NEXORA.location },
+          { id: "nisha-location", slot: "location", label: "Location", value: NEXORA.location },
           {
             id: "nisha-connections",
+            slot: "connections",
             label: "Connections",
             value: "1,184 connections · 4 mutual connections",
           },
@@ -117,6 +126,7 @@ export const PANELS = {
 
   "nexora-record": {
     kind: "company",
+    variant: "official-record",
     title: `${NEXORA.legalName}: company record`,
     sections: [
       {

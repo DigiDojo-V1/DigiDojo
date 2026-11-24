@@ -20,7 +20,9 @@ import {
   ChoiceFooter,
   ComposeView,
   EmailView,
+  EvidenceStack,
   EvidenceToolbar,
+  flaggedInPanels,
   TriageView,
   useEvidence,
 } from "./PlayViews";
@@ -28,7 +30,7 @@ import { OUTCOME_STYLE } from "./outcome-style";
 import type { OutcomeNode, Scenario, ThreadApp, ThreadNode } from "./schema";
 import { scenarioKey } from "./keys";
 import { currentNodeId, useRunStore } from "./store";
-import { priorTranscript, toBubble } from "./transcript";
+import { channelTransition, priorTranscript, toBubble } from "./transcript";
 
 const DEFAULT_DELAY_MS = 800;
 
@@ -199,7 +201,17 @@ function ThreadView({
   );
 
   const evidence = useEvidence(scenario);
-  const footer = done ? <ChoiceFooter choices={node.choices} /> : undefined;
+  const network = node.app === "linkedin";
+  const footer = done ? (
+    <ChoiceFooter choices={node.choices} variant={network ? "composer" : "default"} />
+  ) : undefined;
+  const transition = useMemo(
+    () => channelTransition(scenario, trail, locale),
+    [scenario, trail, locale],
+  );
+  // Tapping the contact opens their profile, if the screen offers one.
+  const profileId = node.evidence?.find((id) => scenario.evidence?.[id]?.kind === "profile");
+  const split = node.layout === "split" && node.evidence !== undefined;
 
   const shellProps: ShellProps = {
     contact: {
@@ -215,9 +227,24 @@ function ThreadView({
     backHref,
     hint: showHint ? t("thread.hint") : undefined,
     toolbar: (
-      <EvidenceToolbar scenario={scenario} panelIds={node.evidence} onOpen={evidence.open} />
+      <EvidenceToolbar
+        scenario={scenario}
+        panelIds={node.evidence}
+        onOpen={evidence.open}
+        variant={network ? "network" : "default"}
+      />
     ),
     footer,
+    onContactClick: profileId === undefined ? undefined : () => evidence.open(profileId),
+    aside:
+      split && node.evidence !== undefined
+        ? {
+            label: t("split.evidence"),
+            flaggedCount: flaggedInPanels(scenario, node.evidence, flagged),
+            content: <EvidenceStack scenario={scenario} panelIds={node.evidence} />,
+          }
+        : undefined,
+    transition,
   };
 
   return (

@@ -182,6 +182,53 @@ describe("ScenarioSchema with evidence", () => {
   });
 });
 
+describe("ScenarioSchema display hints", () => {
+  type Rich = ReturnType<typeof richScenarioInput>;
+  const dm = (s: Rich) => {
+    const n = s.nodes.dm;
+    if (n?.kind !== "thread") throw new Error("fixture node dm is not a thread");
+    return n;
+  };
+
+  it("accepts a message time, a profile slot, a record variant and a split layout", () => {
+    const s = richScenarioInput();
+    dm(s).messages[0]!.time = "09:14";
+    dm(s).layout = "split";
+    s.evidence!.profile!.sections[0]!.fields[0]!.slot = "headline";
+    s.evidence!.record = {
+      kind: "company",
+      variant: "official-record",
+      title: "Record",
+      sections: [{ fields: [{ id: "rec-date", value: "Incorporated 2021" }] }],
+    };
+    expect(errorsFor(s)).toEqual([]);
+  });
+
+  it("rejects unknown slot, variant and layout values", () => {
+    const s = richScenarioInput();
+    (dm(s) as { layout?: string }).layout = "side-by-side";
+    (s.evidence!.profile!.sections[0]!.fields[0]! as { slot?: string }).slot = "photo";
+    (s.evidence!.profile! as { variant?: string }).variant = "fancy";
+    expect(errorsFor(s).length).toBeGreaterThanOrEqual(3);
+  });
+
+  it("rejects a slot outside a profile and a record variant outside a company", () => {
+    const s = richScenarioInput();
+    s.evidence!["offer-pdf"]!.sections[0]!.fields[0]!.slot = "name";
+    s.evidence!["offer-pdf"]!.variant = "official-record";
+    const errors = errorsFor(s);
+    expect(errors).toContainEqual(expect.stringContaining("slots are for profile panels only"));
+    expect(errors).toContainEqual(expect.stringContaining('needs kind "company"'));
+  });
+
+  it("rejects a split layout without evidence", () => {
+    const s = richScenarioInput();
+    dm(s).layout = "split";
+    delete dm(s).evidence;
+    expect(errorsFor(s)).toContainEqual(expect.stringContaining('layout "split" needs evidence'));
+  });
+});
+
 describe("DojoSchema", () => {
   const dojo = () => ({
     id: "easy-money" as const,

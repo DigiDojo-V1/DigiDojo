@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import type { ProfileSlot, ThreadApp } from "@/engine/schema";
 
 /** The contact in a shell's header, with text already in the player's language. */
 export interface ShellContact {
@@ -19,6 +20,8 @@ export interface ChatBubble {
   flaggable: boolean;
   /** The message in phrases, each flaggable on its own if it has an id. */
   segments?: TextSegment[];
+  /** Display time, e.g. "09:14". */
+  time?: string;
 }
 
 /** A phrase inside a message or email paragraph. */
@@ -46,6 +49,29 @@ export interface ShellProps {
   toolbar?: ReactNode;
   /** Rendered under the messages: the player's reply choices. */
   footer?: ReactNode;
+  /** Tapping the contact in the header, e.g. to open their profile. */
+  onContactClick?: () => void;
+  /** A second pane next to the messages, behind a switch (the split layout). */
+  aside?: AsidePane;
+  /** The chat moved here from another app: shown as a card above the first message. */
+  transition?: ChannelTransitionView;
+}
+
+/** The second pane of a split chat. */
+export interface AsidePane {
+  /** Switch label, e.g. "Recruiter & company". */
+  label: string;
+  /** How many items are flagged inside the pane. */
+  flaggedCount: number;
+  content: ReactNode;
+}
+
+/** "This conversation moved from X to Y". */
+export interface ChannelTransitionView {
+  fromApp: ThreadApp;
+  toApp: ThreadApp;
+  /** Who moved the conversation, in the player's language. */
+  fromName: string;
 }
 
 /** Tap-to-flag wiring every evidence shell takes. */
@@ -89,10 +115,21 @@ export interface MailView {
 export interface PanelView {
   id: string;
   kind: "profile" | "company" | "web-page" | "document";
+  variant?: "official-record";
   title: string;
   subtitle?: string;
   sections: {
     heading?: string;
-    fields: { id: string; label?: string; value: string; finePrint: boolean }[];
+    fields: PanelFieldView[];
   }[];
+}
+
+/** One line of a panel. */
+export interface PanelFieldView {
+  id: string;
+  label?: string;
+  value: string;
+  finePrint: boolean;
+  /** Profile header placement. */
+  slot?: ProfileSlot;
 }
