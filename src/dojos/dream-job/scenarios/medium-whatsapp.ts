@@ -35,6 +35,7 @@ export const mediumWhatsapp = defineScenario({
         {
           id: "li-med-m1",
           from: "them",
+          time: "11:05",
           delayMs: 1200,
           text: "Hi Ananya, I came across your profile and noticed your economics coursework and Excel-based project. We have an opening for a Business Research Intern at Nexora Technologies in Bengaluru (hybrid). The internship runs for three months and offers ₹18,000 per month. The role involves desk research, cleaning basic data in Excel and preparing short market summaries.\n\nI would like to arrange a short introductory discussion. Are you available tomorrow between 11:00 AM and 2:00 PM? I can share the detailed role description before the call.",
         },
@@ -60,6 +61,7 @@ export const mediumWhatsapp = defineScenario({
         {
           id: "li-med-m2",
           from: "them",
+          time: "11:48",
           delayMs: 1400,
           segments: [
             { text: "Thanks, Ananya. " },

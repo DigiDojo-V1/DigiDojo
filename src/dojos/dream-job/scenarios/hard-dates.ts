@@ -34,11 +34,13 @@ export const hardDates = defineScenario({
         {
           id: "li-hard-m1",
           from: "them",
+          time: "15:20",
           delayMs: 1400,
           text: "Hi Ananya, I reviewed your profile and the academic project you listed on inflation trends. Our research team is hiring a Business Research Intern for a three-month hybrid role in Bengaluru. The work includes competitor research, spreadsheet analysis and preparing a weekly insight summary. The stipend is ₹18,000 per month.\n\nThe selection process is a 20-minute video discussion with the Research Manager, Priya Nair, on 25 November at 3:30 PM. The role is listed under reference NX-BRI-026. Please let me know whether you would like me to reserve the slot.",
         },
       ],
       evidence: ["nisha-profile", "nexora-company", "nexora-record"],
+      layout: "split",
       choices: [
         { label: "Reply and reserve the interview slot", nextNodeId: "gmail-hard" },
         { label: "Report the profile: the dates don't add up", nextNodeId: "safe-early" },
