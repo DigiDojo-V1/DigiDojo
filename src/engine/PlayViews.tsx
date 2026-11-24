@@ -9,7 +9,6 @@ import {
   Globe,
   Landmark,
   Paperclip,
-  Reply,
   Search,
   SendHorizontal,
   UserRound,
@@ -89,14 +88,9 @@ export function ChoiceFooter({
             key={`${i}-${choice.nextNodeId}`}
             type="button"
             onClick={() => choose(choice)}
-            className={cn(
-              "flex min-h-11 w-full items-center gap-2 rounded-full border px-4 py-2 text-left text-[15px] leading-snug transition-colors",
-              i === 0
-                ? "border-blue-600 bg-blue-600 font-medium text-white hover:bg-blue-700"
-                : "border-slate-300 text-slate-800 hover:bg-slate-50",
-            )}
+            // Every choice looks the same: styling must never hint at the right answer.
+            className="flex min-h-11 w-full items-center rounded-full border border-slate-300 px-4 py-2 text-left text-[15px] leading-snug text-slate-800 transition-colors hover:border-blue-600 hover:bg-blue-50 active:bg-blue-100"
           >
-            {i === 0 && <Reply className="size-4 shrink-0" aria-hidden />}
             {text(choice.label)}
           </button>
         ))}
@@ -373,9 +367,14 @@ export function EmailView({
         backHref={backHref}
         hint={scenario.coldRun === true ? undefined : t("mail.hint")}
         toolbar={
-          <EvidenceToolbar scenario={scenario} panelIds={node.evidence} onOpen={evidence.open} />
+          <EvidenceToolbar
+            scenario={scenario}
+            panelIds={node.evidence}
+            onOpen={evidence.open}
+            variant="mail"
+          />
         }
-        footer={<ChoiceFooter choices={node.choices} />}
+        footer={<ChoiceFooter choices={node.choices} variant="mail" />}
       >
         <MailBody
           mail={mail}
@@ -408,7 +407,8 @@ export function ComposeView({ node, backHref }: { node: ComposeNode; backHref: s
     <MailShell
       title={t("mail.reply")}
       backHref={backHref}
-      footer={<ChoiceFooter choices={node.choices} />}
+      variant="compose"
+      footer={<ChoiceFooter choices={node.choices} variant="mail" />}
     >
       <ComposeBody
         to={{ id: node.to.id, address: node.to.address }}
@@ -455,6 +455,8 @@ export function TriageView({
     if (item === undefined) return;
     reveal(emailOpenIds(item.email));
     setOpenItemId(itemId);
+    // Open the email at its top, not at the list's scroll position.
+    window.scrollTo({ top: 0 });
   };
 
   const rows: InboxRow[] = node.items.map((item) => {
@@ -467,6 +469,7 @@ export function TriageView({
       preview: mail.preview,
       date: mail.date,
       label: classifications[item.id],
+      opened: seen.includes(item.email.from.id),
     };
   });
 
@@ -500,8 +503,9 @@ export function TriageView({
 
   return (
     <MailShell
-      title={t("mail.inbox")}
+      title={t("mail.primary")}
       backHref={backHref}
+      variant="inbox"
       hint={t("triage.hint")}
       footer={
         <div className="sticky bottom-0 z-30 space-y-2 border-t bg-white/95 p-3 backdrop-blur">
