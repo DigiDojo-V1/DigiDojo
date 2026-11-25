@@ -80,13 +80,23 @@ export function rankFor(points: number, max: number, falseAlarms: number): Rank 
   return "rookie";
 }
 
-/** The best flag for a red flag: one with the right reason, then one with a good note, then any. */
+const goodNote = (f: Pick<FlagRecord, "judge">) =>
+  typeof f.judge === "object" && f.judge.verdict === "good";
+
+/**
+ * Whether a flag named the right trick: the right reason chip, or no chip and an explanation
+ * the marker judged "good".
+ */
+export function reasonIsRight(flag: Pick<FlagRecord, "tactic" | "judge">, tactic: Tactic): boolean {
+  return flag.tactic === tactic || (flag.tactic === undefined && goodNote(flag));
+}
+
+/** The best flag for a red flag: right reason with a good note, then right reason, then a good note, then any. */
 function bestFlag(flags: FlagRecord[], tactic: Tactic): FlagRecord | undefined {
-  const good = (f: FlagRecord) => typeof f.judge === "object" && f.judge.verdict === "good";
   return (
-    flags.find((f) => f.tactic === tactic && good(f)) ??
-    flags.find((f) => f.tactic === tactic) ??
-    flags.find(good) ??
+    flags.find((f) => reasonIsRight(f, tactic) && goodNote(f)) ??
+    flags.find((f) => reasonIsRight(f, tactic)) ??
+    flags.find(goodNote) ??
     flags[0]
   );
 }
@@ -134,11 +144,10 @@ export function computeDebrief(scenario: Scenario, run: RunRecord): DebriefResul
 
     if (catching.length > 0) {
       const flag = bestFlag(catching, redFlag.tactic)!;
-      const right = flag.tactic === redFlag.tactic;
+      const right = reasonIsRight(flag, redFlag.tactic);
       (right ? result.caught : result.spotted).push(entry(shown, flag));
       points += right ? POINTS.rightReason : POINTS.wrongReason;
-      if (typeof flag.judge === "object" && flag.judge.verdict === "good")
-        points += POINTS.goodNote;
+      if (goodNote(flag)) points += POINTS.goodNote;
       result.score.max += POINTS.rightReason;
     } else if (seenCarrier !== undefined) {
       result.missed.push(entry(seenCarrier));

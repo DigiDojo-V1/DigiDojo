@@ -102,6 +102,50 @@ describe("POST /api/flag/chips", () => {
   });
 });
 
+describe("chips edge cases", () => {
+  it("gives no options for a highlight with almost no letters, without calling the model", async () => {
+    const llm = fakeLlm({ trivial: false, chips: [] });
+    const target = { ...base, targetId: "dm-1", ...span("₹") };
+    target.end = target.start + 1;
+    const result = await handleChips(target, deps({ llm }));
+    expect(result.body).toEqual({ chips: [], graded: true });
+    expect(llm.calls).toBe(0);
+  });
+
+  it("passes on the model's call that a highlight is too trivial for options", async () => {
+    const llm = fakeLlm({ trivial: true, chips: [] });
+    const result = await handleChips(payHighlight, deps({ llm }));
+    expect(result.body).toEqual({ chips: [], graded: true });
+  });
+
+  it("keeps 3 options when the model gives 3, always with the right one", async () => {
+    const llm = fakeLlm({
+      trivial: false,
+      chips: [
+        { tactic: "urgency", label: "A deadline stops you checking" },
+        { tactic: "flattery", label: "Praise lowers your guard" },
+        { tactic: "authority", label: "Sounds official, so you obey" },
+      ],
+    });
+    const result = await handleChips(payHighlight, deps({ llm }));
+    expect(tactics(result.body)).toHaveLength(3);
+    expect(tactics(result.body)).toContain("pay-to-earn");
+  });
+
+  it("tells the model the level's goals and which tactic must be an option", async () => {
+    let prompt = "";
+    const llm: LlmLike = {
+      async generateJson(req) {
+        prompt = req.prompt;
+        return { trivial: true, chips: [] };
+      },
+    };
+    await handleChips(payHighlight, deps({ llm, getGoals: () => ["Never pay to get a job."] }));
+    expect(prompt).toContain("Never pay to get a job.");
+    expect(prompt).toContain("<must_include>pay-to-earn</must_include>");
+  });
+});
+
 describe("POST /api/flag/judge", () => {
   const judge = { ...payHighlight, tactic: "pay-to-earn", note: "real jobs never ask you to pay" };
 

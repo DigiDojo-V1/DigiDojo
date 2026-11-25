@@ -23,6 +23,8 @@ export const ChipSchema = z.object({ tactic: TacticSchema, label: z.string().max
 
 /** The longest note a player can write. */
 export const MAX_NOTE_CHARS = 200;
+/** Shortest explanation that can stand in for a reason chip. */
+export const MIN_NOTE_CHARS = 10;
 
 /** One thing the player flagged: words they highlighted, or a whole item such as a Reply-To line. */
 export interface FlagRecord {

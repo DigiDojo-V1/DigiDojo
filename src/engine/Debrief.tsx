@@ -24,6 +24,7 @@ import { useT, useText } from "@/i18n/hooks";
 import { cn } from "@/lib/utils";
 import {
   computeDebrief,
+  reasonIsRight,
   type DebriefFlag,
   type DebriefResult,
   type DebriefTriageRow,
@@ -283,7 +284,7 @@ function PlayerFlag({
   tactic: Tactic;
 }) {
   const t = useT();
-  const right = player.tactic === tactic;
+  const right = reasonIsRight(player, tactic);
   const judge = player.judge;
   return (
     <div className="space-y-1.5">
@@ -292,7 +293,7 @@ function PlayerFlag({
       <p className="flex flex-wrap items-center gap-1.5 text-sm">
         <span className="text-muted-foreground">{t("debrief.yourReason")}:</span>
         <span className={cn("font-medium", right ? "text-emerald-700" : "text-red-700")}>
-          {player.tactic === undefined ? "—" : t(`tactic.${player.tactic}.label`)}
+          {player.tactic === undefined ? t("debrief.ownWords") : t(`tactic.${player.tactic}.label`)}
         </span>
         {!right && (
           <>

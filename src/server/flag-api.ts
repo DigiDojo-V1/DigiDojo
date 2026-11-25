@@ -34,6 +34,8 @@ export interface FlagApiDeps {
   /** False means the caller is over its rate limit. */
   allow: () => Promise<boolean>;
   getScenario: (dojoId: string, scenarioId: string) => Scenario | undefined;
+  /** The dojo's learning goals, given to the model so its options fit what the level teaches. */
+  getGoals?: (dojoId: string) => readonly string[];
   cache?: ChipCache;
 }
 
@@ -64,8 +66,14 @@ export const JudgeRequestSchema = z.strictObject({
 });
 
 const ModelChipsSchema = z.object({
+  trivial: z.boolean().default(false),
   chips: z.array(z.object({ tactic: z.string(), label: z.string() })).max(8),
 });
+
+/** A highlight with almost no letters or digits ("a", "!!") gets no options: explain it instead. */
+export function isTrivialHighlight(text: string): boolean {
+  return (text.match(/[\p{L}\p{N}]/gu) ?? []).length < 3;
+}
 
 const ModelJudgeSchema = z.object({
   verdict: JudgeResultSchema.shape.verdict,
@@ -126,13 +134,20 @@ export async function handleChips(raw: unknown, deps: FlagApiDeps): Promise<ApiR
   const key = `${req.dojoId}/${req.scenarioId}|${seed}|${req.locale}`;
   const hit = deps.cache?.get(key);
   if (hit !== undefined) return { status: 200, body: { chips: hit, graded } };
+  // No options: the player has to say what they mean in their own words.
+  if (isTrivialHighlight(resolved.text)) return { status: 200, body: { chips: [], graded } };
 
   try {
     const answer = ModelChipsSchema.parse(
       await deps.llm.generateJson({
         model: "chips",
         system: CHIPS_SYSTEM,
-        prompt: chipsPrompt(resolved.text, req.locale),
+        prompt: chipsPrompt({
+          highlight: resolved.text,
+          locale: req.locale,
+          mustInclude: correct,
+          goals: deps.getGoals?.(req.dojoId) ?? [],
+        }),
         schema: CHIPS_SCHEMA,
         timeoutMs: CHIPS_TIMEOUT_MS,
       }),
@@ -141,7 +156,9 @@ export async function handleChips(raw: unknown, deps: FlagApiDeps): Promise<ApiR
       const label = c.label.trim().slice(0, MAX_LABEL_CHARS);
       return isTactic(c.tactic) ? [{ tactic: c.tactic, label: label || undefined }] : [];
     });
-    const chips = finalizeChips(proposed, scenario, correct, seed);
+    const chips = answer.trivial
+      ? []
+      : finalizeChips(proposed, scenario, correct, seed, proposed.length);
     deps.cache?.set(key, chips);
     return { status: 200, body: { chips, graded } };
   } catch (error) {
@@ -183,6 +200,7 @@ export async function handleJudge(raw: unknown, deps: FlagApiDeps): Promise<ApiR
           rubricLabel: resolveText(rubric.label, "en"),
           rubricExplanation: resolveText(rubric.explanation, "en"),
           tactic: rubric.tactic,
+          picked: req.tactic,
           note: req.note,
           locale: req.locale,
         }),
