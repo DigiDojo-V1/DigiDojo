@@ -3,6 +3,7 @@
 import {
   createContext,
   useContext,
+  useEffect,
   useMemo,
   useState,
   type KeyboardEvent,
@@ -10,7 +11,7 @@ import {
 } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { Flag, X } from "lucide-react";
-import { tokenize } from "@/engine/highlight";
+import { snapToWords, tokenize } from "@/engine/highlight";
 import { useT } from "@/i18n/hooks";
 import { cn } from "@/lib/utils";
 
@@ -61,11 +62,60 @@ export function HighlightProvider({
   const [selection, setSelection] = useState<Selection | null>(null);
   const [range, registerRange] = useState<{ start: number; end: number } | null>(null);
 
+  const clear = () => {
+    setSelection(null);
+    clearNativeSelection();
+  };
+
   const confirm = () => {
     if (selection === null || range === null) return;
     onFlagRange(selection.targetId, range.start, range.end);
-    setSelection(null);
+    clear();
   };
+
+  // Click-and-drag (or long-press on a phone) selects text the usual way. The selection is
+  // widened to whole words and becomes the one the "Flag this" bar acts on.
+  useEffect(() => {
+    const onSelectionChange = () => {
+      const native = document.getSelection();
+      if (native === null || native.isCollapsed || native.rangeCount === 0) return;
+      const r = native.getRangeAt(0);
+      const container = targetElement(r.commonAncestorContainer);
+      if (container === null) return;
+      const targetId = container.dataset.highlightTarget;
+      if (targetId === undefined) return;
+      const start = textOffset(container, r.startContainer, r.startOffset);
+      const end = textOffset(container, r.endContainer, r.endOffset);
+      const tokens = tokenize(container.textContent ?? "");
+      const words = snapToWords(tokens, start, end);
+      if (words === undefined) return;
+      const from = tokens[words.first]!.start;
+      const to = tokens[words.last]!.end;
+      // Never overlap a flag the player already made.
+      if (marksFor(targetId).some((m) => from < m.end && to > m.start)) return;
+      setSelection({ targetId, anchor: words.first, focus: words.last });
+      registerRange({ start: from, end: to });
+    };
+    document.addEventListener("selectionchange", onSelectionChange);
+    return () => document.removeEventListener("selectionchange", onSelectionChange);
+  }, [marksFor]);
+
+  // Escape drops a selection in progress, wherever focus is. Registered once: a listener
+  // tied to `selection` would be removed mid-event when the text's own Escape handler runs.
+  useEffect(() => {
+    const onKey = (e: globalThis.KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      setSelection(null);
+      const native = document.getSelection();
+      if (native !== null && native.rangeCount > 0) {
+        if (targetElement(native.getRangeAt(0).commonAncestorContainer) !== null) {
+          clearNativeSelection();
+        }
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   const value = useMemo(
     () => ({ marksFor, onFlagRange, onOpenFlag, selection, setSelection, registerRange }),
@@ -91,7 +141,7 @@ export function HighlightProvider({
             </p>
             <button
               type="button"
-              onClick={() => setSelection(null)}
+              onClick={clear}
               aria-label={t("highlight.cancel")}
               className="flex size-11 shrink-0 items-center justify-center rounded-xl text-slate-300 hover:bg-white/10"
             >
@@ -111,10 +161,35 @@ export function HighlightProvider({
   );
 }
 
+function clearNativeSelection() {
+  document.getSelection()?.removeAllRanges();
+}
+
+/** True while the player has text selected the usual way (drag or long-press). */
+function hasNativeSelection(): boolean {
+  const native = document.getSelection();
+  return native !== null && !native.isCollapsed;
+}
+
+/** The highlightable text a DOM node sits in, if any. */
+function targetElement(node: Node): HTMLElement | null {
+  const element = node instanceof HTMLElement ? node : node.parentElement;
+  return element?.closest<HTMLElement>("[data-highlight-target]") ?? null;
+}
+
+/** Character offset of a DOM position from the start of `container`'s text. */
+function textOffset(container: HTMLElement, node: Node, offset: number): number {
+  const r = document.createRange();
+  r.setStart(container, 0);
+  r.setEnd(node, offset);
+  return r.toString().length;
+}
+
 /**
  * Text the player can highlight word by word. Nothing in it looks tappable: red flags are
- * hidden, so the player has to find them. Tap a word to start, tap another to extend, then
- * "Flag this". Tapping a flagged highlight reopens it.
+ * hidden, so the player has to find them. Select words by click-and-drag (long-press on a
+ * phone), or tap a word and tap another to extend; then "Flag this". Tapping a flagged
+ * highlight reopens it.
  */
 export function HighlightableText({ targetId, text }: { targetId: string; text: string }) {
   const ctx = useContext(HighlightContext);
@@ -184,7 +259,8 @@ export function HighlightableText({ targetId, text }: { targetId: string; text: 
       role="group"
       aria-label={t("highlight.textAria")}
       onKeyDown={onKeyDown}
-      className="whitespace-pre-line select-none focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+      data-highlight-target={targetId}
+      className="whitespace-pre-line select-text selection:bg-amber-200 focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
     >
       {tokens.map((token, i) => {
         const mark = markAt(i);
@@ -208,6 +284,8 @@ export function HighlightableText({ targetId, text }: { targetId: string; text: 
             key={i}
             onClick={(e) => {
               e.stopPropagation();
+              // A drag that ends on a word also fires a click: the drag's selection wins.
+              if (hasNativeSelection()) return;
               tapWord(i);
             }}
             className={cn(

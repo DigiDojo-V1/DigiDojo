@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { motion } from "motion/react";
 import { Flag, Trash2, X } from "lucide-react";
 import { useT } from "@/i18n/hooks";
@@ -42,6 +43,13 @@ export function FlagPopover({
   onRemove: () => void;
 }) {
   const t = useT();
+  useEffect(() => {
+    const onKey = (e: globalThis.KeyboardEvent) => {
+      if (e.key === "Escape") onCancel();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onCancel]);
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center">
       <button

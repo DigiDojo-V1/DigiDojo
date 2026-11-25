@@ -254,3 +254,22 @@ export function correctTactics(scenario: ScenarioData, redFlagIds: readonly stri
     ),
   ];
 }
+
+/**
+ * Widens a free text selection [start, end) to whole words. Returns the first and last word
+ * token indexes, or undefined if the selection holds no word (only spaces).
+ */
+export function snapToWords(
+  tokens: readonly Token[],
+  start: number,
+  end: number,
+): { first: number; last: number } | undefined {
+  let first = -1;
+  let last = -1;
+  tokens.forEach((token, i) => {
+    if (!token.word || token.end <= start || token.start >= end) return;
+    if (first === -1) first = i;
+    last = i;
+  });
+  return first === -1 ? undefined : { first, last };
+}

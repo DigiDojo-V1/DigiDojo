@@ -9,6 +9,7 @@ import {
   highlightCatches,
   MAX_HIGHLIGHT_CHARS,
   matchHighlight,
+  snapToWords,
   targetText,
   textTargets,
   tokenize,
@@ -139,5 +140,28 @@ describe("chips", () => {
     expect(tactics).toContain("pay-to-earn");
     expect(new Set(tactics).size).toBe(CHIP_COUNT);
     expect(chips.find((c) => c.tactic === "urgency")?.label).toBe("Rushes you");
+  });
+});
+
+describe("snapToWords", () => {
+  const tokens = tokenize("Pay ₹999 to register now.");
+
+  it("widens a selection that starts or ends mid-word to whole words", () => {
+    // "y ₹99" → "Pay ₹999"
+    const snapped = snapToWords(tokens, 2, 7)!;
+    expect(tokens[snapped.first]!.text).toBe("Pay");
+    expect(tokens[snapped.last]!.text).toBe("₹999");
+  });
+
+  it("ignores spaces at the edges of a selection", () => {
+    const text = "Pay ₹999 to register now.";
+    const start = text.indexOf(" to ");
+    const snapped = snapToWords(tokens, start, start + 4)!;
+    expect(snapped.first).toBe(snapped.last);
+    expect(tokens[snapped.first]!.text).toBe("to");
+  });
+
+  it("returns nothing for a selection of only spaces", () => {
+    expect(snapToWords(tokens, 3, 4)).toBeUndefined();
   });
 });
