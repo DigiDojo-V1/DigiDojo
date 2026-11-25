@@ -18,6 +18,7 @@ import {
   flaggedItemIds,
   JudgeResultSchema,
   MAX_NOTE_CHARS,
+  MIN_NOTE_CHARS,
   resolveSpot,
   type FlagRecord,
   type FlagSpot,
@@ -62,10 +63,10 @@ export function useFlagActions(): FlagActions {
 let counter = 0;
 const newFlagId = () => `flag-${Date.now().toString(36)}-${(counter++).toString(36)}`;
 
-const ChipsResponseSchema = z.object({
-  chips: z.array(ChipSchema).min(1),
-  graded: z.boolean().default(false),
-});
+// No chips means "explain it in your own words", which only makes sense when notes are marked.
+const ChipsResponseSchema = z
+  .object({ chips: z.array(ChipSchema), graded: z.boolean().default(false) })
+  .refine((r) => r.chips.length > 0 || r.graded);
 const JudgeResponseSchema = z.object({ result: JudgeResultSchema.nullable() });
 
 async function postJson(url: string, body: unknown, timeoutMs: number): Promise<unknown> {
@@ -207,9 +208,16 @@ export function Flagging({ scenario, children }: { scenario: Scenario; children:
     setDraft(null);
   };
 
+  const draftNote = draft?.note.trim() ?? "";
+  // A picked reason saves the flag; so does a real explanation, when explanations are marked.
+  const canSave =
+    draft !== null &&
+    draft.chips !== null &&
+    (draft.tactic !== undefined || (graded && draftNote.length >= MIN_NOTE_CHARS));
+
   const save = () => {
-    if (draft === null || draft.chips === null || draft.tactic === undefined) return;
-    const note = draft.note.trim().slice(0, MAX_NOTE_CHARS);
+    if (draft === null || !canSave) return;
+    const note = draftNote.slice(0, MAX_NOTE_CHARS);
     const previous = draft.flagId === undefined ? undefined : flags[draft.flagId];
     const unchangedNote = previous !== undefined && (previous.note ?? "") === note;
     // Grade only notes on flags that caught something; a false alarm earns nothing either way.
@@ -220,7 +228,7 @@ export function Flagging({ scenario, children }: { scenario: Scenario; children:
       text: draft.text,
       locale,
       catches: draft.catches,
-      chips: draft.chips,
+      chips: draft.chips ?? [],
       tactic: draft.tactic,
       note: note.length > 0 ? note : undefined,
       judge:
@@ -266,11 +274,17 @@ export function Flagging({ scenario, children }: { scenario: Scenario; children:
           note={draft.note}
           maxNote={MAX_NOTE_CHARS}
           showNote={graded || draft.note.length > 0}
+          canExplainOnly={graded}
+          canSave={canSave}
+          minNote={MIN_NOTE_CHARS}
           editing={draft.flagId !== undefined}
           onChoose={(value) =>
-            setDraft((d) =>
-              d === null ? d : { ...d, tactic: d.chips?.find((c) => c.tactic === value)?.tactic },
-            )
+            setDraft((d) => {
+              if (d === null) return d;
+              // Tapping the picked reason again unpicks it, to answer in your own words instead.
+              if (d.tactic === value && graded) return { ...d, tactic: undefined };
+              return { ...d, tactic: d.chips?.find((c) => c.tactic === value)?.tactic };
+            })
           }
           onNote={(note) => setDraft((d) => (d === null ? d : { ...d, note }))}
           onSave={save}

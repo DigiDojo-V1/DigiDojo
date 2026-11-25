@@ -86,6 +86,22 @@ describe("score", () => {
     expect(result.score.points).toBe(POINTS.rightReason + POINTS.goodNote + POINTS.falseAlarm);
   });
 
+  it("counts a spot-on explanation with no reason picked as caught", () => {
+    const words = makeFlag(s, "m2", { phrase: "Send ₹500" });
+    const good = {
+      ...words,
+      note: "they want money before I earn",
+      judge: { verdict: "good" as const, feedback: "Yes." },
+    };
+    const partial = { ...good, judge: { verdict: "partial" as const, feedback: "Close." } };
+    const caught = computeDebrief(s, run({ seen: ["m2"], flags: flagsById(good) }));
+    expect(caught.caught).toHaveLength(1);
+    expect(caught.score.points).toBe(POINTS.rightReason + POINTS.goodNote);
+    const spotted = computeDebrief(s, run({ seen: ["m2"], flags: flagsById(partial) }));
+    expect(spotted.spotted).toHaveLength(1);
+    expect(spotted.score.points).toBe(POINTS.wrongReason);
+  });
+
   it("never goes below zero, so flagging everything ranks as a rookie", () => {
     const words = ["Hello", "Send", "₹500", "to", "earn", "₹5,000"];
     const flags = words.map((w, i) => ({

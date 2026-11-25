@@ -22,6 +22,9 @@ export function FlagPopover({
   note,
   maxNote,
   showNote,
+  canExplainOnly,
+  canSave,
+  minNote,
   editing,
   onChoose,
   onNote,
@@ -37,6 +40,11 @@ export function FlagPopover({
   maxNote: number;
   /** Show the "In your own words" box: only when explanations are graded. */
   showNote: boolean;
+  /** A written explanation alone can save the flag (explanations are marked). */
+  canExplainOnly: boolean;
+  canSave: boolean;
+  /** Shortest explanation that counts on its own. */
+  minNote: number;
   /** Editing an existing flag (shows Remove). */
   editing: boolean;
   onChoose: (value: string) => void;
@@ -46,6 +54,16 @@ export function FlagPopover({
   onRemove: () => void;
 }) {
   const t = useT();
+  // No options for this highlight: the player has to explain it.
+  const explainOnly = chips !== null && chips.length === 0;
+  const hint =
+    chips === null || canSave
+      ? null
+      : explainOnly
+        ? t("flag.explainHint")(minNote)
+        : canExplainOnly
+          ? t("flag.pickOrExplain")
+          : t("flag.pickReason");
   useEffect(() => {
     const onKey = (e: globalThis.KeyboardEvent) => {
       if (e.key === "Escape") onCancel();
@@ -87,9 +105,14 @@ export function FlagPopover({
         </div>
 
         <h2 id="flag-popover-title" className="mt-4 text-base font-semibold text-slate-900">
-          {t("flag.why")}
+          {explainOnly ? t("flag.explainTitle") : t("flag.why")}
         </h2>
-        <div className="mt-2 grid grid-cols-1 gap-2" role="radiogroup" aria-label={t("flag.why")}>
+        {explainOnly && <p className="mt-1 text-sm text-slate-600">{t("flag.explainBody")}</p>}
+        <div
+          className={cn("mt-2 grid grid-cols-1 gap-2", explainOnly && "hidden")}
+          role="radiogroup"
+          aria-label={t("flag.why")}
+        >
           {chips === null
             ? [0, 1, 2, 3].map((i) => (
                 <div key={i} className="h-11 animate-pulse rounded-xl bg-slate-100" aria-hidden />
@@ -114,17 +137,25 @@ export function FlagPopover({
         </div>
         {chips === null && <p className="mt-2 text-xs text-slate-500">{t("flag.loadingChips")}</p>}
 
-        {showNote && (
-          <label className="mt-4 block">
-            <span className="text-sm font-medium text-slate-900">{t("flag.noteLabel")}</span>
-            <span className="ml-1 text-xs text-slate-500">{t("flag.noteOptional")}</span>
+        {(showNote || explainOnly) && (
+          <label className={cn("block", explainOnly ? "mt-3" : "mt-4")}>
+            {!explainOnly && (
+              <>
+                <span className="text-sm font-medium text-slate-900">
+                  {canExplainOnly ? t("flag.noteLabelOr") : t("flag.noteLabel")}
+                </span>
+                <span className="ml-1 text-xs text-slate-500">{t("flag.noteOptional")}</span>
+              </>
+            )}
             <textarea
               value={note}
+              autoFocus={explainOnly}
+              aria-label={explainOnly ? t("flag.explainTitle") : undefined}
               maxLength={maxNote}
               onChange={(e) => onNote(e.target.value)}
-              rows={2}
+              rows={explainOnly ? 3 : 2}
               autoComplete="off"
-              placeholder={t("flag.notePlaceholder")}
+              placeholder={explainOnly ? t("flag.explainPlaceholder") : t("flag.notePlaceholder")}
               className="mt-1.5 block w-full resize-none rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-900 focus:outline-none"
             />
             <span className="mt-1 flex justify-between text-[11px] text-slate-500">
@@ -149,7 +180,7 @@ export function FlagPopover({
           <button
             type="button"
             onClick={onSave}
-            disabled={chosen === undefined}
+            disabled={!canSave}
             className="flex h-11 flex-1 items-center justify-center gap-1.5 rounded-xl bg-red-600 text-sm font-semibold text-white disabled:bg-slate-300"
           >
             <Flag className="size-4" aria-hidden /> {editing ? t("flag.update") : t("flag.save")}
@@ -157,13 +188,10 @@ export function FlagPopover({
         </div>
         {/* Always takes its space, so the buttons don't jump when a reason is picked. */}
         <p
-          className={cn(
-            "mt-2 text-center text-xs text-slate-500",
-            (chosen !== undefined || chips === null) && "invisible",
-          )}
-          aria-hidden={chosen !== undefined}
+          className={cn("mt-2 text-center text-xs text-slate-500", hint === null && "invisible")}
+          aria-live="polite"
         >
-          {t("flag.pickReason")}
+          {hint ?? t("flag.pickReason")}
         </p>
       </motion.div>
     </div>

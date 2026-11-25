@@ -21,7 +21,7 @@ If OpenAI is slow, failing or over the rate limit, that one request quietly fall
 
 ## What the model sees
 
-- **Reason chips:** only the words the player highlighted, never the rest of the message. So the labels can't hint at red flags elsewhere.
+- **Reason chips:** only the words the player highlighted (never the rest of the message, so the labels can't hint at red flags elsewhere), the dojo's takeaways as learning goals, and which tactic must be an option. The model may answer `trivial: true` with no options, and the player then explains in their own words.
   - The server works out which red flag (if any) the highlight caught from the scenario data. It always puts the right reason among the 4, and shuffles them.
 - **Marking:** the highlighted words, the red flag's label and explanation (the rubric), and the player's note.
   - Player text sits in tagged data blocks, and the prompt says to ignore any instructions inside them.

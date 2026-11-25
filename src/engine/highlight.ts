@@ -218,16 +218,21 @@ export function fallbackChips(
   return shuffle(picked, `${seed}:order`).map((tactic) => ({ tactic }));
 }
 
+/** Fewest chips worth showing: with fewer, the right one would stand out. */
+export const MIN_CHIPS = 3;
+
 /**
- * Makes chips from any source safe to show: known tactics only, no duplicates, exactly
- * `CHIP_COUNT`, every correct tactic present, in a shuffled order.
+ * Makes chips from any source safe to show: known tactics only, no duplicates, exactly `count`
+ * (3 or 4), every correct tactic present, in a shuffled order.
  */
 export function finalizeChips(
   proposed: readonly Chip[],
   scenario: ScenarioData,
   correct: readonly Tactic[],
   seed: string,
+  count: number = CHIP_COUNT,
 ): Chip[] {
+  const size = Math.min(CHIP_COUNT, Math.max(MIN_CHIPS, count));
   const known = new Set<string>(TACTICS);
   const unique: Chip[] = [];
   for (const chip of proposed) {
@@ -236,13 +241,13 @@ export function finalizeChips(
   }
   const missing = [...new Set(correct)].filter((t) => !unique.some((c) => c.tactic === t));
   // Make room for the right answers by dropping proposed distractors from the end.
-  let chips = unique.slice(0, Math.max(0, CHIP_COUNT - missing.length));
+  let chips = unique.slice(0, Math.max(0, size - missing.length));
   for (const tactic of missing) chips.push({ tactic });
   for (const filler of fallbackChips(scenario, [], seed)) {
-    if (chips.length >= CHIP_COUNT) break;
+    if (chips.length >= size) break;
     if (!chips.some((c) => c.tactic === filler.tactic)) chips.push(filler);
   }
-  chips = chips.slice(0, CHIP_COUNT);
+  chips = chips.slice(0, size);
   return shuffle(chips, `${seed}:order`);
 }
 

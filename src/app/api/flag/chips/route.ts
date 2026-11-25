@@ -1,4 +1,5 @@
-import { getScenario } from "@/dojos/registry";
+import { getDojo, getScenario } from "@/dojos/registry";
+import { resolveText } from "@/i18n/text";
 import { ChipCache, handleChips } from "@/server/flag-api";
 import { callerKey, getLimiter } from "@/server/ratelimit";
 import { getLlm } from "@/server/openai";
@@ -15,6 +16,7 @@ export async function POST(request: Request) {
     llm: getLlm(),
     allow: () => getLimiter("chips").allow(caller),
     getScenario,
+    getGoals: (dojoId) => (getDojo(dojoId)?.takeaways ?? []).map((t) => resolveText(t, "en")),
     cache,
   });
   return Response.json(result.body, { status: result.status });
