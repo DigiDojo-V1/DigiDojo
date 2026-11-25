@@ -3,7 +3,8 @@ import { create } from "zustand";
 import { createJSONStorage, persist, type StateStorage } from "zustand/middleware";
 import { z } from "zod";
 import { DEFAULT_LOCALE, LOCALES, type Locale } from "@/i18n/locale";
-import type { Choice, LocalizedText, Scenario, TriageLabel } from "./schema";
+import type { FlagRecord, JudgeState } from "./flags";
+import type { Choice, LocalizedText, Scenario, Tactic, TriageLabel } from "./schema";
 
 /* ------------------------------------------------------------------ */
 /* Current run (in memory only)                                        */
@@ -26,8 +27,8 @@ interface RunState {
   visited: string[];
   /** Flaggable ids revealed to the player (messages, phrases, inspected fields), across rewinds. */
   seen: string[];
-  /** Flaggable ids the player has flagged. Kept across nodes and rewinds. */
-  flagged: string[];
+  /** What the player has flagged, by flag id. Kept across nodes and rewinds. */
+  flags: Record<string, FlagRecord>;
   /** Inbox triage labels, keyed by triage item id. */
   classifications: Record<string, TriageLabel>;
   rewinds: number;
@@ -40,7 +41,11 @@ interface RunActions {
   reveal: (ids: readonly string[]) => void;
   /** Same as `reveal([id])`. */
   markSeen: (id: string) => void;
-  toggleFlag: (id: string) => void;
+  /** Save a new flag, or replace one with the same id. */
+  saveFlag: (flag: FlagRecord) => void;
+  setFlagReason: (id: string, tactic: Tactic | undefined, note: string | undefined) => void;
+  removeFlag: (id: string) => void;
+  setJudge: (id: string, judge: JudgeState) => void;
   choose: (choice: Choice) => void;
   classify: (itemId: string, label: TriageLabel) => void;
   /** Leave a triage node for its `nextNodeId`. */
@@ -57,7 +62,7 @@ const initialRun: RunState = {
   trail: [],
   visited: [],
   seen: [],
-  flagged: [],
+  flags: {},
   classifications: {},
   rewinds: 0,
 };
@@ -97,10 +102,27 @@ export const useRunStore = create<RunState & RunActions>()((set) => ({
 
   markSeen: (id) => set((s) => (s.seen.includes(id) ? s : { seen: [...s.seen, id] })),
 
-  toggleFlag: (id) =>
-    set((s) => ({
-      flagged: s.flagged.includes(id) ? s.flagged.filter((f) => f !== id) : [...s.flagged, id],
-    })),
+  saveFlag: (flag) => set((s) => ({ flags: { ...s.flags, [flag.id]: flag } })),
+
+  setFlagReason: (id, tactic, note) =>
+    set((s) => {
+      const flag = s.flags[id];
+      if (flag === undefined) return s;
+      return { flags: { ...s.flags, [id]: { ...flag, tactic, note, judge: undefined } } };
+    }),
+
+  removeFlag: (id) =>
+    set((s) => {
+      if (!(id in s.flags)) return s;
+      return { flags: Object.fromEntries(Object.entries(s.flags).filter(([key]) => key !== id)) };
+    }),
+
+  setJudge: (id, judge) =>
+    set((s) => {
+      const flag = s.flags[id];
+      if (flag === undefined) return s;
+      return { flags: { ...s.flags, [id]: { ...flag, judge } } };
+    }),
 
   choose: (choice) => set((s) => advance(s, choice.nextNodeId, choice.label)),
 

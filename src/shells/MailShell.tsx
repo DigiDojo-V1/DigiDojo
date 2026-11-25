@@ -29,7 +29,7 @@ import {
 import { MotionConfig } from "motion/react";
 import { useT } from "@/i18n/hooks";
 import { cn } from "@/lib/utils";
-import { SegmentButton } from "./ChatShell";
+import { HighlightableText } from "./HighlightableText";
 import { SimulationBar } from "./SimulationBar";
 import type { FlagProps, MailView } from "./types";
 
@@ -336,22 +336,9 @@ export function MailBody({
 
       {/* Body */}
       <div className="mt-5 space-y-3 px-4 text-[15px] leading-relaxed text-slate-900">
-        {mail.body.map((paragraph, p) => (
-          <p key={p} className="whitespace-pre-line">
-            {paragraph.map((segment, i) =>
-              segment.flaggable && segment.id !== undefined ? (
-                <SegmentButton
-                  key={segment.id}
-                  id={segment.id}
-                  text={segment.text}
-                  flagged={flag.flaggedIds.includes(segment.id)}
-                  onToggleFlag={flag.onToggleFlag}
-                  showFlagIcon
-                />
-              ) : (
-                <span key={i}>{segment.text}</span>
-              ),
-            )}
+        {mail.body.map((paragraph) => (
+          <p key={paragraph.targetId}>
+            <HighlightableText targetId={paragraph.targetId} text={paragraph.text} />
           </p>
         ))}
       </div>

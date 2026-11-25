@@ -47,7 +47,7 @@ const en = {
 
   // Thread
   "thread.prompt": "What do you do?",
-  "thread.hint": "Tap any message to flag it as suspicious",
+  "thread.hint": "Spot something off? Tap the words, then flag them.",
   "chat.typing": (sender?: string) => (sender ? `${sender} is typing…` : "typing…"),
   "chat.typingAria": "typing",
   "chat.flagAria": (text: string) => `Flag message: ${text}`,
@@ -78,7 +78,7 @@ const en = {
   // Mail
   "mail.inbox": "Inbox",
   "mail.reply": "Reply",
-  "mail.hint": "Tap a phrase or a detail to flag it as suspicious",
+  "mail.hint": "Tap words in the email, or the flag next to a detail, to flag it.",
   "mail.from": "From",
   "mail.replyTo": "Reply-To",
   "mail.to": "To",
@@ -102,6 +102,26 @@ const en = {
   "mail.attachments": (n: number) => `${n} attachment${n === 1 ? "" : "s"}`,
   "mail.showDetails": "Show sender details",
   "mail.hideDetails": "Hide sender details",
+
+  // Highlighting and flagging
+  "highlight.toolbar": "Selected words",
+  "highlight.extendHint": "Tap another word to select more.",
+  "highlight.cancel": "Cancel selection",
+  "highlight.flagThis": "Flag this",
+  "highlight.flagged": "Flagged",
+  "highlight.textAria":
+    "Message text. Use the arrow keys to pick a word, Shift and arrows to select more, Enter to flag.",
+  "flag.why": "Why is this suspicious?",
+  "flag.loadingChips": "Finding possible reasons…",
+  "flag.noteLabel": "In your own words",
+  "flag.noteOptional": "(optional, bonus points)",
+  "flag.notePlaceholder": "What makes this look like a scam?",
+  "flag.notePrivacy": "Don't type personal details.",
+  "flag.pickReason": "Pick a reason to save this flag.",
+  "flag.save": "Flag it",
+  "flag.update": "Save",
+  "flag.remove": "Remove",
+  "flag.close": "Close",
 
   // Evidence panels
   "evidence.close": "Close",
@@ -176,6 +196,25 @@ const en = {
   "debrief.where.link": "Button or link",
   "debrief.where.panel-field": "Profile or record",
   "debrief.where.fine-print": "Fine print",
+  "debrief.spotted": "Spotted, wrong reason",
+  "debrief.spottedNote": "You found it, but the trick behind it was different.",
+  "debrief.youFlagged": "You flagged",
+  "debrief.yourReason": "Your reason",
+  "debrief.rightReason": "The trick",
+  "debrief.yourNote": "You wrote",
+  "debrief.judgePending": "Checking your explanation…",
+  "debrief.judgeError": "We couldn't check your explanation this time.",
+  "debrief.judge.good": "Great explanation (+1)",
+  "debrief.judge.partial": "Partly right",
+  "debrief.judge.off": "Not quite",
+  "score.title": "Your score",
+  "score.points": (points: number, max: number) => `${points} / ${max} points`,
+  "score.accuracy": (caught: number, total: number, falseAlarms: number) =>
+    `${caught} of ${total} red flags · ${falseAlarms} false alarm${falseAlarms === 1 ? "" : "s"}`,
+  "score.howItWorks": "Right reason +3 · wrong reason +1 · false alarm −1 · good explanation +1",
+  "rank.rookie": "Rookie",
+  "rank.sharp": "Sharp",
+  "rank.scam-proof": "Scam-proof",
   "debrief.rule": "Rule to remember",
   "debrief.playAgain": "Play again",
 

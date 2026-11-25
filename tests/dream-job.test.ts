@@ -79,7 +79,7 @@ describe("Dream Job dojo", () => {
   it("reports the Hard clue as unchecked if the player never opens a panel", () => {
     const result = computeDebrief(scenario("hard-dates"), {
       seen: ["li-hard-date", "li-hard-m1"],
-      flagged: [],
+      flags: {},
       visited: ["li-nisha", "safe-early"],
       classifications: {},
     });

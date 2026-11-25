@@ -1,19 +1,13 @@
 import type { Locale } from "@/i18n/locale";
 import { resolveText } from "@/i18n/text";
-import type { MailView, PanelView, TextSegment } from "@/shells/types";
-import type { Email, EvidencePanel, Segment } from "./schema";
+import type { MailView, PanelView } from "@/shells/types";
+import { emailBodyTargetId } from "./highlight";
+import type { Email, EvidencePanel } from "./schema";
 
 /** Turns scenario data into what the shells draw, in the player's language. */
 
-function toSegments(segments: readonly Segment[], locale: Locale): TextSegment[] {
-  return segments.map((s) => ({
-    id: s.id,
-    text: resolveText(s.text, locale),
-    flaggable: s.id !== undefined,
-  }));
-}
-
-export function toMailView(email: Email, locale: Locale): MailView {
+/** `ownerId` is the email node, or the triage item, the email is shown at. */
+export function toMailView(email: Email, locale: Locale, ownerId: string): MailView {
   return {
     displayName: resolveText(email.displayName, locale),
     from: { id: email.from.id, address: email.from.address },
@@ -26,7 +20,10 @@ export function toMailView(email: Email, locale: Locale): MailView {
     date: resolveText(email.date, locale),
     subject: resolveText(email.subject, locale),
     preview: resolveText(email.preview, locale),
-    body: email.body.map((paragraph) => toSegments(paragraph, locale)),
+    body: email.body.map((paragraph, p) => ({
+      targetId: emailBodyTargetId(ownerId, p),
+      text: paragraph.map((s) => resolveText(s.text, locale)).join(""),
+    })),
     attachments: (email.attachments ?? []).map((a) => ({
       id: a.id,
       shownName: a.shownName,

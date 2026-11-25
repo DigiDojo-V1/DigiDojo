@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { currentNodeId, useRunStore } from "@/engine/store";
-import { richScenario, validScenario } from "./fixtures";
+import { makeFlag, richScenario, validScenario } from "./fixtures";
 
 const run = () => useRunStore.getState();
 
@@ -25,21 +25,35 @@ describe("run store", () => {
     ]);
   });
 
-  it("toggles flags", () => {
-    run().toggleFlag("m1");
-    expect(run().flagged).toEqual(["m1"]);
-    run().toggleFlag("m1");
-    expect(run().flagged).toEqual([]);
+  it("saves, edits and removes flags", () => {
+    const flag = makeFlag(validScenario(), "m2", { phrase: "Send ₹500" });
+    run().saveFlag(flag);
+    expect(Object.keys(run().flags)).toEqual([flag.id]);
+    run().setFlagReason(flag.id, "pay-to-earn", "pay first");
+    expect(run().flags[flag.id]).toMatchObject({ tactic: "pay-to-earn", note: "pay first" });
+    run().setJudge(flag.id, { verdict: "good", feedback: "Yes." });
+    expect(run().flags[flag.id]?.judge).toEqual({ verdict: "good", feedback: "Yes." });
+    // A new reason clears the old grade.
+    run().setFlagReason(flag.id, "urgency", "hurry");
+    expect(run().flags[flag.id]?.judge).toBeUndefined();
+    run().removeFlag(flag.id);
+    expect(run().flags).toEqual({});
+  });
+
+  it("ignores grades for a removed flag", () => {
+    run().setJudge("nope", "error");
+    expect(run().flags).toEqual({});
   });
 
   it("rewinds to the target node and keeps flags and seen messages", () => {
+    const flag = makeFlag(validScenario(), "m2", { phrase: "Send ₹500" });
     run().markSeen("m2");
-    run().toggleFlag("m2");
+    run().saveFlag(flag);
     run().choose({ label: { en: "Pay" }, nextNodeId: "follow-up" });
     run().choose({ label: { en: "Pay again" }, nextNodeId: "lost" });
     run().rewind("start");
     expect(run().trail).toEqual([{ nodeId: "start" }]);
-    expect(run().flagged).toEqual(["m2"]);
+    expect(Object.keys(run().flags)).toEqual([flag.id]);
     expect(run().seen).toEqual(["m2"]);
     expect(run().rewinds).toBe(1);
   });
@@ -69,9 +83,11 @@ describe("run store", () => {
     expect(run().visited).toContain("safe");
   });
 
-  it("starts every run with empty triage labels", () => {
+  it("starts every run with empty triage labels and no flags", () => {
     run().classify("t-real", "legit");
+    run().saveFlag(makeFlag(validScenario(), "m1", { phrase: "Hello" }));
     run().start("easy-money/fixture", validScenario());
     expect(run().classifications).toEqual({});
+    expect(run().flags).toEqual({});
   });
 });

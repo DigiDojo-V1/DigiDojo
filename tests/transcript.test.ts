@@ -4,17 +4,13 @@ import { channelTransition, priorTranscript, toBubble } from "@/engine/transcrip
 import { richScenario, validScenario } from "./fixtures";
 
 describe("toBubble with segments", () => {
-  it("joins the phrases into the text and makes only phrases with an id flaggable", () => {
+  it("joins the phrases into one highlightable text with no visible phrases", () => {
     const dm = richScenario().nodes.dm;
     if (dm?.kind !== "thread") throw new Error("fixture");
     const bubble = toBubble(dm.messages[0]!, "en");
     expect(bubble.text).toBe("Hi! Pay ₹999 to register. The role is in Bengaluru.");
-    expect(bubble.flaggable).toBe(false);
-    expect(bubble.segments?.map((s) => [s.id, s.flaggable])).toEqual([
-      [undefined, false],
-      ["dm-pay", true],
-      ["dm-role", true],
-    ]);
+    expect(bubble.flaggable).toBe(true);
+    expect(bubble).not.toHaveProperty("segments");
   });
 });
 

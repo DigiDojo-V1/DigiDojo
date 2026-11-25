@@ -1,4 +1,6 @@
-import { ScenarioSchema, type Scenario, type ScenarioInput } from "@/engine/schema";
+import { resolveSpot, type FlagRecord, type FlagSpot, type JudgeState } from "@/engine/flags";
+import { findTarget, targetText } from "@/engine/highlight";
+import { ScenarioSchema, type Scenario, type ScenarioInput, type Tactic } from "@/engine/schema";
 
 /**
  * A small valid scenario as an author writes it: plain English strings, no Hinglish.
@@ -187,4 +189,39 @@ export function richScenarioInput(): ScenarioInput {
 
 export function richScenario(): Scenario {
   return ScenarioSchema.parse(richScenarioInput());
+}
+
+/**
+ * A flag as the player would make it: a highlight of `phrase` inside text target `targetId`,
+ * or a whole item when `phrase` is omitted.
+ */
+export function makeFlag(
+  scenario: Scenario,
+  targetId: string,
+  options: { phrase?: string; tactic?: Tactic; note?: string; judge?: JudgeState } = {},
+): FlagRecord {
+  let spot: FlagSpot = { targetId };
+  if (options.phrase !== undefined) {
+    const target = findTarget(scenario, targetId);
+    if (target === undefined) throw new Error(`no text target ${targetId}`);
+    const start = targetText(target, "en").indexOf(options.phrase);
+    if (start === -1) throw new Error(`"${options.phrase}" not in ${targetId}`);
+    spot = { targetId, start, end: start + options.phrase.length };
+  }
+  const resolved = resolveSpot(scenario, spot, "en");
+  if (resolved === undefined) throw new Error(`can't flag ${targetId}`);
+  return {
+    id: `flag-${targetId}-${spot.start ?? "item"}`,
+    ...spot,
+    ...resolved,
+    locale: "en",
+    chips: [],
+    tactic: options.tactic,
+    note: options.note,
+    judge: options.judge,
+  };
+}
+
+export function flagsById(...flags: FlagRecord[]): Record<string, FlagRecord> {
+  return Object.fromEntries(flags.map((f) => [f.id, f]));
 }

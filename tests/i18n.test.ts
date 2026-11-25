@@ -7,7 +7,7 @@ import { collectTexts, hinglishCoverage } from "@/i18n/coverage";
 import { LOCALES } from "@/i18n/locale";
 import { resolveText } from "@/i18n/text";
 import { translate, UI_STRINGS } from "@/i18n/ui";
-import { validScenarioInput } from "./fixtures";
+import { flagsById, makeFlag, validScenarioInput } from "./fixtures";
 
 describe("translate", () => {
   it("returns the Hinglish string when there is one", () => {
@@ -90,7 +90,10 @@ describe("a scenario written in plain English strings", () => {
 
     const debrief = computeDebrief(scenario, {
       seen: ["m1", "m2", "m3"],
-      flagged: ["m2", "m1"],
+      flags: flagsById(
+        makeFlag(scenario, "m2", { phrase: "Send ₹500", tactic: "pay-to-earn" }),
+        makeFlag(scenario, "m1", { phrase: "Hello" }),
+      ),
       visited: ["start", "follow-up", "lost"],
       classifications: {},
     });
@@ -98,7 +101,7 @@ describe("a scenario written in plain English strings", () => {
     expect(debrief.missed.map((f) => resolveText(f.evidenceText, locale))).toEqual([
       "Only 2 minutes left!",
     ]);
-    expect(debrief.falseAlarms.map((a) => resolveText(a.text, locale))).toEqual(["Hello"]);
+    expect(debrief.falseAlarms.map((a) => a.text)).toEqual(["Hello"]);
     expect(translate(locale, `tactic.${debrief.caught[0]!.tactic}.label`)).toBe("Pay to earn");
     expect(resolveText(scenario.debrief.rule, locale)).toBe("Never pay to earn.");
   });

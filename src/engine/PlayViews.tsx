@@ -24,6 +24,7 @@ import { InboxList, shortAddress, TriageLabelBar, type InboxRow } from "@/shells
 import { MailBody, MailShell } from "@/shells/MailShell";
 import { emailOpenIds, panelFieldIds } from "./evidence";
 import type { Choice, ComposeNode, EmailNode, EvidencePanel, Scenario, TriageNode } from "./schema";
+import { useFlagActions } from "./Flagging";
 import { useRunStore } from "./store";
 import { toMailView, toPanelView } from "./views";
 
@@ -126,8 +127,7 @@ export function ChoiceFooter({
 export function useEvidence(scenario: Scenario) {
   const [openId, setOpenId] = useState<string | undefined>(undefined);
   const reveal = useRunStore((s) => s.reveal);
-  const flagged = useRunStore((s) => s.flagged);
-  const toggleFlag = useRunStore((s) => s.toggleFlag);
+  const { itemIds: flagged, flagItem: toggleFlag } = useFlagActions();
   const locale = useLocale();
 
   const open = (panelId: string) => {
@@ -267,8 +267,7 @@ export function EvidenceStack({
 }) {
   const t = useT();
   const locale = useLocale();
-  const flagged = useRunStore((s) => s.flagged);
-  const toggleFlag = useRunStore((s) => s.toggleFlag);
+  const { itemIds: flagged, flagItem: toggleFlag } = useFlagActions();
   return (
     <div className="bg-slate-100 pb-6">
       <p className="px-4 pt-3 pb-1 text-xs text-slate-500">{t("split.hint")}</p>
@@ -342,23 +341,24 @@ export function flaggedInPanels(
 
 export function EmailView({
   scenario,
+  nodeId,
   node,
   backHref,
 }: {
   scenario: Scenario;
+  nodeId: string;
   node: EmailNode;
   backHref: string;
 }) {
   const seen = useRunStore((s) => s.seen);
-  const flagged = useRunStore((s) => s.flagged);
+  const { itemIds: flagged, flagItem: toggleFlag } = useFlagActions();
   const reveal = useRunStore((s) => s.reveal);
-  const toggleFlag = useRunStore((s) => s.toggleFlag);
   const locale = useLocale();
   const t = useT();
   const evidence = useEvidence(scenario);
 
   useEffect(() => reveal(emailOpenIds(node.email)), [node.email, reveal]);
-  const mail = useMemo(() => toMailView(node.email, locale), [node.email, locale]);
+  const mail = useMemo(() => toMailView(node.email, locale, nodeId), [node.email, nodeId, locale]);
 
   return (
     <>
@@ -395,9 +395,8 @@ export function EmailView({
 /* ------------------------------------------------------------------ */
 
 export function ComposeView({ node, backHref }: { node: ComposeNode; backHref: string }) {
-  const flagged = useRunStore((s) => s.flagged);
+  const { itemIds: flagged, flagItem: toggleFlag } = useFlagActions();
   const reveal = useRunStore((s) => s.reveal);
-  const toggleFlag = useRunStore((s) => s.toggleFlag);
   const t = useT();
   const text = useText();
 
@@ -435,10 +434,9 @@ export function TriageView({
   backHref: string;
 }) {
   const seen = useRunStore((s) => s.seen);
-  const flagged = useRunStore((s) => s.flagged);
+  const { itemIds: flagged, flagItem: toggleFlag } = useFlagActions();
   const classifications = useRunStore((s) => s.classifications);
   const reveal = useRunStore((s) => s.reveal);
-  const toggleFlag = useRunStore((s) => s.toggleFlag);
   const classify = useRunStore((s) => s.classify);
   const submitTriage = useRunStore((s) => s.submitTriage);
   const locale = useLocale();
@@ -460,7 +458,7 @@ export function TriageView({
   };
 
   const rows: InboxRow[] = node.items.map((item) => {
-    const mail = toMailView(item.email, locale);
+    const mail = toMailView(item.email, locale, item.id);
     return {
       id: item.id,
       displayName: mail.displayName,
@@ -488,7 +486,7 @@ export function TriageView({
           }
         >
           <MailBody
-            mail={toMailView(openItem.email, locale)}
+            mail={toMailView(openItem.email, locale, openItem.id)}
             seenIds={seen}
             flaggedIds={flagged}
             onToggleFlag={toggleFlag}

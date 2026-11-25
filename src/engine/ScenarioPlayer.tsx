@@ -15,6 +15,7 @@ import { SmsShell } from "@/shells/SmsShell";
 import type { ShellProps } from "@/shells/types";
 import { UpiShell } from "@/shells/UpiShell";
 import { Debrief } from "./Debrief";
+import { Flagging, useFlagActions } from "./Flagging";
 import { messageRevealIds } from "./evidence";
 import {
   ChoiceFooter,
@@ -47,7 +48,7 @@ export function ScenarioPlayer({ scenario, backHref }: ScenarioPlayerProps) {
   const phase = useRunStore((s) => s.phase);
   const trail = useRunStore((s) => s.trail);
   const seen = useRunStore((s) => s.seen);
-  const flagged = useRunStore((s) => s.flagged);
+  const flags = useRunStore((s) => s.flags);
   const visited = useRunStore((s) => s.visited);
   const classifications = useRunStore((s) => s.classifications);
   const rewinds = useRunStore((s) => s.rewinds);
@@ -77,7 +78,7 @@ export function ScenarioPlayer({ scenario, backHref }: ScenarioPlayerProps) {
       <Debrief
         scenario={scenario}
         outcome={node?.kind === "outcome" ? node : undefined}
-        run={{ seen, flagged, visited, classifications }}
+        run={{ seen, flags, visited, classifications }}
         backHref={backHref}
         onReplay={() => start(key, scenario)}
       />
@@ -100,16 +101,26 @@ export function ScenarioPlayer({ scenario, backHref }: ScenarioPlayerProps) {
 
   // Remount for every visit so each screen starts fresh (messages reveal again, instantly if seen).
   const visitKey = `${trail.length}-${rewinds}`;
-  switch (node.kind) {
-    case "thread":
-      return <ThreadView key={visitKey} scenario={scenario} node={node} backHref={backHref} />;
-    case "email":
-      return <EmailView key={visitKey} scenario={scenario} node={node} backHref={backHref} />;
-    case "compose":
-      return <ComposeView key={visitKey} node={node} backHref={backHref} />;
-    case "triage":
-      return <TriageView key={visitKey} scenario={scenario} node={node} backHref={backHref} />;
-  }
+  return (
+    <Flagging scenario={scenario}>
+      {node.kind === "thread" && (
+        <ThreadView key={visitKey} scenario={scenario} node={node} backHref={backHref} />
+      )}
+      {node.kind === "email" && nodeId !== undefined && (
+        <EmailView
+          key={visitKey}
+          scenario={scenario}
+          nodeId={nodeId}
+          node={node}
+          backHref={backHref}
+        />
+      )}
+      {node.kind === "compose" && <ComposeView key={visitKey} node={node} backHref={backHref} />}
+      {node.kind === "triage" && (
+        <TriageView key={visitKey} scenario={scenario} node={node} backHref={backHref} />
+      )}
+    </Flagging>
+  );
 }
 
 /* ------------------------------------------------------------------ */
@@ -164,9 +175,8 @@ function ThreadView({
   backHref: string;
 }) {
   const trail = useRunStore((s) => s.trail);
-  const flagged = useRunStore((s) => s.flagged);
+  const { itemIds: flagged } = useFlagActions();
   const reveal = useRunStore((s) => s.reveal);
-  const toggleFlag = useRunStore((s) => s.toggleFlag);
   const t = useT();
   const text = useText();
   const locale = useLocale();
@@ -197,7 +207,7 @@ function ThreadView({
   const done = next === undefined;
   // Decided once per screen, so the hint doesn't vanish (and shift the chat) on the first tap.
   const [showHint] = useState(
-    () => scenario.coldRun !== true && useRunStore.getState().flagged.length === 0,
+    () => scenario.coldRun !== true && Object.keys(useRunStore.getState().flags).length === 0,
   );
 
   const evidence = useEvidence(scenario);
@@ -222,8 +232,6 @@ function ThreadView({
     messages,
     typing,
     typingSender: typing && next?.sender !== undefined ? text(next.sender) : undefined,
-    flaggedIds: flagged,
-    onToggleFlag: toggleFlag,
     backHref,
     hint: showHint ? t("thread.hint") : undefined,
     toolbar: (

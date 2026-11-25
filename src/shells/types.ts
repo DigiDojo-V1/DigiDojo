@@ -16,19 +16,10 @@ export interface ChatBubble {
   /** Display name inside group chats. */
   sender?: string;
   text: string;
-  /** Whether the player can tap it to flag it. The player's own replies can't be flagged. */
+  /** Whether the player can highlight words in it. The player's own replies can't be flagged. */
   flaggable: boolean;
-  /** The message in phrases, each flaggable on its own if it has an id. */
-  segments?: TextSegment[];
   /** Display time, e.g. "09:14". */
   time?: string;
-}
-
-/** A phrase inside a message or email paragraph. */
-export interface TextSegment {
-  id?: string;
-  text: string;
-  flaggable: boolean;
 }
 
 /** The props every fake-app shell accepts, so the player can swap shells by `app`. */
@@ -39,8 +30,6 @@ export interface ShellProps {
   typing: boolean;
   /** Who is typing, for group chats. */
   typingSender?: string;
-  flaggedIds: readonly string[];
-  onToggleFlag: (messageId: string) => void;
   /** Where the header's back arrow goes. */
   backHref: string;
   /** Hint line above the first message, e.g. "Tap a message to flag it". */
@@ -97,8 +86,8 @@ export interface MailView {
   date: string;
   subject: string;
   preview: string;
-  /** Paragraphs of phrases. */
-  body: TextSegment[][];
+  /** Paragraphs, each a highlightable text. */
+  body: { targetId: string; text: string }[];
   attachments: {
     id: string;
     shownName: string;
