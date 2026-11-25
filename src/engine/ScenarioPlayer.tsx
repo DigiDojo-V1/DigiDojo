@@ -2,10 +2,9 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "motion/react";
-import { RotateCcw, Sparkles } from "lucide-react";
+import { RotateCcw } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLocale, useT, useText } from "@/i18n/hooks";
 import { formatRupees } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -16,6 +15,7 @@ import type { ShellProps } from "@/shells/types";
 import { UpiShell } from "@/shells/UpiShell";
 import { Debrief } from "./Debrief";
 import { Flagging, useFlagActions } from "./Flagging";
+import { HowToPlay } from "./HowToPlay";
 import { messageRevealIds } from "./evidence";
 import {
   ChoiceFooter,
@@ -30,7 +30,8 @@ import {
 import { OUTCOME_STYLE } from "./outcome-style";
 import type { OutcomeNode, Scenario, ThreadApp, ThreadNode } from "./schema";
 import { scenarioKey } from "./keys";
-import { currentNodeId, useRunStore } from "./store";
+import { ScenarioIntro } from "./ScenarioIntro";
+import { currentNodeId, useProgressStore, useRunStore } from "./store";
 import { channelTransition, priorTranscript, toBubble } from "./transcript";
 
 const DEFAULT_DELAY_MS = 800;
@@ -41,7 +42,7 @@ interface ScenarioPlayerProps {
   backHref: string;
 }
 
-/** Plays one scenario: primer → threads → outcome → debrief. */
+/** Plays one scenario: how to play (first time only) → primer → threads → outcome → debrief. */
 export function ScenarioPlayer({ scenario, backHref }: ScenarioPlayerProps) {
   const key = scenarioKey(scenario.dojoId, scenario.id);
   const activeKey = useRunStore((s) => s.scenarioKey);
@@ -55,12 +56,16 @@ export function ScenarioPlayer({ scenario, backHref }: ScenarioPlayerProps) {
   const start = useRunStore((s) => s.start);
   const reset = useRunStore((s) => s.reset);
   const beginSimulation = useRunStore((s) => s.beginSimulation);
+  const finishTutorial = useRunStore((s) => s.finishTutorial);
+  const openTutorial = useRunStore((s) => s.openTutorial);
+  const markTutorialSeen = useProgressStore((s) => s.markTutorialSeen);
   const rewind = useRunStore((s) => s.rewind);
   const openDebrief = useRunStore((s) => s.openDebrief);
 
-  // A fresh run every time the player opens the scenario.
+  // A fresh run every time the player opens the scenario. "How to play" opens the very first one.
+  // Runs on the client only, after the saved progress has loaded.
   useEffect(() => {
-    start(key, scenario);
+    start(key, scenario, { tutorial: !useProgressStore.getState().tutorialSeen });
     return () => reset();
   }, [key, scenario, start, reset]);
 
@@ -69,8 +74,26 @@ export function ScenarioPlayer({ scenario, backHref }: ScenarioPlayerProps) {
   const nodeId = currentNodeId({ trail });
   const node = nodeId === undefined ? undefined : scenario.nodes[nodeId];
 
+  if (phase === "tutorial") {
+    return (
+      <HowToPlay
+        onDone={() => {
+          markTutorialSeen();
+          finishTutorial();
+        }}
+      />
+    );
+  }
+
   if (phase === "primer" && scenario.primer !== undefined) {
-    return <PrimerCard primer={scenario.primer} backHref={backHref} onStart={beginSimulation} />;
+    return (
+      <ScenarioIntro
+        primer={scenario.primer}
+        backHref={backHref}
+        onStart={beginSimulation}
+        onHowToPlay={openTutorial}
+      />
+    );
   }
 
   if (phase === "debrief") {
@@ -120,46 +143,6 @@ export function ScenarioPlayer({ scenario, backHref }: ScenarioPlayerProps) {
         <TriageView key={visitKey} scenario={scenario} node={node} backHref={backHref} />
       )}
     </Flagging>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-
-function PrimerCard({
-  primer,
-  backHref,
-  onStart,
-}: {
-  primer: NonNullable<Scenario["primer"]>;
-  backHref: string;
-  onStart: () => void;
-}) {
-  const t = useT();
-  const text = useText();
-  return (
-    <main className="flex flex-1 flex-col p-4">
-      <TopBar back={{ href: backHref, label: "nav.backToDojo" }} />
-      <motion.div
-        className="flex flex-1 flex-col justify-center"
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-      >
-        <Card>
-          <CardHeader>
-            <CardDescription className="flex items-center gap-1.5">
-              <Sparkles className="size-4" /> {t("primer.eyebrow")}
-            </CardDescription>
-            <CardTitle className="text-xl">{text(primer.title)}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="leading-relaxed">{text(primer.body)}</p>
-          </CardContent>
-        </Card>
-        <Button size="lg" className="mt-4 h-11" onClick={onStart}>
-          {t("primer.start")}
-        </Button>
-      </motion.div>
-    </main>
   );
 }
 
