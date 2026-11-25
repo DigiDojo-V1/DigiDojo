@@ -37,6 +37,7 @@ const en = {
   "dojo.legit": "Legit",
   "dojo.coldRun": "Cold run",
   "dojo.takeaways": "What to remember",
+  "dojo.route": "Happens in",
 
   // 404
   "notFound.body": "We couldn't find this page.",
@@ -140,6 +141,8 @@ const en = {
   "channel.sms": "text messages",
   "channel.upi": "payment app",
   "channel.call": "phone call",
+  "channel.gmail": "email",
+  "channel.inbox": "inbox",
 
   // Mail
   "mail.inbox": "Inbox",
