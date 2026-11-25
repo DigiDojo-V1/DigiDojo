@@ -47,7 +47,8 @@ const en = {
 
   // Thread
   "thread.prompt": "What do you do?",
-  "thread.hint": "Spot something off? Tap the words, then flag them.",
+  "thread.hint":
+    "Spot something off? Select the words (drag, or tap word by word), then flag them.",
   "chat.typing": (sender?: string) => (sender ? `${sender} is typing…` : "typing…"),
   "chat.typingAria": "typing",
   "chat.flagAria": (text: string) => `Flag message: ${text}`,
@@ -78,7 +79,7 @@ const en = {
   // Mail
   "mail.inbox": "Inbox",
   "mail.reply": "Reply",
-  "mail.hint": "Tap words in the email, or the flag next to a detail, to flag it.",
+  "mail.hint": "Select words in the email, or tap the flag next to a detail, to flag it.",
   "mail.from": "From",
   "mail.replyTo": "Reply-To",
   "mail.to": "To",
@@ -105,7 +106,7 @@ const en = {
 
   // Highlighting and flagging
   "highlight.toolbar": "Selected words",
-  "highlight.extendHint": "Tap another word to select more.",
+  "highlight.extendHint": "Drag to change the selection, or tap another word to add more.",
   "highlight.cancel": "Cancel selection",
   "highlight.flagThis": "Flag this",
   "highlight.flagged": "Flagged",
