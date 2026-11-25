@@ -1,7 +1,7 @@
 import { getScenario } from "@/dojos/registry";
 import { handleJudge } from "@/server/flag-api";
 import { callerKey, getLimiter } from "@/server/ratelimit";
-import { getLlm } from "@/server/gemini";
+import { getLlm } from "@/server/openai";
 
 export const maxDuration = 15;
 
