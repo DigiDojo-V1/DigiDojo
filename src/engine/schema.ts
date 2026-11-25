@@ -119,6 +119,25 @@ export type Contact = z.output<typeof ContactSchema>;
 export const PROFILE_SLOTS = ["name", "headline", "location", "connections"] as const;
 export type ProfileSlot = (typeof PROFILE_SLOTS)[number];
 
+/**
+ * How a line is drawn on a PDF page. Without one it is a body paragraph.
+ * letterhead: company name on the first line, address lines under it.
+ * title: centred heading such as "OFFER LETTER". meta: date or reference line.
+ * term: a row in a terms table (label | value). clause: a numbered clause.
+ * signature: a closing block; signed: the same with a handwritten signature of its second line.
+ */
+export const DOCUMENT_LOOKS = [
+  "letterhead",
+  "title",
+  "meta",
+  "paragraph",
+  "term",
+  "clause",
+  "signature",
+  "signed",
+] as const;
+export type DocumentLook = (typeof DOCUMENT_LOOKS)[number];
+
 /** One inspectable fact in an evidence panel: a profile line, a company record entry, a PDF clause. */
 export const FieldSchema = z.strictObject({
   id: kebabCase,
@@ -132,6 +151,8 @@ export const FieldSchema = z.strictObject({
    * instead of in a section card. Still flaggable.
    */
   slot: z.enum(PROFILE_SLOTS).optional(),
+  /** Display only, documents only: how the line is drawn on the page. */
+  look: z.enum(DOCUMENT_LOOKS).optional(),
 });
 export type Field = z.output<typeof FieldSchema>;
 
@@ -144,6 +165,8 @@ export const EvidencePanelSchema = z.strictObject({
   variant: z.enum(["official-record"]).optional(),
   title: LocalizedTextSchema,
   subtitle: LocalizedTextSchema.optional(),
+  /** Documents only: the running footer printed at the foot of every page. */
+  footer: LocalizedTextSchema.optional(),
   /** For a document, one section per page. */
   sections: z
     .array(

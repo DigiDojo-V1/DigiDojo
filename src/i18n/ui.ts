@@ -152,6 +152,13 @@ const en = {
   "evidence.browser.address": "Address",
   "evidence.pdf.page": (n: number, total: number) => `Page ${n} of ${total}`,
   "evidence.pdf.pages": (n: number) => `${n} page${n === 1 ? "" : "s"}`,
+  "evidence.pdf.badge": "PDF",
+  "evidence.pdf.pageWord": "Page",
+  "evidence.pdf.fit": "Fit",
+  "evidence.pdf.zoomIn": "Zoom in",
+  "evidence.pdf.zoomOut": "Zoom out",
+  "evidence.pdf.prev": "Previous page",
+  "evidence.pdf.next": "Next page",
 
   // Inbox triage
   "triage.hint": "Open each email and label it. You can inspect senders and attachments first.",

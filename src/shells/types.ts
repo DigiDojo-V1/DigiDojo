@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import type { ProfileSlot, ThreadApp } from "@/engine/schema";
+import type { DocumentLook, ProfileSlot, ThreadApp } from "@/engine/schema";
 
 /** The contact in a shell's header, with text already in the player's language. */
 export interface ShellContact {
@@ -107,6 +107,8 @@ export interface PanelView {
   variant?: "official-record";
   title: string;
   subtitle?: string;
+  /** Documents only: running page footer. */
+  footer?: string;
   sections: {
     heading?: string;
     fields: PanelFieldView[];
@@ -121,4 +123,6 @@ export interface PanelFieldView {
   finePrint: boolean;
   /** Profile header placement. */
   slot?: ProfileSlot;
+  /** How a document line is drawn. */
+  look?: DocumentLook;
 }
