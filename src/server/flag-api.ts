@@ -49,7 +49,7 @@ export interface ApiResult {
   body: unknown;
 }
 
-export const CHIPS_TIMEOUT_MS = 1500;
+export const CHIPS_TIMEOUT_MS = 3000;
 export const JUDGE_TIMEOUT_MS = 8000;
 const MAX_LABEL_CHARS = 70;
 
@@ -121,12 +121,17 @@ export async function handleChips(raw: unknown, deps: FlagApiDeps): Promise<ApiR
 
   const correct = correctTactics(scenario, resolved.catches);
   const seed = `${req.targetId}:${req.start ?? ""}:${req.end ?? ""}`;
-  const fallback = () => ({ status: 200, body: { chips: fallbackChips(scenario, correct, seed) } });
+  // `graded` tells the client whether a written explanation will be marked.
+  const graded = deps.llm !== null;
+  const fallback = () => ({
+    status: 200,
+    body: { chips: fallbackChips(scenario, correct, seed), graded },
+  });
   if (deps.llm === null) return fallback();
 
   const key = `${req.dojoId}/${req.scenarioId}|${seed}|${req.locale}`;
   const hit = deps.cache?.get(key);
-  if (hit !== undefined) return { status: 200, body: { chips: hit } };
+  if (hit !== undefined) return { status: 200, body: { chips: hit, graded } };
 
   try {
     const answer = ModelChipsSchema.parse(
@@ -148,7 +153,7 @@ export async function handleChips(raw: unknown, deps: FlagApiDeps): Promise<ApiR
     });
     const chips = finalizeChips(proposed, scenario, correct, seed);
     deps.cache?.set(key, chips);
-    return { status: 200, body: { chips } };
+    return { status: 200, body: { chips, graded } };
   } catch {
     return fallback();
   }

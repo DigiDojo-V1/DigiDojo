@@ -100,18 +100,26 @@ export function HighlightProvider({
     return () => document.removeEventListener("selectionchange", onSelectionChange);
   }, [marksFor]);
 
+  // Tapping or clicking anywhere outside the texts and the "Flag this" bar drops the selection,
+  // like tapping away from selected text in any app.
+  useEffect(() => {
+    const onPointerDown = (e: PointerEvent) => {
+      const el = e.target instanceof Element ? e.target : null;
+      if (el?.closest("[data-highlight-target], [data-highlight-bar]")) return;
+      setSelection(null);
+      clearNativeSelectionInTargets();
+    };
+    document.addEventListener("pointerdown", onPointerDown);
+    return () => document.removeEventListener("pointerdown", onPointerDown);
+  }, []);
+
   // Escape drops a selection in progress, wherever focus is. Registered once: a listener
   // tied to `selection` would be removed mid-event when the text's own Escape handler runs.
   useEffect(() => {
     const onKey = (e: globalThis.KeyboardEvent) => {
       if (e.key !== "Escape") return;
       setSelection(null);
-      const native = document.getSelection();
-      if (native !== null && native.rangeCount > 0) {
-        if (targetElement(native.getRangeAt(0).commonAncestorContainer) !== null) {
-          clearNativeSelection();
-        }
-      }
+      clearNativeSelectionInTargets();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -134,6 +142,7 @@ export function HighlightProvider({
             transition={{ duration: 0.15 }}
             className="fixed inset-x-0 bottom-4 z-50 mx-auto flex w-[calc(100%-1.5rem)] max-w-[396px] items-center gap-2 rounded-2xl bg-slate-900 p-2 pl-4 text-white shadow-xl"
             role="toolbar"
+            data-highlight-bar
             aria-label={t("highlight.toolbar")}
           >
             <p className="min-w-0 flex-1 text-xs leading-snug text-slate-300">
@@ -163,6 +172,14 @@ export function HighlightProvider({
 
 function clearNativeSelection() {
   document.getSelection()?.removeAllRanges();
+}
+
+/** Clears the browser's selection only if it sits inside a highlightable text. */
+function clearNativeSelectionInTargets() {
+  const native = document.getSelection();
+  if (native === null || native.rangeCount === 0) return;
+  if (targetElement(native.getRangeAt(0).commonAncestorContainer) !== null)
+    native.removeAllRanges();
 }
 
 /** True while the player has text selected the usual way (drag or long-press). */

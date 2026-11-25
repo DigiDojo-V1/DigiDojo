@@ -8,6 +8,7 @@ import {
   type FlagApiDeps,
   type LlmLike,
 } from "@/server/flag-api";
+import { describeAuth } from "@/server/gemini-config";
 import { richScenario } from "./fixtures";
 
 const scenario = richScenario();
@@ -61,6 +62,7 @@ describe("POST /api/flag/chips", () => {
   it("falls back to its own chips without an LLM, with the right tactic included", async () => {
     const result = await handleChips(payHighlight, deps());
     expect(result.status).toBe(200);
+    expect(result.body).toMatchObject({ graded: false });
     expect(tactics(result.body)).toHaveLength(4);
     expect(tactics(result.body)).toContain("pay-to-earn");
   });
@@ -76,6 +78,7 @@ describe("POST /api/flag/chips", () => {
     });
     const result = await handleChips(payHighlight, deps({ llm }));
     expect(tactics(result.body)).toContain("pay-to-earn");
+    expect(result.body).toMatchObject({ graded: true });
     expect(tactics(result.body)).not.toContain("not-a-tactic");
     const chips = (result.body as { chips: { tactic: string; label?: string }[] }).chips;
     expect(chips.find((c) => c.tactic === "urgency")?.label).toBe("Pushes you to act fast");
@@ -141,5 +144,37 @@ describe("POST /api/flag/judge", () => {
   it("reports an error when the model's answer is unusable", async () => {
     const result = await handleJudge(judge, deps({ llm: fakeLlm({ verdict: "great" }) }));
     expect(result.status).toBe(502);
+  });
+});
+
+describe("describeAuth", () => {
+  const creds = {
+    GOOGLE_CLIENT_ID: "id",
+    GOOGLE_CLIENT_SECRET: "secret",
+    GOOGLE_REFRESH_TOKEN: "refresh",
+    GCP_PROJECT_ID: "proj",
+  };
+
+  it("is off unless FLAG_AI is on, whatever credentials exist", () => {
+    expect(describeAuth({ ...creds })).toEqual({ off: "FLAG_AI is not on" });
+    expect(describeAuth({ ...creds, FLAG_AI: "off" })).toHaveProperty("off");
+  });
+
+  it("picks an API key first, then a service account, then the OAuth user", () => {
+    expect(describeAuth({ FLAG_AI: "on", GEMINI_API_KEY: "k", ...creds })).toEqual({
+      method: "api-key",
+    });
+    expect(
+      describeAuth({ FLAG_AI: "ON", GCP_SERVICE_ACCOUNT_JSON: "{}", GCP_PROJECT_ID: "p" }),
+    ).toEqual({ method: "service-account" });
+    expect(describeAuth({ FLAG_AI: "on", ...creds })).toEqual({ method: "oauth-user" });
+  });
+
+  it("stays off when the OAuth client has no refresh token or project yet", () => {
+    const noToken = { ...creds, GOOGLE_REFRESH_TOKEN: undefined };
+    expect(describeAuth({ FLAG_AI: "on", ...noToken })).toHaveProperty("off");
+    expect(
+      describeAuth({ FLAG_AI: "on", GOOGLE_CLIENT_ID: "id", GOOGLE_CLIENT_SECRET: "s" }),
+    ).toHaveProperty("off");
   });
 });

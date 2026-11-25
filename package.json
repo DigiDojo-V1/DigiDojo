@@ -12,7 +12,8 @@
     "test:watch": "vitest",
     "i18n:report": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --import ./scripts/ts-resolve.mjs scripts/i18n-report.ts",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "google:auth": "node scripts/google-auth.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",
@@ -21,6 +22,7 @@
     "@upstash/redis": "^1.41.1",
     "class-variance-authority": "^0.7.1",
     "cn": "^0.5.2",
+    "google-auth-library": "^10.9.1",
     "lucide-react": "^1.77.0",
     "motion": "^14.14.0",
     "next": "16.4.6",
