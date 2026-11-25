@@ -7,6 +7,7 @@ import { useT } from "@/i18n/hooks";
 import { cn } from "@/lib/utils";
 import { FlagToggle } from "../MailShell";
 import type { FlagProps, PanelFieldView, PanelView } from "../types";
+import { DocumentPages } from "./PdfViewer";
 
 /**
  * How each kind of evidence panel looks: a profile, a company page, an official record,
@@ -23,7 +24,7 @@ export function PanelBody({ panel, ...flag }: FlagProps & { panel: PanelView }) 
     case "web-page":
       return <WebPageView panel={panel} {...flag} />;
     case "document":
-      return <DocumentView panel={panel} {...flag} />;
+      return <DocumentPages panel={panel} {...flag} />;
   }
 }
 
@@ -385,76 +386,6 @@ function WebPageView({ panel, ...flag }: FlagProps & { panel: PanelView }) {
           </div>
         </div>
       </div>
-    </div>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/* PDF                                                                 */
-/* ------------------------------------------------------------------ */
-
-function DocumentView({ panel, ...flag }: FlagProps & { panel: PanelView }) {
-  const t = useT();
-  const total = panel.sections.length;
-  return (
-    <div className="space-y-4 bg-neutral-600 px-3 py-4">
-      {panel.sections.map((section, i) => {
-        // Fine print sits at the foot of the page, as it would in a real letter.
-        const body = section.fields.filter((f) => !f.finePrint);
-        const fine = section.fields.filter((f) => f.finePrint);
-        return (
-          <article
-            key={i}
-            aria-label={t("evidence.pdf.page")(i + 1, total)}
-            className="flex min-h-[420px] flex-col bg-white px-4 pt-5 pb-3 font-serif text-neutral-900 shadow-lg"
-          >
-            {section.heading !== undefined && (
-              <h3 className="mb-3 border-b border-neutral-200 pb-2 font-sans text-xs font-semibold tracking-widest text-neutral-500 uppercase">
-                {section.heading}
-              </h3>
-            )}
-            <div className="space-y-1">
-              {body.map((field) => (
-                <FlaggableRow
-                  key={field.id}
-                  field={field}
-                  className="ring-1 ring-transparent ring-inset hover:ring-neutral-200"
-                  {...flag}
-                >
-                  {field.label !== undefined && (
-                    <span className="block font-sans text-[10px] font-semibold tracking-widest text-neutral-500 uppercase">
-                      {field.label}
-                    </span>
-                  )}
-                  <span className="block text-[15px] leading-snug whitespace-pre-line">
-                    {field.value}
-                  </span>
-                </FlaggableRow>
-              ))}
-            </div>
-            <div className="mt-auto space-y-1 pt-6">
-              {fine.map((field) => (
-                <FlaggableRow
-                  key={field.id}
-                  field={field}
-                  className="ring-1 ring-transparent ring-inset hover:ring-neutral-200"
-                  {...flag}
-                >
-                  <span className="block text-[10.5px] leading-snug text-neutral-500">
-                    {field.label !== undefined && (
-                      <span className="font-semibold">{field.label}. </span>
-                    )}
-                    {field.value}
-                  </span>
-                </FlaggableRow>
-              ))}
-              <p className="pt-2 text-center font-sans text-[10px] text-neutral-400">
-                {t("evidence.pdf.page")(i + 1, total)}
-              </p>
-            </div>
-          </article>
-        );
-      })}
     </div>
   );
 }

@@ -47,6 +47,7 @@ export function toPanelView(id: string, panel: EvidencePanel, locale: Locale): P
     variant: panel.variant,
     title: resolveText(panel.title, locale),
     subtitle: panel.subtitle === undefined ? undefined : resolveText(panel.subtitle, locale),
+    footer: panel.footer === undefined ? undefined : resolveText(panel.footer, locale),
     sections: panel.sections.map((section) => ({
       heading: section.heading === undefined ? undefined : resolveText(section.heading, locale),
       fields: section.fields.map((field) => ({
@@ -55,6 +56,7 @@ export function toPanelView(id: string, panel: EvidencePanel, locale: Locale): P
         value: resolveText(field.value, locale),
         finePrint: field.finePrint === true,
         slot: field.slot,
+        look: field.look,
       })),
     })),
   };
