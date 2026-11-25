@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { computeDebrief, type RunRecord } from "@/engine/scoring";
-import { richScenario, validScenario } from "./fixtures";
+import { computeDebrief, POINTS, rankFor, type RunRecord } from "@/engine/scoring";
+import { flagsById, makeFlag, richScenario, validScenario } from "./fixtures";
 
 const run = (partial: Partial<RunRecord>): RunRecord => ({
   seen: [],
-  flagged: [],
+  flags: {},
   visited: [],
   classifications: {},
   ...partial,
@@ -12,9 +12,14 @@ const run = (partial: Partial<RunRecord>): RunRecord => ({
 
 describe("computeDebrief", () => {
   it("splits red flags into caught, missed and not reached", () => {
+    const s = validScenario();
     const result = computeDebrief(
-      validScenario(),
-      run({ seen: ["m1", "m2"], flagged: ["m2"], visited: ["start"] }),
+      s,
+      run({
+        seen: ["m1", "m2"],
+        flags: flagsById(makeFlag(s, "m2", { phrase: "Send ₹500", tactic: "pay-to-earn" })),
+        visited: ["start"],
+      }),
     );
     expect(result.caught.map((f) => f.redFlagId)).toEqual(["pay-first"]);
     expect(result.missed).toEqual([]);
@@ -28,14 +33,30 @@ describe("computeDebrief", () => {
     expect(result.caught).toEqual([]);
   });
 
-  it("counts a flagged item with no red flag as a false alarm", () => {
-    const result = computeDebrief(validScenario(), run({ seen: ["m1", "m2"], flagged: ["m1"] }));
-    expect(result.falseAlarms).toEqual([{ id: "m1", text: { en: "Hello" }, where: "message" }]);
+  it("counts a highlight that catches nothing as a false alarm", () => {
+    const s = validScenario();
+    const flag = makeFlag(s, "m1", { phrase: "Hello", tactic: "urgency" });
+    const result = computeDebrief(s, run({ seen: ["m1", "m2"], flags: flagsById(flag) }));
+    expect(result.falseAlarms).toEqual([{ id: flag.id, text: "Hello", tactic: "urgency" }]);
+  });
+
+  it("puts a found red flag with the wrong reason in 'spotted'", () => {
+    const s = validScenario();
+    const flag = makeFlag(s, "m2", { phrase: "Send ₹500 to earn", tactic: "urgency" });
+    const result = computeDebrief(s, run({ seen: ["m2"], flags: flagsById(flag) }));
+    expect(result.caught).toEqual([]);
+    expect(result.spotted.map((f) => f.redFlagId)).toEqual(["pay-first"]);
+    expect(result.spotted[0]?.player).toMatchObject({
+      text: "Send ₹500 to earn",
+      tactic: "urgency",
+    });
   });
 
   it("carries the tactic, the evidence text and where it was", () => {
-    const [flag] = computeDebrief(validScenario(), run({ seen: ["m2"], flagged: ["m2"] })).caught;
-    expect(flag).toMatchObject({
+    const s = validScenario();
+    const flag = makeFlag(s, "m2", { phrase: "₹5,000", tactic: "pay-to-earn" });
+    const [caught] = computeDebrief(s, run({ seen: ["m2"], flags: flagsById(flag) })).caught;
+    expect(caught).toMatchObject({
       tactic: "pay-to-earn",
       evidenceText: { en: "Send ₹500 to earn ₹5,000" },
       where: "message",
@@ -43,22 +64,79 @@ describe("computeDebrief", () => {
   });
 });
 
-describe("computeDebrief with evidence", () => {
-  it("catches a flag on a single phrase", () => {
+describe("score", () => {
+  const s = validScenario();
+  const right = makeFlag(s, "m2", { phrase: "Send ₹500", tactic: "pay-to-earn" });
+
+  it("gives points for the right reason and takes them for false alarms", () => {
+    const alarm = makeFlag(s, "m1", { phrase: "Hello", tactic: "urgency" });
     const result = computeDebrief(
-      richScenario(),
-      run({ seen: ["dm-1", "dm-pay", "dm-role"], flagged: ["dm-pay"], visited: ["dm"] }),
+      s,
+      run({ seen: ["m1", "m2", "m3"], flags: flagsById(right, alarm) }),
+    );
+    expect(result.score.points).toBe(POINTS.rightReason + POINTS.falseAlarm);
+    expect(result.score.max).toBe(2 * POINTS.rightReason);
+  });
+
+  it("adds a bonus only for a good note on a flag that caught something", () => {
+    const good = { verdict: "good" as const, feedback: "Spot on." };
+    const withNote = { ...right, note: "pay first", judge: good };
+    const alarm = { ...makeFlag(s, "m1", { phrase: "Hello" }), note: "x", judge: good };
+    const result = computeDebrief(s, run({ seen: ["m2"], flags: flagsById(withNote, alarm) }));
+    expect(result.score.points).toBe(POINTS.rightReason + POINTS.goodNote + POINTS.falseAlarm);
+  });
+
+  it("never goes below zero, so flagging everything ranks as a rookie", () => {
+    const words = ["Hello", "Send", "₹500", "to", "earn", "₹5,000"];
+    const flags = words.map((w, i) => ({
+      ...makeFlag(s, i === 0 ? "m1" : "m2", { phrase: w, tactic: "flattery" }),
+      id: `f${i}`,
+    }));
+    const result = computeDebrief(s, run({ seen: ["m1", "m2"], flags: flagsById(...flags) }));
+    expect(result.score.points).toBeGreaterThanOrEqual(0);
+    expect(result.score.rank).toBe("rookie");
+  });
+
+  it("ranks by share of the maximum, and rewards restraint when nothing was there", () => {
+    expect(rankFor(9, 9, 0)).toBe("scam-proof");
+    expect(rankFor(4, 9, 0)).toBe("sharp");
+    expect(rankFor(3, 9, 0)).toBe("rookie");
+    expect(rankFor(0, 0, 0)).toBe("scam-proof");
+    expect(rankFor(0, 0, 1)).toBe("sharp");
+    expect(rankFor(0, 0, 3)).toBe("rookie");
+  });
+});
+
+describe("computeDebrief with evidence", () => {
+  it("catches a red flag hidden inside a longer message", () => {
+    const s = richScenario();
+    const flag = makeFlag(s, "dm-1", { phrase: "Pay ₹999", tactic: "pay-to-earn" });
+    const result = computeDebrief(
+      s,
+      run({ seen: ["dm-1", "dm-pay"], flags: flagsById(flag), visited: ["dm"] }),
     );
     expect(result.caught.map((f) => f.redFlagId)).toEqual(["fee"]);
     expect(result.caught[0]?.evidenceText).toEqual({ en: "Pay ₹999 to register." });
   });
 
-  it("treats a flagged harmless phrase as a false alarm", () => {
+  it("treats a highlighted harmless phrase as a false alarm", () => {
+    const s = richScenario();
+    const flag = makeFlag(s, "dm-1", { phrase: "in Bengaluru", tactic: "authority" });
     const result = computeDebrief(
-      richScenario(),
-      run({ seen: ["dm-role"], flagged: ["dm-role"], visited: ["dm"] }),
+      s,
+      run({ seen: ["dm-1"], flags: flagsById(flag), visited: ["dm"] }),
     );
-    expect(result.falseAlarms.map((a) => a.id)).toEqual(["dm-role"]);
+    expect(result.falseAlarms.map((a) => a.text)).toEqual(["in Bengaluru"]);
+  });
+
+  it("catches a phrase inside an email paragraph", () => {
+    const s = richScenario();
+    const flag = makeFlag(s, "mail/body/0", { phrase: "Candidate", tactic: "no-real-process" });
+    const result = computeDebrief(
+      s,
+      run({ seen: ["e-greeting"], flags: flagsById(flag), visited: ["mail"] }),
+    );
+    expect(result.caught.map((f) => f.redFlagId)).toEqual(["generic"]);
   });
 
   it("separates 'didn't check' from 'never reached'", () => {
@@ -75,11 +153,15 @@ describe("computeDebrief with evidence", () => {
   });
 
   it("counts a flag on an evidence field and on the reply composer", () => {
+    const s = richScenario();
     const result = computeDebrief(
-      richScenario(),
+      s,
       run({
         seen: ["p-joined", "reply-to-field"],
-        flagged: ["p-joined", "reply-to-field"],
+        flags: flagsById(
+          makeFlag(s, "p-joined", { tactic: "impersonation" }),
+          makeFlag(s, "reply-to-field", { tactic: "impersonation" }),
+        ),
         visited: ["dm", "mail", "reply"],
       }),
     );

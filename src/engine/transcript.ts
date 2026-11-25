@@ -12,13 +12,8 @@ export function toBubble(message: Message, locale: Locale): ChatBubble {
     from: message.from,
     sender: message.sender === undefined ? undefined : resolveText(message.sender, locale),
     text: resolveText(messageText(message), locale),
-    // A message written in segments is flagged phrase by phrase, never as a whole.
-    flaggable: message.from !== "me" && message.segments === undefined,
-    segments: message.segments?.map((segment) => ({
-      id: segment.id,
-      text: resolveText(segment.text, locale),
-      flaggable: segment.id !== undefined && message.from !== "me",
-    })),
+    // Words in other people's messages can be highlighted; red flags inside stay hidden.
+    flaggable: message.from !== "me",
     time: message.time,
   };
 }

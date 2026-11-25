@@ -23,6 +23,7 @@ import {
 import type { ThreadApp } from "@/engine/schema";
 import { useT } from "@/i18n/hooks";
 import { cn } from "@/lib/utils";
+import { HighlightableText } from "./HighlightableText";
 import { SimulationBar } from "./SimulationBar";
 import type { AsidePane, ChannelTransitionView, ChatBubble, ShellProps } from "./types";
 
@@ -95,8 +96,6 @@ export function ChatShell({
   messages,
   typing,
   typingSender,
-  flaggedIds,
-  onToggleFlag,
   backHref,
   hint,
   toolbar,
@@ -189,19 +188,9 @@ export function ChatShell({
                     contactName={contact.name}
                     contactAvatar={contact.avatar}
                     style={t}
-                    flagged={flaggedIds.includes(m.id)}
-                    flaggedIds={flaggedIds}
-                    onToggleFlag={onToggleFlag}
                   />
                 ) : (
-                  <Bubble
-                    key={m.id}
-                    message={m}
-                    style={t}
-                    flagged={flaggedIds.includes(m.id)}
-                    flaggedIds={flaggedIds}
-                    onToggleFlag={onToggleFlag}
-                  />
+                  <Bubble key={m.id} message={m} style={t} />
                 ),
               )}
               {typing &&
@@ -374,94 +363,10 @@ function Avatar({
   );
 }
 
-/** A tappable phrase inside a message or email. Shared with the mail shell. */
-export function SegmentButton({
-  id,
-  text,
-  flagged,
-  onToggleFlag,
-  showFlagIcon = false,
-}: {
-  id: string;
-  text: string;
-  flagged: boolean;
-  onToggleFlag: (id: string) => void;
-  /** Add a small flag after a flagged phrase. */
-  showFlagIcon?: boolean;
-}) {
-  const t = useT();
-  // A span, not a <button>: browsers lay buttons out as inline blocks, so a long phrase
-  // would start on its own line instead of wrapping with the sentence around it.
-  return (
-    <span
-      role="button"
-      tabIndex={0}
-      onClick={() => onToggleFlag(id)}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          onToggleFlag(id);
-        }
-      }}
-      aria-pressed={flagged}
-      aria-label={t(flagged ? "chat.unflagAria" : "chat.flagAria")(text)}
-      className={cn(
-        "cursor-pointer rounded-sm [box-decoration-break:clone] underline decoration-neutral-400 decoration-dotted underline-offset-[3px] focus-visible:outline-2 focus-visible:outline-blue-600",
-        flagged && "bg-red-100 decoration-red-500 decoration-solid",
-      )}
-    >
-      {text}
-      {showFlagIcon && flagged && (
-        <Flag
-          className="ml-0.5 inline size-3 -translate-y-px fill-red-500 text-red-600"
-          aria-hidden
-        />
-      )}
-    </span>
-  );
-}
-
-/** The message's text, or its phrases as tappable segments. */
-function MessageText({
-  message,
-  flaggedIds,
-  onToggleFlag,
-  showFlagIcon,
-}: {
-  message: ChatBubble;
-  flaggedIds: readonly string[];
-  onToggleFlag: (id: string) => void;
-  showFlagIcon?: boolean;
-}) {
-  if (message.segments === undefined) {
-    return <span className="whitespace-pre-line">{message.text}</span>;
-  }
-  return (
-    <span className="whitespace-pre-line">
-      {message.segments.map((segment, i) =>
-        segment.flaggable && segment.id !== undefined ? (
-          <SegmentButton
-            key={segment.id}
-            id={segment.id}
-            text={segment.text}
-            flagged={flaggedIds.includes(segment.id)}
-            onToggleFlag={onToggleFlag}
-            showFlagIcon={showFlagIcon}
-          />
-        ) : (
-          <span key={i}>{segment.text}</span>
-        ),
-      )}
-    </span>
-  );
-}
-
-function FlagBadge() {
-  return (
-    <span className="absolute -top-2 -right-2 flex size-5 items-center justify-center rounded-full bg-red-500 text-white shadow">
-      <Flag className="size-3" aria-hidden />
-    </span>
-  );
+/** The message's text. Other people's messages can be highlighted word by word. */
+function MessageText({ message }: { message: ChatBubble }) {
+  if (!message.flaggable) return <span className="whitespace-pre-line">{message.text}</span>;
+  return <HighlightableText targetId={message.id} text={message.text} />;
 }
 
 /* ------------------------------------------------------------------ */
@@ -474,18 +379,12 @@ function MessageCard({
   contactName,
   contactAvatar,
   style,
-  flagged,
-  flaggedIds,
-  onToggleFlag,
 }: {
   message: ChatBubble;
   previous: ChatBubble | undefined;
   contactName: string;
   contactAvatar?: string;
   style: ThemeStyle;
-  flagged: boolean;
-  flaggedIds: readonly string[];
-  onToggleFlag: (id: string) => void;
 }) {
   const t = useT();
 
@@ -519,18 +418,6 @@ function MessageCard({
   const cardClass = cn(
     "relative block w-full rounded-xl px-3.5 py-2.5 text-left text-[15px] leading-relaxed shadow-sm",
     isMe ? style.me : style.them,
-    flagged && "ring-2 ring-red-500",
-  );
-  const body = (
-    <>
-      <MessageText
-        message={message}
-        flaggedIds={flaggedIds}
-        onToggleFlag={onToggleFlag}
-        showFlagIcon
-      />
-      {flagged && <FlagBadge />}
-    </>
   );
 
   return (
@@ -560,19 +447,9 @@ function MessageCard({
         </div>
       )}
       <div className="pl-12">
-        {message.flaggable ? (
-          <button
-            type="button"
-            onClick={() => onToggleFlag(message.id)}
-            aria-pressed={flagged}
-            aria-label={t(flagged ? "chat.unflagAria" : "chat.flagAria")(message.text)}
-            className={cn(cardClass, "cursor-pointer transition-transform active:scale-[0.99]")}
-          >
-            {body}
-          </button>
-        ) : (
-          <div className={cardClass}>{body}</div>
-        )}
+        <div className={cardClass}>
+          <MessageText message={message} />
+        </div>
         {isMe && (
           <p className="mt-1 flex items-center justify-end gap-1 text-[11px] text-slate-500">
             <CheckCheck className="size-3.5 text-indigo-700" aria-hidden /> {t("chat.sent")}
@@ -604,20 +481,7 @@ function CardTyping({ name, style }: { name: string; style: ThemeStyle }) {
 /* Bubbles layout: a messaging app                                     */
 /* ------------------------------------------------------------------ */
 
-function Bubble({
-  message,
-  style,
-  flagged,
-  flaggedIds,
-  onToggleFlag,
-}: {
-  message: ChatBubble;
-  style: ThemeStyle;
-  flagged: boolean;
-  flaggedIds: readonly string[];
-  onToggleFlag: (id: string) => void;
-}) {
-  const t = useT();
+function Bubble({ message, style }: { message: ChatBubble; style: ThemeStyle }) {
   const isMe = message.from === "me";
   const isSystem = message.from === "system";
 
@@ -628,8 +492,7 @@ function Bubble({
           {message.sender}
         </span>
       )}
-      <MessageText message={message} flaggedIds={flaggedIds} onToggleFlag={onToggleFlag} />
-      {flagged && <FlagBadge />}
+      <MessageText message={message} />
     </>
   );
 
@@ -640,7 +503,6 @@ function Bubble({
       : isMe
         ? cn("ml-auto rounded-2xl rounded-br-sm", style.me)
         : cn("mr-auto rounded-2xl rounded-bl-sm", style.them),
-    flagged && "ring-2 ring-red-500 ring-offset-1",
   );
 
   return (
@@ -651,19 +513,7 @@ function Bubble({
       transition={{ duration: 0.18 }}
       className="flex"
     >
-      {message.flaggable ? (
-        <button
-          type="button"
-          onClick={() => onToggleFlag(message.id)}
-          aria-pressed={flagged}
-          aria-label={t(flagged ? "chat.unflagAria" : "chat.flagAria")(message.text)}
-          className={cn(bubbleClass, "cursor-pointer transition-transform active:scale-[0.98]")}
-        >
-          {body}
-        </button>
-      ) : (
-        <div className={bubbleClass}>{body}</div>
-      )}
+      <div className={bubbleClass}>{body}</div>
     </motion.div>
   );
 }

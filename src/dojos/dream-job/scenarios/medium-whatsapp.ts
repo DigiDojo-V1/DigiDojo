@@ -122,7 +122,9 @@ export const mediumWhatsapp = defineScenario({
               text: "Your answers were excellent. Congratulations, you are selected!",
               redFlagId: "wa-thin-selection",
             },
-            { text: " " },
+            {
+              text: " Your internship will be in our research team, and onboarding starts on 1 December. ",
+            },
             {
               id: "wa-deposit",
               text: "To allocate your company laptop, please pay a refundable security deposit of ₹2,499",
