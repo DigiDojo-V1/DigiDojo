@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import type { ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import {
   Archive,
   ChevronDown,
@@ -12,7 +12,6 @@ import {
   FileArchive,
   FileText,
   Flag,
-  Globe,
   Image as ImageIcon,
   MailOpen,
   Menu,
@@ -36,7 +35,9 @@ import type { FlagProps, MailView } from "./types";
 /**
  * A fake mail app: the familiar layout of a phone mail client, with our own styling (no real
  * app's logo, colours or typeface). Icons for actions we don't simulate are decorative only.
- * Nothing here opens a real link: destinations are only ever shown as text.
+ * Nothing here opens a real link: destinations are only ever shown as text, in a browser-style
+ * status pill at the bottom-left (on hover, focus or tap), the way a desktop browser shows a
+ * link's real URL.
  */
 export function MailShell({
   title,
@@ -58,6 +59,7 @@ export function MailShell({
   variant?: "inbox" | "message" | "compose";
 }) {
   const t = useT();
+  const [linkStatus, setLinkStatus] = useState<string | null>(null);
   const back = (
     <Link
       href={backHref}
@@ -70,77 +72,160 @@ export function MailShell({
 
   return (
     <MotionConfig reducedMotion="user">
-      <div className="flex min-h-dvh flex-col bg-white">
-        <div className="sticky top-0 z-40 bg-white">
-          <SimulationBar />
-          {variant === "inbox" ? (
-            <header className="px-2 pt-2 pb-1">
-              <div className="flex items-center gap-1">
-                {back}
-                <div
-                  aria-hidden
-                  className="flex h-12 min-w-0 flex-1 items-center gap-3 rounded-full bg-slate-100 px-4 text-[15px] text-slate-500"
-                >
-                  <Menu className="size-5 shrink-0" />
-                  <span className="flex-1 truncate">{t("mail.search")}</span>
-                  <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-teal-700 text-white">
-                    <UserRound className="size-4" />
-                  </span>
+      <LinkStatusContext.Provider value={setLinkStatus}>
+        <div className="flex min-h-dvh flex-col bg-white">
+          <div className="sticky top-0 z-40 bg-white">
+            <SimulationBar />
+            {variant === "inbox" ? (
+              <header className="px-2 pt-2 pb-1">
+                <div className="flex items-center gap-1">
+                  {back}
+                  <div
+                    aria-hidden
+                    className="flex h-12 min-w-0 flex-1 items-center gap-3 rounded-full bg-slate-100 px-4 text-[15px] text-slate-500"
+                  >
+                    <Menu className="size-5 shrink-0" />
+                    <span className="flex-1 truncate">{t("mail.search")}</span>
+                    <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-teal-700 text-white">
+                      <UserRound className="size-4" />
+                    </span>
+                  </div>
                 </div>
-              </div>
-              <h1 className="px-3 pt-3 text-xs font-medium tracking-wide text-slate-500 uppercase">
-                {title}
-              </h1>
-            </header>
-          ) : (
-            <header className="flex h-14 items-center gap-1 border-b border-slate-200 px-1 text-slate-700">
-              {back}
-              <span
-                className={cn(
-                  "min-w-0 flex-1 truncate",
-                  variant === "compose" ? "text-lg font-medium text-slate-900" : "sr-only",
-                )}
-              >
-                {title}
-              </span>
-              <span aria-hidden className="flex items-center gap-5 pr-3">
-                {variant === "compose" ? (
-                  <>
-                    <Paperclip className="size-5" />
-                    <SendHorizontal className="size-5" />
-                  </>
-                ) : (
-                  <>
-                    <Archive className="size-5" />
-                    <Trash2 className="size-5" />
-                    <MailOpen className="size-5" />
-                  </>
-                )}
-                <EllipsisVertical className="size-5" />
-              </span>
-            </header>
-          )}
-          {toolbar}
-        </div>
-        {hint !== undefined && (
-          <p className="mx-auto mt-3 flex items-center gap-1.5 rounded-full bg-black/5 px-3 py-1 text-xs text-neutral-600">
-            <Flag className="size-3" aria-hidden /> {hint}
-          </p>
-        )}
-        <div className="relative flex-1">{children}</div>
-        {variant === "inbox" && (
-          <div
-            aria-hidden
-            className="pointer-events-none sticky bottom-28 z-20 flex justify-end px-4"
-          >
-            <span className="flex h-14 items-center gap-3 rounded-2xl bg-teal-100 px-5 text-[15px] font-medium text-teal-900 shadow-md">
-              <Pencil className="size-5" /> {t("mail.compose")}
-            </span>
+                <h1 className="px-3 pt-3 text-xs font-medium tracking-wide text-slate-500 uppercase">
+                  {title}
+                </h1>
+              </header>
+            ) : (
+              <header className="flex h-14 items-center gap-1 border-b border-slate-200 px-1 text-slate-700">
+                {back}
+                <span
+                  className={cn(
+                    "min-w-0 flex-1 truncate",
+                    variant === "compose" ? "text-lg font-medium text-slate-900" : "sr-only",
+                  )}
+                >
+                  {title}
+                </span>
+                <span aria-hidden className="flex items-center gap-5 pr-3">
+                  {variant === "compose" ? (
+                    <>
+                      <Paperclip className="size-5" />
+                      <SendHorizontal className="size-5" />
+                    </>
+                  ) : (
+                    <>
+                      <Archive className="size-5" />
+                      <Trash2 className="size-5" />
+                      <MailOpen className="size-5" />
+                    </>
+                  )}
+                  <EllipsisVertical className="size-5" />
+                </span>
+              </header>
+            )}
+            {toolbar}
           </div>
-        )}
-        {footer}
-      </div>
+          {hint !== undefined && (
+            <p className="mx-auto mt-3 flex items-center gap-1.5 rounded-full bg-black/5 px-3 py-1 text-xs text-neutral-600">
+              <Flag className="size-3" aria-hidden /> {hint}
+            </p>
+          )}
+          <div className="relative flex-1">{children}</div>
+          {variant === "inbox" && (
+            <div
+              aria-hidden
+              className="pointer-events-none sticky bottom-28 z-20 flex justify-end px-4"
+            >
+              <span className="flex h-14 items-center gap-3 rounded-2xl bg-teal-100 px-5 text-[15px] font-medium text-teal-900 shadow-md">
+                <Pencil className="size-5" /> {t("mail.compose")}
+              </span>
+            </div>
+          )}
+          <div className="sticky bottom-0 z-30">
+            {linkStatus !== null && (
+              <div
+                role="status"
+                className="pointer-events-none absolute bottom-full left-0 mb-0 max-w-[calc(100%-1.5rem)] truncate rounded-tr-md border border-b-0 border-l-0 border-slate-300 bg-slate-100 px-2 py-0.5 text-xs text-slate-800 shadow-sm"
+              >
+                {linkStatus}
+              </div>
+            )}
+            {footer}
+          </div>
+        </div>
+      </LinkStatusContext.Provider>
     </MotionConfig>
+  );
+}
+
+/** Sets the URL shown in the shell's bottom-left status pill (null hides it). */
+const LinkStatusContext = createContext<(url: string | null) => void>(() => {});
+
+/** Link text that is itself a web address is drawn as a plain link; anything else as a button. */
+const LOOKS_LIKE_URL = /^(https?:\/\/)?[\w-]+(\.[\w-]+)+(\/\S*)?$/i;
+
+/**
+ * One inert link or button in an email. Hovering, focusing or tapping it shows its real
+ * destination in the status pill; tapping also counts as inspecting it.
+ */
+function MailLink({
+  link,
+  inspected,
+  onReveal,
+  ...flag
+}: FlagProps & {
+  link: MailView["links"][number];
+  inspected: boolean;
+  onReveal: (ids: string[]) => void;
+}) {
+  const setStatus = useContext(LinkStatusContext);
+  const [pinned, setPinned] = useState(false);
+  const show = () => setStatus(link.actualUrl);
+  const hide = () => {
+    if (!pinned) setStatus(null);
+  };
+
+  // A tap pins the pill (touch screens have no hover) until the next tap somewhere else.
+  useEffect(() => {
+    if (!pinned) return;
+    const unpin = (e: PointerEvent) => {
+      if (e.target instanceof Element && e.target.closest(`[data-link-id="${link.id}"]`)) return;
+      setPinned(false);
+      setStatus(null);
+    };
+    document.addEventListener("pointerdown", unpin);
+    return () => document.removeEventListener("pointerdown", unpin);
+  }, [pinned, link.id, setStatus]);
+
+  // Never leave a stale URL behind when the email changes.
+  useEffect(() => () => setStatus(null), [setStatus]);
+
+  const isUrl = LOOKS_LIKE_URL.test(link.text.trim());
+  return (
+    <div className="flex items-center gap-1">
+      {/* Inert on purpose: a button, never an <a href>. */}
+      <button
+        type="button"
+        data-link-id={link.id}
+        onMouseEnter={show}
+        onMouseLeave={hide}
+        onFocus={show}
+        onBlur={hide}
+        onClick={() => {
+          show();
+          setPinned(true);
+          onReveal([link.id]);
+        }}
+        className={
+          isUrl
+            ? "min-h-11 min-w-0 cursor-pointer text-left text-[15px] break-all text-blue-700 underline underline-offset-2 hover:text-blue-800"
+            : "min-h-11 cursor-pointer rounded-md bg-indigo-700 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-800"
+        }
+      >
+        {link.text}
+      </button>
+      {inspected && <FlagToggle id={link.id} label={link.actualUrl} {...flag} />}
+    </div>
   );
 }
 
@@ -345,38 +430,19 @@ export function MailBody({
 
       {/* Buttons and links: inert, only their destination can be inspected */}
       {mail.links.length > 0 && (
-        <div className="mt-5 space-y-3 px-4">
-          {mail.links.map((link) => {
-            const inspected = seenIds.includes(link.id);
-            return (
-              <div key={link.id} className="space-y-1.5">
-                {/* Inert on purpose: a button, never an <a href>. */}
-                <button
-                  type="button"
-                  onClick={() => onReveal([link.id])}
-                  className="min-h-11 rounded-md bg-indigo-700 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-800"
-                >
-                  {link.text}
-                </button>
-                {inspected ? (
-                  <div className="overflow-hidden rounded-xl border border-slate-200 shadow-sm">
-                    <p className="bg-slate-50 px-3 pt-2 text-[11px] text-slate-500">
-                      {t("mail.linkPreview")}
-                    </p>
-                    <div className="flex items-center gap-2 bg-slate-50 px-3 pb-2">
-                      <Globe className="size-4 shrink-0 text-slate-500" aria-hidden />
-                      <span className="min-w-0 flex-1 rounded-full bg-white px-3 py-1.5 font-mono text-xs break-all text-slate-900 ring-1 ring-slate-200">
-                        {link.actualUrl}
-                      </span>
-                      <FlagToggle id={link.id} label={link.actualUrl} {...flag} />
-                    </div>
-                  </div>
-                ) : (
-                  <p className="text-xs text-slate-500">{t("mail.inspectLinkHint")}</p>
-                )}
-              </div>
-            );
-          })}
+        <div className="mt-5 space-y-2 px-4">
+          {mail.links.map((link) => (
+            <MailLink
+              key={link.id}
+              link={link}
+              inspected={seenIds.includes(link.id)}
+              onReveal={onReveal}
+              {...flag}
+            />
+          ))}
+          {!mail.links.every((link) => seenIds.includes(link.id)) && (
+            <p className="text-xs text-slate-500">{t("mail.inspectLinkHint")}</p>
+          )}
         </div>
       )}
 

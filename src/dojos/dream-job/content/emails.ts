@@ -266,7 +266,7 @@ export const EMAIL_LOGIN = {
     [{ text: "Hello Ananya," }],
     [
       {
-        text: "Your candidate profile is ready. To access your offer documents, select the button below and ",
+        text: "Your candidate profile is ready. To access your offer documents, select the link below and ",
       },
       {
         id: "gx-password",
@@ -281,7 +281,7 @@ export const EMAIL_LOGIN = {
   links: [
     {
       id: "gx-button",
-      text: `Complete onboarding · ${NEXORA.careersHost}/complete-onboarding`,
+      text: `https://${NEXORA.careersHost}/complete-onboarding`,
       actualUrl: "https://nexora.example.candidate-portal.example/login",
       redFlagId: "mail-link-mismatch",
     },
