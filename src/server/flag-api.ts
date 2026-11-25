@@ -1,15 +1,8 @@
 import { z } from "zod";
 import { JudgeResultSchema, MAX_NOTE_CHARS, resolveSpot, type JudgeResult } from "@/engine/flags";
-import {
-  correctTactics,
-  fallbackChips,
-  finalizeChips,
-  findTarget,
-  targetText,
-  type Chip,
-} from "@/engine/highlight";
+import { correctTactics, fallbackChips, finalizeChips, type Chip } from "@/engine/highlight";
 import { TACTICS, TacticSchema, type Scenario, type Tactic } from "@/engine/schema";
-import { LOCALES, type Locale } from "@/i18n/locale";
+import { LOCALES } from "@/i18n/locale";
 import { resolveText } from "@/i18n/text";
 import {
   CHIPS_SCHEMA,
@@ -49,7 +42,7 @@ export interface ApiResult {
   body: unknown;
 }
 
-export const CHIPS_TIMEOUT_MS = 3000;
+export const CHIPS_TIMEOUT_MS = 5000;
 export const JUDGE_TIMEOUT_MS = 8000;
 const MAX_LABEL_CHARS = 70;
 
@@ -98,12 +91,13 @@ export class ChipCache {
   }
 }
 
-const bad = (status: number, error: string): ApiResult => ({ status, body: { error } });
-
-function contextFor(scenario: Scenario, targetId: string, fallback: string, locale: Locale) {
-  const target = findTarget(scenario, targetId);
-  return target === undefined ? fallback : targetText(target, locale);
+/** Logs why the model call failed: the error only, never what the player wrote. */
+function logFailure(kind: "chips" | "judge", error: unknown) {
+  const message = error instanceof Error ? `${error.name}: ${error.message}` : String(error);
+  console.warn(`Flag API ${kind}: model call failed, using the fallback. ${message.slice(0, 300)}`);
 }
+
+const bad = (status: number, error: string): ApiResult => ({ status, body: { error } });
 
 const isTactic = (t: string): t is Tactic => (TACTICS as readonly string[]).includes(t);
 
@@ -138,11 +132,7 @@ export async function handleChips(raw: unknown, deps: FlagApiDeps): Promise<ApiR
       await deps.llm.generateJson({
         model: "chips",
         system: CHIPS_SYSTEM,
-        prompt: chipsPrompt(
-          contextFor(scenario, req.targetId, resolved.text, req.locale),
-          resolved.text,
-          req.locale,
-        ),
+        prompt: chipsPrompt(resolved.text, req.locale),
         schema: CHIPS_SCHEMA,
         timeoutMs: CHIPS_TIMEOUT_MS,
       }),
@@ -154,7 +144,8 @@ export async function handleChips(raw: unknown, deps: FlagApiDeps): Promise<ApiR
     const chips = finalizeChips(proposed, scenario, correct, seed);
     deps.cache?.set(key, chips);
     return { status: 200, body: { chips, graded } };
-  } catch {
+  } catch (error) {
+    logFailure("chips", error);
     return fallback();
   }
 }
@@ -204,7 +195,8 @@ export async function handleJudge(raw: unknown, deps: FlagApiDeps): Promise<ApiR
       feedback: answer.feedback.trim().slice(0, 300),
     });
     return { status: 200, body: { result } };
-  } catch {
+  } catch (error) {
+    logFailure("judge", error);
     return bad(502, "could not grade");
   }
 }

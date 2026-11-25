@@ -8,7 +8,7 @@ import {
   type FlagApiDeps,
   type LlmLike,
 } from "@/server/flag-api";
-import { describeAuth } from "@/server/gemini-config";
+import { aiStatus, DEFAULT_MODELS, modelsFrom } from "@/server/ai-config";
 import { richScenario } from "./fixtures";
 
 const scenario = richScenario();
@@ -147,34 +147,16 @@ describe("POST /api/flag/judge", () => {
   });
 });
 
-describe("describeAuth", () => {
-  const creds = {
-    GOOGLE_CLIENT_ID: "id",
-    GOOGLE_CLIENT_SECRET: "secret",
-    GOOGLE_REFRESH_TOKEN: "refresh",
-    GCP_PROJECT_ID: "proj",
-  };
-
-  it("is off unless FLAG_AI is on, whatever credentials exist", () => {
-    expect(describeAuth({ ...creds })).toEqual({ off: "FLAG_AI is not on" });
-    expect(describeAuth({ ...creds, FLAG_AI: "off" })).toHaveProperty("off");
+describe("aiStatus", () => {
+  it("is on only with FLAG_AI=on and an OpenAI key", () => {
+    expect(aiStatus({ OPENAI_API_KEY: "k" })).toEqual({ off: "FLAG_AI is not on" });
+    expect(aiStatus({ FLAG_AI: "off", OPENAI_API_KEY: "k" })).toHaveProperty("off");
+    expect(aiStatus({ FLAG_AI: "on" })).toHaveProperty("off");
+    expect(aiStatus({ FLAG_AI: " ON ", OPENAI_API_KEY: "k" })).toEqual({ on: true });
   });
 
-  it("picks an API key first, then a service account, then the OAuth user", () => {
-    expect(describeAuth({ FLAG_AI: "on", GEMINI_API_KEY: "k", ...creds })).toEqual({
-      method: "api-key",
-    });
-    expect(
-      describeAuth({ FLAG_AI: "ON", GCP_SERVICE_ACCOUNT_JSON: "{}", GCP_PROJECT_ID: "p" }),
-    ).toEqual({ method: "service-account" });
-    expect(describeAuth({ FLAG_AI: "on", ...creds })).toEqual({ method: "oauth-user" });
-  });
-
-  it("stays off when the OAuth client has no refresh token or project yet", () => {
-    const noToken = { ...creds, GOOGLE_REFRESH_TOKEN: undefined };
-    expect(describeAuth({ FLAG_AI: "on", ...noToken })).toHaveProperty("off");
-    expect(
-      describeAuth({ FLAG_AI: "on", GOOGLE_CLIENT_ID: "id", GOOGLE_CLIENT_SECRET: "s" }),
-    ).toHaveProperty("off");
+  it("uses small default models that env vars can override", () => {
+    expect(modelsFrom({})).toEqual(DEFAULT_MODELS);
+    expect(modelsFrom({ OPENAI_CHIPS_MODEL: "x" }).chips).toBe("x");
   });
 });

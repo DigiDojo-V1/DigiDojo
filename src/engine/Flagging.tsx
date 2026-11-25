@@ -29,7 +29,7 @@ import { useRunStore } from "./store";
 import { z } from "zod";
 
 /** How long the client waits for chips before using its own. */
-const CHIPS_TIMEOUT_MS = 4000;
+const CHIPS_TIMEOUT_MS = 6500;
 const JUDGE_TIMEOUT_MS = 15000;
 
 interface Draft {
@@ -138,7 +138,7 @@ export function Flagging({ scenario, children }: { scenario: Scenario; children:
   const removeFlag = useRunStore((s) => s.removeFlag);
   const setJudge = useRunStore((s) => s.setJudge);
   const [draft, setDraft] = useState<Draft | null>(null);
-  // Whether Gemini marks written explanations (FLAG_AI on). Learned from the chips API.
+  // Whether the AI marks written explanations (FLAG_AI on). Learned from the chips API.
   const [graded, setGraded] = useState(false);
   // Ignore chips that arrive after the popup moved on.
   const draftToken = useRef(0);

@@ -5,7 +5,7 @@ import { collectFlaggables } from "./evidence";
 import { findTarget, matchHighlight, targetText, type Chip } from "./highlight";
 import { TacticSchema, type ScenarioData, type Tactic } from "./schema";
 
-/** How Gemini rated the player's own explanation. */
+/** How the AI rated the player's own explanation. */
 export const JUDGE_VERDICTS = ["good", "partial", "off"] as const;
 export type JudgeVerdict = (typeof JUDGE_VERDICTS)[number];
 
