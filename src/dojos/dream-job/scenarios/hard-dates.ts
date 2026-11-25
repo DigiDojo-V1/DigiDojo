@@ -18,6 +18,8 @@ export const hardDates = defineScenario({
   primer: {
     title: "Investigate before you trust",
     body: "The message is professional and asks for no money. Inspect the recruiter's profile and the company's own information before you decide.",
+    setup:
+      "You're Ananya. Placement season is close and you'd love a research role before graduating. A senior recruiter messages you with an offer of a proper interview.",
   },
   startNodeId: "li-nisha",
 
