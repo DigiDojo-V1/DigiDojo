@@ -10,7 +10,7 @@ import type { Choice, LocalizedText, Scenario, Tactic, TriageLabel } from "./sch
 /* Current run (in memory only)                                        */
 /* ------------------------------------------------------------------ */
 
-export type RunPhase = "primer" | "playing" | "debrief";
+export type RunPhase = "tutorial" | "primer" | "playing" | "debrief";
 
 /** One node on the path the player has taken, with the reply they chose there. */
 export interface TrailStep {
@@ -21,6 +21,8 @@ export interface TrailStep {
 interface RunState {
   scenarioKey: string | null;
   phase: RunPhase;
+  /** Where "How to play" goes when it ends. */
+  afterTutorial: Exclude<RunPhase, "tutorial">;
   /** Nodes visited on the current timeline. The last entry is the current node. */
   trail: TrailStep[];
   /** Every node entered during the run, across rewinds, in first-visit order. */
@@ -35,7 +37,12 @@ interface RunState {
 }
 
 interface RunActions {
-  start: (key: string, scenario: Scenario) => void;
+  /** A fresh run. With `tutorial`, it opens on "How to play" before the primer. */
+  start: (key: string, scenario: Scenario, options?: { tutorial?: boolean }) => void;
+  /** Leave "How to play" for the primer, or straight into play when there is none. */
+  finishTutorial: () => void;
+  /** Open "How to play" again from the primer. */
+  openTutorial: () => void;
   beginSimulation: () => void;
   /** Record flaggable items as seen: a message appeared, a panel opened, the sender was tapped. */
   reveal: (ids: readonly string[]) => void;
@@ -59,6 +66,7 @@ interface RunActions {
 const initialRun: RunState = {
   scenarioKey: null,
   phase: "playing",
+  afterTutorial: "playing",
   trail: [],
   visited: [],
   seen: [],
@@ -83,14 +91,22 @@ function advance(s: RunState, nextNodeId: string, choiceLabel?: LocalizedText): 
 export const useRunStore = create<RunState & RunActions>()((set) => ({
   ...initialRun,
 
-  start: (key, scenario) =>
+  start: (key, scenario, options) => {
+    const first: RunState["afterTutorial"] =
+      scenario.primer !== undefined && scenario.coldRun !== true ? "primer" : "playing";
     set({
       ...initialRun,
       scenarioKey: key,
-      phase: scenario.primer !== undefined && scenario.coldRun !== true ? "primer" : "playing",
+      phase: options?.tutorial === true ? "tutorial" : first,
+      afterTutorial: first,
       trail: [{ nodeId: scenario.startNodeId }],
       visited: [scenario.startNodeId],
-    }),
+    });
+  },
+
+  finishTutorial: () => set((s) => ({ phase: s.afterTutorial })),
+
+  openTutorial: () => set((s) => (s.phase === "primer" ? { phase: "tutorial" } : s)),
 
   beginSimulation: () => set({ phase: "playing" }),
 
@@ -159,9 +175,12 @@ export function currentNodeId(state: Pick<RunState, "trail">): string | undefine
 interface ProgressState {
   /** Keys are `dojoId/scenarioId`. */
   completed: Record<string, true>;
+  /** The player has finished or skipped "How to play" once. */
+  tutorialSeen: boolean;
   /** The player's language. Read it with `useLocale()` from `@/i18n/hooks`, not directly. */
   locale: Locale;
   markComplete: (key: string) => void;
+  markTutorialSeen: () => void;
   resetProgress: () => void;
   setLocale: (locale: Locale) => void;
 }
@@ -170,6 +189,7 @@ interface ProgressState {
 const PersistedProgressSchema = z.object({
   completed: z.record(z.string(), z.literal(true)).catch({}),
   locale: z.enum(LOCALES).catch(DEFAULT_LOCALE),
+  tutorialSeen: z.boolean().catch(false),
 });
 
 const noopStorage: StateStorage = {
@@ -182,8 +202,10 @@ export const useProgressStore = create<ProgressState>()(
   persist(
     (set) => ({
       completed: {},
+      tutorialSeen: false,
       locale: DEFAULT_LOCALE,
       markComplete: (key) => set((s) => ({ completed: { ...s.completed, [key]: true } })),
+      markTutorialSeen: () => set({ tutorialSeen: true }),
       resetProgress: () => set({ completed: {} }),
       setLocale: (locale) => set({ locale }),
     }),
@@ -193,8 +215,12 @@ export const useProgressStore = create<ProgressState>()(
       storage: createJSONStorage(() =>
         typeof window === "undefined" ? noopStorage : window.localStorage,
       ),
-      partialize: (s) => ({ completed: s.completed, locale: s.locale }),
-      // Version 1 saves had no locale; the schema fills it in, so no version bump is needed.
+      partialize: (s) => ({
+        completed: s.completed,
+        locale: s.locale,
+        tutorialSeen: s.tutorialSeen,
+      }),
+      // Older version 1 saves had no locale or tutorialSeen; the schema fills them in.
       merge: (persisted, current) => {
         const parsed = PersistedProgressSchema.safeParse(persisted);
         return parsed.success ? { ...current, ...parsed.data } : current;

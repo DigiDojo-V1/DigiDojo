@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { currentNodeId, useRunStore } from "@/engine/store";
+import { currentNodeId, useProgressStore, useRunStore } from "@/engine/store";
 import { makeFlag, richScenario, validScenario } from "./fixtures";
 
 const run = () => useRunStore.getState();
@@ -10,6 +10,33 @@ describe("run store", () => {
   it("starts on the primer when the scenario has one", () => {
     expect(run().phase).toBe("primer");
     expect(currentNodeId(run())).toBe("start");
+  });
+
+  it("opens on how to play when asked, then goes to the primer", () => {
+    run().start("k", validScenario(), { tutorial: true });
+    expect(run().phase).toBe("tutorial");
+    run().finishTutorial();
+    expect(run().phase).toBe("primer");
+  });
+
+  it("goes from how to play straight into play on a cold run", () => {
+    run().start("k", { ...validScenario(), coldRun: true }, { tutorial: true });
+    expect(run().phase).toBe("tutorial");
+    run().finishTutorial();
+    expect(run().phase).toBe("playing");
+  });
+
+  it("reopens how to play from the primer and returns to it", () => {
+    run().openTutorial();
+    expect(run().phase).toBe("tutorial");
+    run().finishTutorial();
+    expect(run().phase).toBe("primer");
+  });
+
+  it("only reopens how to play from the primer", () => {
+    run().beginSimulation();
+    run().openTutorial();
+    expect(run().phase).toBe("playing");
   });
 
   it("skips the primer on a cold run", () => {
@@ -89,5 +116,14 @@ describe("run store", () => {
     run().start("easy-money/fixture", validScenario());
     expect(run().classifications).toEqual({});
     expect(run().flags).toEqual({});
+  });
+});
+
+describe("progress store", () => {
+  it("remembers that how to play was seen, and keeps it across a progress reset", () => {
+    useProgressStore.setState({ tutorialSeen: false });
+    useProgressStore.getState().markTutorialSeen();
+    useProgressStore.getState().resetProgress();
+    expect(useProgressStore.getState().tutorialSeen).toBe(true);
   });
 });

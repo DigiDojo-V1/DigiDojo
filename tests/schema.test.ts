@@ -19,6 +19,18 @@ describe("ScenarioSchema", () => {
     expect(errorsFor(validScenario())).toEqual([]);
   });
 
+  it("accepts a primer with a setup and up to four questions", () => {
+    const s = validScenario();
+    s.primer = { title: "T", body: "B", setup: "You're a student.", watchFor: ["A?", "B?"] };
+    expect(errorsFor(s)).toEqual([]);
+  });
+
+  it("rejects more than four ask-yourself questions", () => {
+    const s = validScenario();
+    s.primer = { title: "T", body: "B", watchFor: ["1?", "2?", "3?", "4?", "5?"] };
+    expect(ScenarioSchema.safeParse(s).success).toBe(false);
+  });
+
   it("rejects a startNodeId that isn't a node", () => {
     const s = validScenario();
     s.startNodeId = "nowhere";

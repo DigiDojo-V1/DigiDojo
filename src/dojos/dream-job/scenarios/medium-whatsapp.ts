@@ -19,6 +19,8 @@ export const mediumWhatsapp = defineScenario({
   primer: {
     title: "Read the whole conversation",
     body: "Don't flag the first message just because it's a recruiter. Watch how the conversation develops.",
+    setup:
+      "You're Ananya. Your LinkedIn profile lists your economics coursework and an Excel project you're proud of. A recruiter reaches out about a research internship in Bengaluru.",
   },
   startNodeId: "li-open",
 

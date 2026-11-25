@@ -16,6 +16,13 @@ export const easyTooGood = defineScenario({
   primer: {
     title: "Too good to be true",
     body: "Read the recruiter's message, flag the parts that look suspicious, then decide what to do.",
+    setup:
+      "You're Ananya, a final-year economics student. You've been sending internship applications for weeks and heard nothing back. One morning, a LinkedIn message pops up.",
+    watchFor: [
+      "Do I remember applying for this?",
+      "Does the pay make sense for the work?",
+      "Is anyone asking me for money, and why?",
+    ],
   },
   startNodeId: "li-dm",
 

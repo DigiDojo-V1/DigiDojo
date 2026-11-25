@@ -17,6 +17,8 @@ export function collectTexts(scenario: Scenario): TextField[] {
   add("summary", scenario.summary);
   add("primer.title", scenario.primer?.title);
   add("primer.body", scenario.primer?.body);
+  add("primer.setup", scenario.primer?.setup);
+  scenario.primer?.watchFor?.forEach((q, i) => add(`primer.watchFor.${i}`, q));
 
   const addSegments = (at: string, segments: readonly Segment[]) =>
     segments.forEach((segment, i) => add(`${at}.${segment.id ?? i}`, segment.text));

@@ -343,7 +343,16 @@ const ScenarioShape = z.strictObject({
   legit: z.boolean(),
   /** true = no primer, no hints. */
   coldRun: z.boolean().optional(),
-  primer: z.strictObject({ title: LocalizedTextSchema, body: LocalizedTextSchema }).optional(),
+  primer: z
+    .strictObject({
+      title: LocalizedTextSchema,
+      body: LocalizedTextSchema,
+      /** "Your situation": who the player is and what just happened, in a sentence or two. */
+      setup: LocalizedTextSchema.optional(),
+      /** "Ask yourself": questions to keep in mind. Easy scenarios only; they never point at a red flag. */
+      watchFor: z.array(LocalizedTextSchema).min(1).max(4).optional(),
+    })
+    .optional(),
   startNodeId: kebabCase,
   nodes: z.record(kebabCase, ScenarioNodeSchema),
   /** Panels the player can open: profiles, company pages, web pages, PDFs. */

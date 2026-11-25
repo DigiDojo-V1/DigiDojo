@@ -44,6 +44,71 @@ const en = {
   // Primer
   "primer.eyebrow": "The trick",
   "primer.start": "Start simulation",
+  "primer.howToPlay": "How to play",
+  "primer.setup": "Your situation",
+  "primer.watchFor": "Ask yourself",
+  "primer.goals": "Your goals",
+  "primer.goalSpot": "Spot the red flags",
+  "primer.goalCalm": "Avoid false alarms",
+  "primer.goalDecide": "Make the right call",
+  "primer.someGenuine": "Heads up: some messages are genuine. Don't flag everything.",
+
+  // How to play
+  "howto.title": "How to play",
+  "howto.skip": "Skip",
+  "howto.next": "Next",
+  "howto.ready": "I'm ready",
+  "howto.stepOf": (n: number, total: number) => `Step ${n} of ${total}`,
+  "howto.practice": "Practice",
+  "howto.sender": "Lucky Draw Desk",
+  "howto.scamMessage":
+    "Congrats!! 🎉 Your number won ₹50,000 in our lucky draw. To claim it, pay a ₹499 processing fee today.",
+  "howto.highlight.title": "Spot it. Highlight it.",
+  "howto.highlight.body":
+    "Something in this message is off. Select those words: drag across them, or tap one word and then another. Then tap Flag this.",
+  "howto.highlight.tryIt": "Your turn: find the giveaway.",
+  "howto.highlight.miss": "Close! Look at what they want from you before you get the prize.",
+  "howto.highlight.tooBig": "Too much. Pick just the few words that give it away.",
+  "howto.why.title": "Say why",
+  "howto.why.body":
+    "Every flag asks why it's suspicious. Pick the reason that fits best. You can also write it in your own words for bonus points.",
+  "howto.why.tap": "Tap your flagged words to choose a reason.",
+  "howto.why.right": "Nailed it. Real prizes never charge you a fee to collect them.",
+  "howto.why.wrong":
+    "Not quite. The giveaway is paying to receive money: real prizes never charge a fee.",
+  "howto.why.secret":
+    "In the real thing, nobody tells you if you're right. Everything is scored at the end.",
+  "howto.mixed.title": "Not everything is a scam",
+  "howto.mixed.body":
+    "Some messages are genuine, and flagging them costs you points. What about these two?",
+  "howto.mixed.fine": "Looks fine",
+  "howto.mixed.suspicious": "Suspicious",
+  "howto.mixed.legitSender": "Campus Placement Cell",
+  "howto.mixed.legitText":
+    "Hi! Your interview with the hiring panel is confirmed for Thursday, 3 pm, Room 204. Reply here if you need to reschedule.",
+  "howto.mixed.scamSender": "Unknown number",
+  "howto.mixed.scamText":
+    "Your account will be blocked in 2 hours. Share the OTP you just received to keep it active.",
+  "howto.mixed.legitRight": "Right. A normal interview message: no money, no rush, no secrets.",
+  "howto.mixed.legitWrong":
+    "This one is genuine. Nothing is asked of you except to turn up. Flagging it would be a false alarm.",
+  "howto.mixed.scamRight": "Right. A deadline plus a request for your OTP is a classic trap.",
+  "howto.mixed.scamWrong":
+    "Look again: a 2-hour deadline and a request for your OTP. Nobody genuine ever asks for an OTP.",
+  "howto.mixed.lesson": "Train your judgement, not paranoia. False alarms cost points.",
+  "howto.recap.title": "Dig, decide, debrief",
+  "howto.recap.dig": "Dig for clues",
+  "howto.recap.digBody":
+    "Tap buttons like View profile or Check careers page. Some clues only show up there.",
+  "howto.recap.decide": "Make your call",
+  "howto.recap.decideBody": "Pick a reply at each step. Every choice has a consequence.",
+  "howto.recap.debrief": "Rewind and learn",
+  "howto.recap.debriefBody":
+    "Slipped up? Rewind to the moment it went wrong. Then see every red flag you caught or missed.",
+  "howto.recap.scoring": "Scoring",
+  "howto.recap.right": "right reason",
+  "howto.recap.bonus": "good explanation",
+  "howto.recap.falseAlarm": "false alarm",
 
   // Thread
   "thread.prompt": "What do you do?",
