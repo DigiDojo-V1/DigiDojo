@@ -22,7 +22,7 @@ Every dojo also contains at least one **legit** scenario (a real internship, a r
 ## 3. How a scenario works (the learning loop)
 
 1. **Primer (optional, ~45 s).** One card naming the trick, e.g. "Small win first: they pay you a little so you trust them with a lot." A **cold run** scenario skips the primer and any hints, to show players they are vulnerable.
-2. **Simulation (2 to 3 min).** Messages arrive in real time (typing indicator, delays) inside a fake app shell. The player can **tap any message to flag it** as suspicious. At 3 to 4 **decision points** the player picks a reply.
+2. **Simulation (2 to 3 min).** Messages arrive in real time (typing indicator, delays) inside a fake app shell. The player **highlights any words** that look suspicious (nothing marks where the red flags are), or taps the flag next to a detail such as a Reply-To line, then picks **why** from 4 reason chips and can explain in their own words for bonus points. At 3 to 4 **decision points** the player picks a reply.
 3. **Consequence.** Each path ends in an outcome: safe, a money loss, a partial loss, or a missed opportunity (for legit scenarios the player wrongly rejected). Losses show exact rupee amounts.
 4. **Rewind.** Loss outcomes offer "Rewind" back to the decision node where the player could have stopped.
 5. **Debrief.** Red flags seen vs caught, false alarms (flagged messages that were fine), the tactic behind each flag (urgency, social proof, small win first, sunk cost, authority, pay to earn...), one rule to remember, and the real-life action (call 1930, report at cybercrime.gov.in).
@@ -187,7 +187,7 @@ interface Address { id: string; address: string; redFlagId?: string }
 
 - Display hints (optional, visual only, never scored): `Message.time` ("09:14") shows next to the sender in card-style chats; `Field.slot` (`name | headline | location | connections`, profile panels only) draws a field in the profile header; `EvidencePanel.variant: "official-record"` (company panels only) draws a registry record card; `ThreadNode.layout: "split"` shows the messages and the node's evidence panels as two panes with a switch.
 - Threads and email nodes take `evidence: [panelId, …]`: buttons such as "View profile" or "Check careers page".
-- Every flaggable item (message, phrase, address, attachment, link, panel field) shares one id space per scenario. `src/engine/evidence.ts` (`collectFlaggables`) is the one place that lists them.
+- Every flaggable item (message, red-flag phrase, address, attachment, link, panel field) shares one id space per scenario. Phrases matter only as hidden answer spans: a segment without a `redFlagId` needs no id. `src/engine/evidence.ts` (`collectFlaggables`) is the one place that lists them.
 - New tactics: `no-real-process`, `data-harvest`, `malicious-file`, `disguised-link`. New outcome result: `compromised` (identity, device or account harm with no money moved).
 - A dojo may set `takeaways: LocalizedText[]`, shown on the dojo page.
 - **Seen** means revealed: a message appeared, the sender was tapped, a panel or attachment was opened. The debrief splits red flags into **caught**, **missed** (seen, not flagged), **didn't check** (on a screen the player reached but behind an inspection they skipped), **not reached**, plus false alarms and a per-email triage table.
@@ -203,8 +203,11 @@ Validation (in `defineScenario` during dev and in `tests/scenarios.test.ts`):
 Engine behaviour:
 
 - Messages in a thread reveal one by one using `delayMs`, with a typing indicator before each `them` message. Choices appear after the last message.
-- Tapping a message toggles its flag. Flags persist across nodes for the whole run, including after a rewind.
-- Debrief: red flags _seen_ = flags on messages the player actually saw; _caught_ = those the player flagged; _false alarms_ = flagged messages with no `redFlagId`.
+- **Flagging is free highlighting** (`src/engine/highlight.ts`). Other people's messages and email paragraphs are plain text the player selects word by word: tap a word, tap another to extend, "Flag this". Segments with a `redFlagId` (or a whole message with one) are hidden answer spans, never drawn as tappable. A highlight catches a span when it overlaps at least half of the shorter of the two and is no longer than `max(3 × span, 40 chars)`; nothing over 160 characters catches anything. Short items (addresses, attachments, links, panel fields, the compose To) are flagged whole with their flag button.
+- Every flag opens **"Why is this suspicious?"**: 4 reason chips (one per tactic) and an optional note. The chips come from `POST /api/flag/chips` (a cheap Gemini model writes contextual labels; the server always makes sure the right tactic is among them) or from `fallbackChips()` when the API is off or slow. The note is graded in the background by `POST /api/flag/judge` against the red flag's explanation. See `docs/DEPLOY_GEMINI.md`.
+- **No feedback during play.** Chips never show whether a reason is right; everything is graded in the debrief, so playing never reveals where the red flags are.
+- Flags (`FlagRecord` in `src/engine/flags.ts`) persist across nodes for the whole run, including after a rewind. Tapping a highlight reopens it to change the reason or remove it.
+- Debrief: **caught** = flagged with the right reason; **spotted** = flagged with the wrong reason; **missed**, **didn't check**, **not reached** as above; **false alarms** = flags that catch no red flag. Score: right reason +3, wrong reason +1, false alarm −1, explanation graded "good" +1; the rank (Rookie, Sharp, Scam-proof) is the share of the maximum for red flags on screens the player reached. Flagging everything scores low.
 - Rewind keeps flags but returns to the target node.
 - Finishing a scenario (reaching the debrief) marks it complete in persisted progress.
 
