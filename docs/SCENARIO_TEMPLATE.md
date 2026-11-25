@@ -18,6 +18,8 @@ Skip if this is a cold run.
 
 **Title:** (the trick's name, e.g. "Small win first")
 **Text:** (2 to 3 sentences)
+**Your situation:** (optional, 1 to 2 sentences: who the player is and what just happened. No hints.)
+**Ask yourself:** (optional, easy scenarios only: 1 to 4 general questions, e.g. "Do I remember applying for this?". Never point at a specific sentence.)
 
 ## Red flags
 

@@ -21,7 +21,8 @@ Every dojo also contains at least one **legit** scenario (a real internship, a r
 
 ## 3. How a scenario works (the learning loop)
 
-1. **Primer (optional, ~45 s).** One card naming the trick, e.g. "Small win first: they pay you a little so you trust them with a lot." A **cold run** scenario skips the primer and any hints, to show players they are vulnerable.
+0. **How to play (first scenario only, ~40 s).** A hands-on walkthrough in `src/engine/HowToPlay.tsx`: flag a practice message with the real highlighting and reason sheet, judge one genuine message and one scam ("not everything is a scam"), then see how a run is scored. Unlike the game it gives instant feedback. It shows once (`tutorialSeen` in persisted progress, cold runs included, since it teaches controls, not the scam) and can be replayed from the intro's "How to play" button.
+1. **Primer (optional, ~45 s).** The intro screen (`src/engine/ScenarioIntro.tsx`): **your situation** (`setup`, who you are and what just happened), the trick's name and a short body, **ask yourself** (`watchFor`, 1 to 4 questions, easy scenarios only, never pointing at a specific red flag), and the goals: spot the red flags, avoid false alarms, make the right call. A **cold run** scenario skips the primer and any hints, to show players they are vulnerable.
 2. **Simulation (2 to 3 min).** Messages arrive in real time (typing indicator, delays) inside a fake app shell. The player **highlights any words** that look suspicious (nothing marks where the red flags are), or taps the flag next to a detail such as a Reply-To line, then picks **why** from 4 reason chips and can explain in their own words for bonus points. At 3 to 4 **decision points** the player picks a reply.
 3. **Consequence.** Each path ends in an outcome: safe, a money loss, a partial loss, or a missed opportunity (for legit scenarios the player wrongly rejected). Losses show exact rupee amounts.
 4. **Rewind.** Loss outcomes offer "Rewind" back to the decision node where the player could have stopped.
@@ -112,7 +113,12 @@ interface Scenario {
   summary: LocalizedText; // one line for the dojo page
   legit: boolean; // true = a real message the player should trust
   coldRun?: boolean; // true = no primer, no hints
-  primer?: { title: LocalizedText; body: LocalizedText };
+  primer?: {
+    title: LocalizedText;
+    body: LocalizedText;
+    setup?: LocalizedText; // "Your situation"
+    watchFor?: LocalizedText[]; // "Ask yourself", 1 to 4, easy scenarios only
+  };
   startNodeId: string;
   nodes: Record<string, ScenarioNode>;
   redFlags: Record<string, { label: LocalizedText; tactic: Tactic; explanation: LocalizedText }>;
@@ -239,7 +245,7 @@ Build:
 7. Screens:
    - **Home** (`/`): app name, a one-line tagline, and the 4 dojos as a vertical path of cards (order number, name, tagline, scenario count, progress). All clickable for now.
    - **Dojo** (`/dojo/[dojoId]`): dojo name and tagline, list of scenarios with completed ticks, back button. Unknown id → 404.
-   - **Player** (`/dojo/[dojoId]/[scenarioId]`): primer card (if any) → threads → outcome → debrief → "Back to dojo". Unknown id → 404.
+   - **Player** (`/dojo/[dojoId]/[scenarioId]`): how to play (first visit only) → intro (if the scenario has a primer) → threads → outcome → debrief → "Back to dojo". Unknown id → 404.
    - Every simulation screen shows the `SimulationBadge`.
 8. Example scenario `easy-money/task-scam-starter` (keep it short, it's a pattern to copy):
    - `dm` (instagram, "Priya · HR"): "Hi! Saw your profile. Part-time work from home, earn ₹3,000/day just by liking YouTube videos" (red flag `pay-far-above-work`, tactic `too-good-to-be-true`), "No experience needed. Interested?". Choices: "Yes, interested!" → `task`; "Ignore and block" → `safe-early`.
