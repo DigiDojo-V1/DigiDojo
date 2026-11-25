@@ -97,13 +97,11 @@ export const EMAIL_MEDIUM = {
     [{ text: "Dear Ananya," }],
     [
       {
-        id: "gm-thanks",
         text: `Thank you for completing the recruitment discussion for the ${ROLE.title} position. We are pleased to move forward with your candidature.`,
       },
     ],
     [
       {
-        id: "gm-review",
         text: "Please review the attached offer letter, which outlines your role, stipend and proposed joining date. Reply to confirm acceptance; our onboarding desk will then share the next steps.",
       },
     ],
@@ -133,24 +131,20 @@ export const EMAIL_LEGIT = {
     [{ text: "Dear Ananya," }],
     [
       {
-        id: "gl-intro",
         text: `Following your interview with Research Manager Priya Nair on 21 November and the HR discussion on 22 November, we are pleased to offer you the position of ${ROLE.title} at ${NEXORA.legalName}.`,
       },
     ],
     [
       {
-        id: "gl-terms",
         text: `Role: ${ROLE.title}\nReference: ${ROLE.reference}\nLocation: Bengaluru, Karnataka (hybrid)\nDuration: 3 months\nStipend: ₹18,000 per month\nProposed start date: 1 December 2026\nReporting manager: Priya Nair, Research Manager`,
       },
     ],
     [
       {
-        id: "gl-portal",
         text: `The attached letter contains the role terms and joining details discussed during your interviews. You may review and accept it through our official careers portal at ${NEXORA.careersHost}/offers/${ROLE.reference}.`,
       },
       { text: " " },
       {
-        id: "gl-no-payment",
         text: "No payment is required at any stage. Identity and payroll documents will be requested only after you accept the written offer, through the verified company process.",
       },
     ],
@@ -187,7 +181,6 @@ export const EMAIL_CHECK = {
     [{ text: "Hi Ananya," }],
     [
       {
-        id: "gc-body",
         text: `We came across your public profile and wanted to check whether you are open to a three-month ${ROLE.title} opportunity with ${NEXORA.name} in Bengaluru. If interested, reply with a suitable time for a short introductory call and we can share more details.`,
       },
     ],
@@ -216,7 +209,6 @@ export const EMAIL_HARD = {
     [{ text: "Dear Ananya," }],
     [
       {
-        id: "gh-progress",
         text: `Congratulations on progressing for the ${ROLE.title} role (Reference ${ROLE.reference}). Your candidate details and proposed role have been added to our onboarding workflow.`,
       },
     ],
@@ -229,7 +221,7 @@ export const EMAIL_HARD = {
       },
     ],
     [
-      { id: "gh-no-payment", text: "There is no payment required at this stage." },
+      { text: "There is no payment required at this stage." },
       { text: " " },
       {
         id: "gh-install",

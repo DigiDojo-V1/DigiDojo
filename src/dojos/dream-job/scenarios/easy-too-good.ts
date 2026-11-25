@@ -34,7 +34,7 @@ export const easyTooGood = defineScenario({
           time: "09:12",
           delayMs: 1200,
           segments: [
-            { text: "Hi Ananya! " },
+            { text: "Hi Ananya! I’m Karan from the hiring team at Nexora Technologies. " },
             {
               id: "li-easy-selected",
               text: "Congratulations! We have reviewed your profile and you have been selected for our Work-From-Home Business Research Internship at Nexora Technologies.",

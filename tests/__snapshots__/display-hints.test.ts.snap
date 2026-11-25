@@ -21,7 +21,7 @@ exports[`Dream Job scoring inputs > easy-too-good has the same flaggable items 1
     ],
     "panelId": null,
     "redFlagId": null,
-    "text": "Hi Ananya! Congratulations! We have reviewed your profile and you have been selected for our Work-From-Home Business Research Internship at Nexora Technologies. You will receive ₹40,000 per month for just two hours of work per day. No interview is needed because the hiring team has already shortlisted you from LinkedIn.
+    "text": "Hi Ananya! I’m Karan from the hiring team at Nexora Technologies. Congratulations! We have reviewed your profile and you have been selected for our Work-From-Home Business Research Internship at Nexora Technologies. You will receive ₹40,000 per month for just two hours of work per day. No interview is needed because the hiring team has already shortlisted you from LinkedIn.
 
 The role involves basic online research, spreadsheet updates and data entry; the complete job description will be shared after registration. To reserve your seat, pay a refundable registration and verification fee of ₹1,499 by 8:00 PM today to our HR coordinator’s UPI ID: karan.sethi@okaxis.
 
@@ -445,17 +445,6 @@ The selection process is a 20-minute video discussion with the Research Manager,
   },
   {
     "hidden": false,
-    "id": "gh-progress",
-    "nodeIds": [
-      "gmail-hard",
-    ],
-    "panelId": null,
-    "redFlagId": null,
-    "text": "Congratulations on progressing for the Business Research Intern role (Reference NX-BRI-026). Your candidate details and proposed role have been added to our onboarding workflow.",
-    "where": "email-body",
-  },
-  {
-    "hidden": false,
     "id": "gh-id-request",
     "nodeIds": [
       "gmail-hard",
@@ -467,17 +456,6 @@ The selection process is a 20-minute video discussion with the Research Manager,
 • PAN card
 • Bank account details
 • A recent selfie for identity matching",
-    "where": "email-body",
-  },
-  {
-    "hidden": false,
-    "id": "gh-no-payment",
-    "nodeIds": [
-      "gmail-hard",
-    ],
-    "panelId": null,
-    "redFlagId": null,
-    "text": "There is no payment required at this stage.",
     "where": "email-body",
   },
   {
@@ -832,28 +810,6 @@ exports[`Dream Job scoring inputs > inbox-triage has the same flaggable items 1`
   },
   {
     "hidden": true,
-    "id": "gm-thanks",
-    "nodeIds": [
-      "inbox",
-    ],
-    "panelId": null,
-    "redFlagId": null,
-    "text": "Thank you for completing the recruitment discussion for the Business Research Intern position. We are pleased to move forward with your candidature.",
-    "where": "email-body",
-  },
-  {
-    "hidden": true,
-    "id": "gm-review",
-    "nodeIds": [
-      "inbox",
-    ],
-    "panelId": null,
-    "redFlagId": null,
-    "text": "Please review the attached offer letter, which outlines your role, stipend and proposed joining date. Reply to confirm acceptance; our onboarding desk will then share the next steps.",
-    "where": "email-body",
-  },
-  {
-    "hidden": true,
     "id": "gm-file",
     "nodeIds": [
       "inbox",
@@ -895,56 +851,6 @@ exports[`Dream Job scoring inputs > inbox-triage has the same flaggable items 1`
     "redFlagId": null,
     "text": "ananya.rao@example.com",
     "where": "to",
-  },
-  {
-    "hidden": true,
-    "id": "gl-intro",
-    "nodeIds": [
-      "inbox",
-    ],
-    "panelId": null,
-    "redFlagId": null,
-    "text": "Following your interview with Research Manager Priya Nair on 21 November and the HR discussion on 22 November, we are pleased to offer you the position of Business Research Intern at Nexora Technologies Pvt. Ltd..",
-    "where": "email-body",
-  },
-  {
-    "hidden": true,
-    "id": "gl-terms",
-    "nodeIds": [
-      "inbox",
-    ],
-    "panelId": null,
-    "redFlagId": null,
-    "text": "Role: Business Research Intern
-Reference: NX-BRI-026
-Location: Bengaluru, Karnataka (hybrid)
-Duration: 3 months
-Stipend: ₹18,000 per month
-Proposed start date: 1 December 2026
-Reporting manager: Priya Nair, Research Manager",
-    "where": "email-body",
-  },
-  {
-    "hidden": true,
-    "id": "gl-portal",
-    "nodeIds": [
-      "inbox",
-    ],
-    "panelId": null,
-    "redFlagId": null,
-    "text": "The attached letter contains the role terms and joining details discussed during your interviews. You may review and accept it through our official careers portal at careers.nexora.example/offers/NX-BRI-026.",
-    "where": "email-body",
-  },
-  {
-    "hidden": true,
-    "id": "gl-no-payment",
-    "nodeIds": [
-      "inbox",
-    ],
-    "panelId": null,
-    "redFlagId": null,
-    "text": "No payment is required at any stage. Identity and payroll documents will be requested only after you accept the written offer, through the verified company process.",
-    "where": "email-body",
   },
   {
     "hidden": true,
@@ -1003,17 +909,6 @@ Reporting manager: Priya Nair, Research Manager",
   },
   {
     "hidden": true,
-    "id": "gc-body",
-    "nodeIds": [
-      "inbox",
-    ],
-    "panelId": null,
-    "redFlagId": null,
-    "text": "We came across your public profile and wanted to check whether you are open to a three-month Business Research Intern opportunity with Nexora Technologies in Bengaluru. If interested, reply with a suitable time for a short introductory call and we can share more details.",
-    "where": "email-body",
-  },
-  {
-    "hidden": true,
     "id": "gh-from",
     "nodeIds": [
       "inbox",
@@ -1047,17 +942,6 @@ Reporting manager: Priya Nair, Research Manager",
   },
   {
     "hidden": true,
-    "id": "gh-progress",
-    "nodeIds": [
-      "inbox",
-    ],
-    "panelId": null,
-    "redFlagId": null,
-    "text": "Congratulations on progressing for the Business Research Intern role (Reference NX-BRI-026). Your candidate details and proposed role have been added to our onboarding workflow.",
-    "where": "email-body",
-  },
-  {
-    "hidden": true,
     "id": "gh-id-request",
     "nodeIds": [
       "inbox",
@@ -1069,17 +953,6 @@ Reporting manager: Priya Nair, Research Manager",
 • PAN card
 • Bank account details
 • A recent selfie for identity matching",
-    "where": "email-body",
-  },
-  {
-    "hidden": true,
-    "id": "gh-no-payment",
-    "nodeIds": [
-      "inbox",
-    ],
-    "panelId": null,
-    "redFlagId": null,
-    "text": "There is no payment required at this stage.",
     "where": "email-body",
   },
   {
@@ -1328,56 +1201,6 @@ exports[`Dream Job scoring inputs > legit-offer has the same flaggable items 1`]
     "redFlagId": null,
     "text": "ananya.rao@example.com",
     "where": "to",
-  },
-  {
-    "hidden": false,
-    "id": "gl-intro",
-    "nodeIds": [
-      "gmail-legit",
-    ],
-    "panelId": null,
-    "redFlagId": null,
-    "text": "Following your interview with Research Manager Priya Nair on 21 November and the HR discussion on 22 November, we are pleased to offer you the position of Business Research Intern at Nexora Technologies Pvt. Ltd..",
-    "where": "email-body",
-  },
-  {
-    "hidden": false,
-    "id": "gl-terms",
-    "nodeIds": [
-      "gmail-legit",
-    ],
-    "panelId": null,
-    "redFlagId": null,
-    "text": "Role: Business Research Intern
-Reference: NX-BRI-026
-Location: Bengaluru, Karnataka (hybrid)
-Duration: 3 months
-Stipend: ₹18,000 per month
-Proposed start date: 1 December 2026
-Reporting manager: Priya Nair, Research Manager",
-    "where": "email-body",
-  },
-  {
-    "hidden": false,
-    "id": "gl-portal",
-    "nodeIds": [
-      "gmail-legit",
-    ],
-    "panelId": null,
-    "redFlagId": null,
-    "text": "The attached letter contains the role terms and joining details discussed during your interviews. You may review and accept it through our official careers portal at careers.nexora.example/offers/NX-BRI-026.",
-    "where": "email-body",
-  },
-  {
-    "hidden": false,
-    "id": "gl-no-payment",
-    "nodeIds": [
-      "gmail-legit",
-    ],
-    "panelId": null,
-    "redFlagId": null,
-    "text": "No payment is required at any stage. Identity and payroll documents will be requested only after you accept the written offer, through the verified company process.",
-    "where": "email-body",
   },
   {
     "hidden": true,
@@ -1718,7 +1541,7 @@ I would like to arrange a short introductory discussion. Are you available tomor
     ],
     "panelId": null,
     "redFlagId": null,
-    "text": "Your answers were excellent. Congratulations, you are selected! To allocate your company laptop, please pay a refundable security deposit of ₹2,499 to our equipment partner. The amount will be returned with your first stipend or when you return the laptop. Make the payment today so we can dispatch it before onboarding.",
+    "text": "Your answers were excellent. Congratulations, you are selected! Your internship will be in our research team, and onboarding starts on 1 December. To allocate your company laptop, please pay a refundable security deposit of ₹2,499 to our equipment partner. The amount will be returned with your first stipend or when you return the laptop. Make the payment today so we can dispatch it before onboarding.",
     "where": "message",
   },
   {
@@ -1786,28 +1609,6 @@ I would like to arrange a short introductory discussion. Are you available tomor
     "redFlagId": null,
     "text": "ananya.rao@example.com",
     "where": "to",
-  },
-  {
-    "hidden": false,
-    "id": "gm-thanks",
-    "nodeIds": [
-      "gmail-medium",
-    ],
-    "panelId": null,
-    "redFlagId": null,
-    "text": "Thank you for completing the recruitment discussion for the Business Research Intern position. We are pleased to move forward with your candidature.",
-    "where": "email-body",
-  },
-  {
-    "hidden": false,
-    "id": "gm-review",
-    "nodeIds": [
-      "gmail-medium",
-    ],
-    "panelId": null,
-    "redFlagId": null,
-    "text": "Please review the attached offer letter, which outlines your role, stipend and proposed joining date. Reply to confirm acceptance; our onboarding desk will then share the next steps.",
-    "where": "email-body",
   },
   {
     "hidden": true,
