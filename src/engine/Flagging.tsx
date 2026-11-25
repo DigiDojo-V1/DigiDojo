@@ -29,7 +29,7 @@ import { useRunStore } from "./store";
 import { z } from "zod";
 
 /** How long the client waits for chips before using its own. */
-const CHIPS_TIMEOUT_MS = 2500;
+const CHIPS_TIMEOUT_MS = 4000;
 const JUDGE_TIMEOUT_MS = 15000;
 
 interface Draft {
@@ -62,7 +62,10 @@ export function useFlagActions(): FlagActions {
 let counter = 0;
 const newFlagId = () => `flag-${Date.now().toString(36)}-${(counter++).toString(36)}`;
 
-const ChipsResponseSchema = z.object({ chips: z.array(ChipSchema).min(1) });
+const ChipsResponseSchema = z.object({
+  chips: z.array(ChipSchema).min(1),
+  graded: z.boolean().default(false),
+});
 const JudgeResponseSchema = z.object({ result: JudgeResultSchema.nullable() });
 
 async function postJson(url: string, body: unknown, timeoutMs: number): Promise<unknown> {
@@ -82,16 +85,22 @@ async function postJson(url: string, body: unknown, timeoutMs: number): Promise<
   }
 }
 
-async function fetchChips(scenario: Scenario, spot: FlagSpot, locale: Locale, fallback: Chip[]) {
+async function fetchChips(
+  scenario: Scenario,
+  spot: FlagSpot,
+  locale: Locale,
+  fallback: Chip[],
+): Promise<{ chips: Chip[]; graded: boolean | undefined }> {
   try {
     const json = await postJson(
       "/api/flag/chips",
       { dojoId: scenario.dojoId, scenarioId: scenario.id, ...spot, locale },
       CHIPS_TIMEOUT_MS,
     );
-    return ChipsResponseSchema.parse(json).chips;
+    return ChipsResponseSchema.parse(json);
   } catch {
-    return fallback;
+    // Unknown: keep whatever the last answer said about grading.
+    return { chips: fallback, graded: undefined };
   }
 }
 
@@ -129,6 +138,8 @@ export function Flagging({ scenario, children }: { scenario: Scenario; children:
   const removeFlag = useRunStore((s) => s.removeFlag);
   const setJudge = useRunStore((s) => s.setJudge);
   const [draft, setDraft] = useState<Draft | null>(null);
+  // Whether Gemini marks written explanations (FLAG_AI on). Learned from the chips API.
+  const [graded, setGraded] = useState(false);
   // Ignore chips that arrive after the popup moved on.
   const draftToken = useRef(0);
 
@@ -140,7 +151,8 @@ export function Flagging({ scenario, children }: { scenario: Scenario; children:
       setDraft({ spot, text: resolved.text, catches: resolved.catches, chips: null, note: "" });
       const seed = `${spot.targetId}:${spot.start ?? ""}:${spot.end ?? ""}`;
       const fallback = fallbackChips(scenario, correctTactics(scenario, resolved.catches), seed);
-      void fetchChips(scenario, spot, locale, fallback).then((chips) => {
+      void fetchChips(scenario, spot, locale, fallback).then(({ chips, graded }) => {
+        if (graded !== undefined) setGraded(graded);
         if (draftToken.current !== token) return;
         setDraft((d) => (d === null ? d : { ...d, chips }));
       });
@@ -253,6 +265,7 @@ export function Flagging({ scenario, children }: { scenario: Scenario; children:
           chosen={draft.tactic}
           note={draft.note}
           maxNote={MAX_NOTE_CHARS}
+          showNote={graded || draft.note.length > 0}
           editing={draft.flagId !== undefined}
           onChoose={(value) =>
             setDraft((d) =>

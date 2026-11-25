@@ -21,6 +21,7 @@ export function FlagPopover({
   chosen,
   note,
   maxNote,
+  showNote,
   editing,
   onChoose,
   onNote,
@@ -34,6 +35,8 @@ export function FlagPopover({
   chosen: string | undefined;
   note: string;
   maxNote: number;
+  /** Show the "In your own words" box: only when explanations are graded. */
+  showNote: boolean;
   /** Editing an existing flag (shows Remove). */
   editing: boolean;
   onChoose: (value: string) => void;
@@ -111,25 +114,27 @@ export function FlagPopover({
         </div>
         {chips === null && <p className="mt-2 text-xs text-slate-500">{t("flag.loadingChips")}</p>}
 
-        <label className="mt-4 block">
-          <span className="text-sm font-medium text-slate-900">{t("flag.noteLabel")}</span>
-          <span className="ml-1 text-xs text-slate-500">{t("flag.noteOptional")}</span>
-          <textarea
-            value={note}
-            maxLength={maxNote}
-            onChange={(e) => onNote(e.target.value)}
-            rows={2}
-            autoComplete="off"
-            placeholder={t("flag.notePlaceholder")}
-            className="mt-1.5 block w-full resize-none rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-900 focus:outline-none"
-          />
-          <span className="mt-1 flex justify-between text-[11px] text-slate-500">
-            <span>{t("flag.notePrivacy")}</span>
-            <span className="tabular-nums">
-              {note.length}/{maxNote}
+        {showNote && (
+          <label className="mt-4 block">
+            <span className="text-sm font-medium text-slate-900">{t("flag.noteLabel")}</span>
+            <span className="ml-1 text-xs text-slate-500">{t("flag.noteOptional")}</span>
+            <textarea
+              value={note}
+              maxLength={maxNote}
+              onChange={(e) => onNote(e.target.value)}
+              rows={2}
+              autoComplete="off"
+              placeholder={t("flag.notePlaceholder")}
+              className="mt-1.5 block w-full resize-none rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-900 focus:outline-none"
+            />
+            <span className="mt-1 flex justify-between text-[11px] text-slate-500">
+              <span>{t("flag.notePrivacy")}</span>
+              <span className="tabular-nums">
+                {note.length}/{maxNote}
+              </span>
             </span>
-          </span>
-        </label>
+          </label>
+        )}
 
         <div className="mt-4 flex gap-2">
           {editing && (
