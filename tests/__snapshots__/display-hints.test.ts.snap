@@ -813,13 +813,58 @@ exports[`Dream Job scoring inputs > inbox-triage has the same flaggable items 1`
   },
   {
     "hidden": true,
+    "id": "easy-pdf-letterhead",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": "easy-offer-pdf",
+    "redFlagId": null,
+    "text": "NEXORA TECHNOLOGIES
+Human Resources Department",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "easy-pdf-date",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": "easy-offer-pdf",
+    "redFlagId": null,
+    "text": "Date: 19/11/2026",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "easy-pdf-title",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": "easy-offer-pdf",
+    "redFlagId": null,
+    "text": "OFFER LETTER",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
     "id": "easy-pdf-greeting",
     "nodeIds": [
       "inbox",
     ],
     "panelId": "easy-offer-pdf",
     "redFlagId": "mail-generic-greeting",
-    "text": "Greeting: Dear Candidate",
+    "text": "Dear Candidate,",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "easy-pdf-congrats",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": "easy-offer-pdf",
+    "redFlagId": null,
+    "text": "Congratulations!! We are very happy to inform you that you have been selected for the post of Business Research Intern in our esteemed organisation Nexora Technologies.",
     "where": "panel-field",
   },
   {
@@ -830,7 +875,7 @@ exports[`Dream Job scoring inputs > inbox-triage has the same flaggable items 1`
     ],
     "panelId": "easy-offer-pdf",
     "redFlagId": "mail-high-salary",
-    "text": "Role / salary: Business Research Intern; ₹40,000/month",
+    "text": "Your salary for the Business Research Intern role will be ₹40,000/- per month (Rupees Forty Thousand Only). Work is simple online data research which can be done from home in 2–3 hours daily.",
     "where": "panel-field",
   },
   {
@@ -841,18 +886,7 @@ exports[`Dream Job scoring inputs > inbox-triage has the same flaggable items 1`
     ],
     "panelId": "easy-offer-pdf",
     "redFlagId": "mail-missing-details",
-    "text": "Manager / office: No reporting manager or office address",
-    "where": "panel-field",
-  },
-  {
-    "hidden": true,
-    "id": "easy-pdf-signatory",
-    "nodeIds": [
-      "inbox",
-    ],
-    "panelId": "easy-offer-pdf",
-    "redFlagId": "mail-missing-details",
-    "text": "Signatory: “HR Manager” (no named person)",
+    "text": "Details of your reporting manager, office location and joining date will be shared after the onboarding process is complete.",
     "where": "panel-field",
   },
   {
@@ -863,7 +897,102 @@ exports[`Dream Job scoring inputs > inbox-triage has the same flaggable items 1`
     ],
     "panelId": "easy-offer-pdf",
     "redFlagId": "mail-fee",
-    "text": "Payment clause: ₹2,999 registration and verification fee payable before onboarding to the coordinator’s UPI ID.",
+    "text": "NOTE: To confirm your seat, the candidate must pay ₹2,999 as Registration & Verification Fee before onboarding to the HR coordinator’s UPI ID given in the email. Seat will be given to next candidate if fee is not received.",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "easy-pdf-welcome",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": "easy-offer-pdf",
+    "redFlagId": null,
+    "text": "We welcome you to our family and wish you a bright career ahead.",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "easy-pdf-signatory",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": "easy-offer-pdf",
+    "redFlagId": "mail-missing-details",
+    "text": "Regards,
+HR Manager
+Nexora Technologies",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "medium-pdf-letterhead",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": "medium-offer-pdf",
+    "redFlagId": null,
+    "text": "Nexora Technologies Pvt. Ltd.
+4th Floor, Meridian Square, Outer Ring Road
+Bengaluru, Karnataka, India",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "medium-pdf-ref",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": "medium-offer-pdf",
+    "redFlagId": null,
+    "text": "Ref: NX/HR/OL/2026/1147
+Date: 21 November 2026",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "medium-pdf-addressee",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": "medium-offer-pdf",
+    "redFlagId": null,
+    "text": "To,
+Ananya Rao
+Bengaluru, Karnataka",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "medium-pdf-title",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": "medium-offer-pdf",
+    "redFlagId": null,
+    "text": "Subject: Offer of Internship",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "medium-pdf-greeting",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": "medium-offer-pdf",
+    "redFlagId": null,
+    "text": "Dear Ananya,",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "medium-pdf-intro",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": "medium-offer-pdf",
+    "redFlagId": null,
+    "text": "With reference to your recent recruitment discussion, we are pleased to offer you an internship with Nexora Technologies Pvt. Ltd. on the terms set out below.",
     "where": "panel-field",
   },
   {
@@ -874,7 +1003,7 @@ exports[`Dream Job scoring inputs > inbox-triage has the same flaggable items 1`
     ],
     "panelId": "medium-offer-pdf",
     "redFlagId": null,
-    "text": "Role: Business Research Intern",
+    "text": "Position: Business Research Intern",
     "where": "panel-field",
   },
   {
@@ -890,14 +1019,118 @@ exports[`Dream Job scoring inputs > inbox-triage has the same flaggable items 1`
   },
   {
     "hidden": true,
+    "id": "medium-pdf-start",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": "medium-offer-pdf",
+    "redFlagId": null,
+    "text": "Proposed joining date: 1 December 2026",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "medium-pdf-accept",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": "medium-offer-pdf",
+    "redFlagId": null,
+    "text": "This offer is subject to the Terms and Conditions on the following page. Please sign and return a copy of this letter to the onboarding desk as a token of your acceptance.",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "medium-pdf-clause-8-1",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": "medium-offer-pdf",
+    "redFlagId": null,
+    "text": "8.1: The internship is a training engagement and does not constitute an offer of permanent employment.",
+    "where": "fine-print",
+  },
+  {
+    "hidden": true,
+    "id": "medium-pdf-clause-8-2",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": "medium-offer-pdf",
+    "redFlagId": null,
+    "text": "8.2: The intern shall maintain strict confidentiality of all business information during and after the internship period.",
+    "where": "fine-print",
+  },
+  {
+    "hidden": true,
+    "id": "medium-pdf-clause-8-3",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": "medium-offer-pdf",
+    "redFlagId": null,
+    "text": "8.3: Working hours shall be 9:30 am to 6:00 pm, Monday to Friday. Hybrid attendance is at the discretion of the reporting team.",
+    "where": "fine-print",
+  },
+  {
+    "hidden": true,
     "id": "medium-pdf-clause-8-4",
     "nodeIds": [
       "inbox",
     ],
     "panelId": "medium-offer-pdf",
     "redFlagId": "pdf-deposit",
-    "text": "Clause 8.4: Before the joining date, the candidate must submit a refundable laptop security deposit of ₹2,499 to the equipment allocation partner. The amount will be returned after the device is handed back in working condition.",
+    "text": "8.4: Before the joining date, the candidate must submit a refundable laptop security deposit of ₹2,499 to the equipment allocation partner. The amount will be returned after the device is handed back in working condition.",
     "where": "fine-print",
+  },
+  {
+    "hidden": true,
+    "id": "medium-pdf-clause-8-5",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": "medium-offer-pdf",
+    "redFlagId": null,
+    "text": "8.5: Either party may end the internship with seven (7) days’ written notice. The stipend is payable on the last working day of each month.",
+    "where": "fine-print",
+  },
+  {
+    "hidden": true,
+    "id": "medium-pdf-signatory",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": "medium-offer-pdf",
+    "redFlagId": null,
+    "text": "For Nexora Technologies Pvt. Ltd.
+Aditi Sharma
+Senior Talent Acquisition Executive",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "legit-pdf-letterhead",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": "legit-offer-pdf",
+    "redFlagId": null,
+    "text": "Nexora Technologies Pvt. Ltd.
+4th Floor, Meridian Square, Outer Ring Road, Bengaluru, Karnataka, India
+nexora.example · careers@nexora.example",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "legit-pdf-ref",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": "legit-offer-pdf",
+    "redFlagId": null,
+    "text": "Ref: NX-BRI-026
+Date: 23 November 2026",
+    "where": "panel-field",
   },
   {
     "hidden": true,
@@ -907,7 +1140,40 @@ exports[`Dream Job scoring inputs > inbox-triage has the same flaggable items 1`
     ],
     "panelId": "legit-offer-pdf",
     "redFlagId": null,
-    "text": "Candidate: Ananya Rao",
+    "text": "To: Ananya Rao",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "legit-pdf-title",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": "legit-offer-pdf",
+    "redFlagId": null,
+    "text": "Letter of Offer: Internship",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "legit-pdf-greeting",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": "legit-offer-pdf",
+    "redFlagId": null,
+    "text": "Dear Ananya,",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "legit-pdf-intro",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": "legit-offer-pdf",
+    "redFlagId": null,
+    "text": "Following your interview with Priya Nair on 21 November 2026 and your HR discussion on 22 November 2026, we are pleased to offer you an internship with Nexora Technologies Pvt. Ltd. on the following terms:",
     "where": "panel-field",
   },
   {
@@ -985,6 +1251,41 @@ exports[`Dream Job scoring inputs > inbox-triage has the same flaggable items 1`
     "panelId": "legit-offer-pdf",
     "redFlagId": null,
     "text": "Reporting manager: Priya Nair, Research Manager",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "legit-pdf-no-fee",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": "legit-offer-pdf",
+    "redFlagId": null,
+    "text": "Nexora Technologies does not charge candidates any fee or deposit at any stage of hiring. Identity and payroll documents will be requested only after you accept this offer on our careers portal.",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "legit-pdf-accept",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": "legit-offer-pdf",
+    "redFlagId": null,
+    "text": "Please accept this offer at careers.nexora.example/offers/NX-BRI-026 by 30 November 2026. We look forward to working with you.",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "legit-pdf-signatory",
+    "nodeIds": [
+      "inbox",
+    ],
+    "panelId": "legit-offer-pdf",
+    "redFlagId": null,
+    "text": "Yours sincerely,
+Priya Nair
+Research Manager, Nexora Technologies Pvt. Ltd.",
     "where": "panel-field",
   },
 ]
@@ -1104,13 +1405,71 @@ exports[`Dream Job scoring inputs > legit-offer has the same flaggable items 1`]
   },
   {
     "hidden": true,
+    "id": "legit-pdf-letterhead",
+    "nodeIds": [
+      "gmail-legit",
+    ],
+    "panelId": "legit-offer-pdf",
+    "redFlagId": null,
+    "text": "Nexora Technologies Pvt. Ltd.
+4th Floor, Meridian Square, Outer Ring Road, Bengaluru, Karnataka, India
+nexora.example · careers@nexora.example",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "legit-pdf-ref",
+    "nodeIds": [
+      "gmail-legit",
+    ],
+    "panelId": "legit-offer-pdf",
+    "redFlagId": null,
+    "text": "Ref: NX-BRI-026
+Date: 23 November 2026",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
     "id": "legit-pdf-candidate",
     "nodeIds": [
       "gmail-legit",
     ],
     "panelId": "legit-offer-pdf",
     "redFlagId": null,
-    "text": "Candidate: Ananya Rao",
+    "text": "To: Ananya Rao",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "legit-pdf-title",
+    "nodeIds": [
+      "gmail-legit",
+    ],
+    "panelId": "legit-offer-pdf",
+    "redFlagId": null,
+    "text": "Letter of Offer: Internship",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "legit-pdf-greeting",
+    "nodeIds": [
+      "gmail-legit",
+    ],
+    "panelId": "legit-offer-pdf",
+    "redFlagId": null,
+    "text": "Dear Ananya,",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "legit-pdf-intro",
+    "nodeIds": [
+      "gmail-legit",
+    ],
+    "panelId": "legit-offer-pdf",
+    "redFlagId": null,
+    "text": "Following your interview with Priya Nair on 21 November 2026 and your HR discussion on 22 November 2026, we are pleased to offer you an internship with Nexora Technologies Pvt. Ltd. on the following terms:",
     "where": "panel-field",
   },
   {
@@ -1188,6 +1547,41 @@ exports[`Dream Job scoring inputs > legit-offer has the same flaggable items 1`]
     "panelId": "legit-offer-pdf",
     "redFlagId": null,
     "text": "Reporting manager: Priya Nair, Research Manager",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "legit-pdf-no-fee",
+    "nodeIds": [
+      "gmail-legit",
+    ],
+    "panelId": "legit-offer-pdf",
+    "redFlagId": null,
+    "text": "Nexora Technologies does not charge candidates any fee or deposit at any stage of hiring. Identity and payroll documents will be requested only after you accept this offer on our careers portal.",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "legit-pdf-accept",
+    "nodeIds": [
+      "gmail-legit",
+    ],
+    "panelId": "legit-offer-pdf",
+    "redFlagId": null,
+    "text": "Please accept this offer at careers.nexora.example/offers/NX-BRI-026 by 30 November 2026. We look forward to working with you.",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "legit-pdf-signatory",
+    "nodeIds": [
+      "gmail-legit",
+    ],
+    "panelId": "legit-offer-pdf",
+    "redFlagId": null,
+    "text": "Yours sincerely,
+Priya Nair
+Research Manager, Nexora Technologies Pvt. Ltd.",
     "where": "panel-field",
   },
 ]
@@ -1569,13 +1963,84 @@ I would like to arrange a short introductory discussion. Are you available tomor
   },
   {
     "hidden": true,
+    "id": "medium-pdf-letterhead",
+    "nodeIds": [
+      "gmail-medium",
+    ],
+    "panelId": "medium-offer-pdf",
+    "redFlagId": null,
+    "text": "Nexora Technologies Pvt. Ltd.
+4th Floor, Meridian Square, Outer Ring Road
+Bengaluru, Karnataka, India",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "medium-pdf-ref",
+    "nodeIds": [
+      "gmail-medium",
+    ],
+    "panelId": "medium-offer-pdf",
+    "redFlagId": null,
+    "text": "Ref: NX/HR/OL/2026/1147
+Date: 21 November 2026",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "medium-pdf-addressee",
+    "nodeIds": [
+      "gmail-medium",
+    ],
+    "panelId": "medium-offer-pdf",
+    "redFlagId": null,
+    "text": "To,
+Ananya Rao
+Bengaluru, Karnataka",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "medium-pdf-title",
+    "nodeIds": [
+      "gmail-medium",
+    ],
+    "panelId": "medium-offer-pdf",
+    "redFlagId": null,
+    "text": "Subject: Offer of Internship",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "medium-pdf-greeting",
+    "nodeIds": [
+      "gmail-medium",
+    ],
+    "panelId": "medium-offer-pdf",
+    "redFlagId": null,
+    "text": "Dear Ananya,",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "medium-pdf-intro",
+    "nodeIds": [
+      "gmail-medium",
+    ],
+    "panelId": "medium-offer-pdf",
+    "redFlagId": null,
+    "text": "With reference to your recent recruitment discussion, we are pleased to offer you an internship with Nexora Technologies Pvt. Ltd. on the terms set out below.",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
     "id": "medium-pdf-role",
     "nodeIds": [
       "gmail-medium",
     ],
     "panelId": "medium-offer-pdf",
     "redFlagId": null,
-    "text": "Role: Business Research Intern",
+    "text": "Position: Business Research Intern",
     "where": "panel-field",
   },
   {
@@ -1591,14 +2056,93 @@ I would like to arrange a short introductory discussion. Are you available tomor
   },
   {
     "hidden": true,
+    "id": "medium-pdf-start",
+    "nodeIds": [
+      "gmail-medium",
+    ],
+    "panelId": "medium-offer-pdf",
+    "redFlagId": null,
+    "text": "Proposed joining date: 1 December 2026",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "medium-pdf-accept",
+    "nodeIds": [
+      "gmail-medium",
+    ],
+    "panelId": "medium-offer-pdf",
+    "redFlagId": null,
+    "text": "This offer is subject to the Terms and Conditions on the following page. Please sign and return a copy of this letter to the onboarding desk as a token of your acceptance.",
+    "where": "panel-field",
+  },
+  {
+    "hidden": true,
+    "id": "medium-pdf-clause-8-1",
+    "nodeIds": [
+      "gmail-medium",
+    ],
+    "panelId": "medium-offer-pdf",
+    "redFlagId": null,
+    "text": "8.1: The internship is a training engagement and does not constitute an offer of permanent employment.",
+    "where": "fine-print",
+  },
+  {
+    "hidden": true,
+    "id": "medium-pdf-clause-8-2",
+    "nodeIds": [
+      "gmail-medium",
+    ],
+    "panelId": "medium-offer-pdf",
+    "redFlagId": null,
+    "text": "8.2: The intern shall maintain strict confidentiality of all business information during and after the internship period.",
+    "where": "fine-print",
+  },
+  {
+    "hidden": true,
+    "id": "medium-pdf-clause-8-3",
+    "nodeIds": [
+      "gmail-medium",
+    ],
+    "panelId": "medium-offer-pdf",
+    "redFlagId": null,
+    "text": "8.3: Working hours shall be 9:30 am to 6:00 pm, Monday to Friday. Hybrid attendance is at the discretion of the reporting team.",
+    "where": "fine-print",
+  },
+  {
+    "hidden": true,
     "id": "medium-pdf-clause-8-4",
     "nodeIds": [
       "gmail-medium",
     ],
     "panelId": "medium-offer-pdf",
     "redFlagId": "pdf-deposit",
-    "text": "Clause 8.4: Before the joining date, the candidate must submit a refundable laptop security deposit of ₹2,499 to the equipment allocation partner. The amount will be returned after the device is handed back in working condition.",
+    "text": "8.4: Before the joining date, the candidate must submit a refundable laptop security deposit of ₹2,499 to the equipment allocation partner. The amount will be returned after the device is handed back in working condition.",
     "where": "fine-print",
+  },
+  {
+    "hidden": true,
+    "id": "medium-pdf-clause-8-5",
+    "nodeIds": [
+      "gmail-medium",
+    ],
+    "panelId": "medium-offer-pdf",
+    "redFlagId": null,
+    "text": "8.5: Either party may end the internship with seven (7) days’ written notice. The stipend is payable on the last working day of each month.",
+    "where": "fine-print",
+  },
+  {
+    "hidden": true,
+    "id": "medium-pdf-signatory",
+    "nodeIds": [
+      "gmail-medium",
+    ],
+    "panelId": "medium-offer-pdf",
+    "redFlagId": null,
+    "text": "For Nexora Technologies Pvt. Ltd.
+Aditi Sharma
+Senior Talent Acquisition Executive",
+    "where": "panel-field",
   },
 ]
 `;
