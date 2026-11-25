@@ -142,9 +142,16 @@ export function FlagPopover({
             <Flag className="size-4" aria-hidden /> {editing ? t("flag.update") : t("flag.save")}
           </button>
         </div>
-        {chosen === undefined && chips !== null && (
-          <p className="mt-2 text-center text-xs text-slate-500">{t("flag.pickReason")}</p>
-        )}
+        {/* Always takes its space, so the buttons don't jump when a reason is picked. */}
+        <p
+          className={cn(
+            "mt-2 text-center text-xs text-slate-500",
+            (chosen !== undefined || chips === null) && "invisible",
+          )}
+          aria-hidden={chosen !== undefined}
+        >
+          {t("flag.pickReason")}
+        </p>
       </motion.div>
     </div>
   );
