@@ -1,23 +1,21 @@
 import { defineScenario } from "@/engine/define";
-import { documentsFor, EMAIL_EASY, redFlagIdsIn } from "../content/emails";
 import { pickPanels } from "../content/evidence";
 import { pickRedFlags } from "../content/red-flags";
 import { REAL_WORLD_ACTION } from "../content/universe";
 
 /**
- * Easy: LI-EASY-01 ("Too good to be true") → gmail-easy-01 ("The offer letter that came from
- * nowhere"). Source: docs/scenarios/dream-job/blueprint.docx, sections 2 and 3.
+ * Easy: LI-EASY-01 ("Too good to be true"). Source: docs/scenarios/dream-job/blueprint.docx,
+ * section 2. Its follow-up email (gmail-easy-01) is played in the inbox triage scenario.
  */
 export const easyTooGood = defineScenario({
   id: "easy-too-good",
   dojoId: "dream-job",
   title: "Too good to be true",
-  summary:
-    "A recruiter says you're selected for a ₹40,000 internship. Then an offer letter arrives.",
+  summary: "A recruiter says you're selected for a ₹40,000 internship. All you have to do is pay.",
   legit: false,
   primer: {
     title: "Too good to be true",
-    body: "Read the recruiter's message and tap the parts that look suspicious. Then check the email that follows.",
+    body: "Read the recruiter's message, flag the parts that look suspicious, then decide what to do.",
   },
   startNodeId: "li-dm",
 
@@ -89,18 +87,7 @@ export const easyTooGood = defineScenario({
       evidence: ["karan-profile", "nexora-company", "nexora-careers"],
       choices: [
         { label: "Reply “YES” and pay the ₹1,499 fee", nextNodeId: "li-paid" },
-        { label: "Don't reply", nextNodeId: "gmail-easy" },
-      ],
-    },
-
-    "gmail-easy": {
-      kind: "email",
-      app: "gmail",
-      email: EMAIL_EASY,
-      evidence: ["nexora-careers"],
-      choices: [
-        { label: "Pay ₹2,999 to the UPI ID", nextNodeId: "mail-paid" },
-        { label: "Delete the email and report it as a scam", nextNodeId: "safe" },
+        { label: "Don't reply", nextNodeId: "safe" },
       ],
     },
 
@@ -112,25 +99,16 @@ export const easyTooGood = defineScenario({
       moneyDelta: -1499,
       rewindToNodeId: "li-dm",
     },
-    "mail-paid": {
-      kind: "outcome",
-      result: "loss",
-      title: "₹2,999 gone",
-      body: "You paid ₹2,999 to karan.sethi@okaxis, an individual's UPI ID. No joining confirmation arrived. Genuine recruitment never needs a registration or verification fee.",
-      moneyDelta: -2999,
-      rewindToNodeId: "gmail-easy",
-    },
     safe: {
       kind: "outcome",
       result: "safe",
       title: "You didn't pay",
-      body: "You ignored the message and reported the email. Nexora's own careers page lists this internship at ₹18,000 a month, not ₹40,000 with a fee.",
+      body: "You didn't reply and kept your ₹1,499. Nexora's own careers page lists this internship at ₹18,000 a month, with no fee to apply. A real employer never asks you to pay to get hired.",
     },
   },
 
   evidence: {
     ...pickPanels(["karan-profile", "nexora-company", "nexora-careers"]),
-    ...documentsFor([EMAIL_EASY]),
   },
   redFlags: pickRedFlags([
     "li-never-applied",
@@ -140,13 +118,12 @@ export const easyTooGood = defineScenario({
     "li-fee",
     "li-personal-upi",
     "li-urgency",
-    ...redFlagIdsIn([EMAIL_EASY]),
   ]),
 
   debrief: {
     rule: "A real employer does not charge you to get a job.",
     summary:
-      "An unsolicited offer, instant selection, unusually high pay, vague duties and a payment deadline are not separate little inconveniences; together they are a strong scam pattern. The sender's display name is editable text: the real sender address is what matters. Verify the vacancy through the company website you find independently.",
+      "An unsolicited offer, instant selection, unusually high pay, vague duties and a payment deadline are not separate little inconveniences; together they are a strong scam pattern. Verify the vacancy through the company website you find independently.",
     realWorldAction: REAL_WORLD_ACTION,
   },
 });
