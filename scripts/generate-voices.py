@@ -10,6 +10,7 @@ voices, never a copy of a real person. Commit the MP3s it writes.
 
 import asyncio
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -61,6 +62,8 @@ async def record(note):
         VOICES[(note["locale"], note["voice"])],
         rate=mood["rate"],
         pitch=mood["pitch"],
+        # aiohttp ignores proxy env vars, so pass one on when there is one.
+        proxy=os.environ.get("HTTPS_PROXY") or os.environ.get("https_proxy"),
     )
     await speech.save(str(path))
     print(f"recorded {note['path']}")
