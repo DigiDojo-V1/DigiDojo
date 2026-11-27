@@ -317,7 +317,9 @@ export function ChatDesktop({
         {look.topNav === true ? (
           <div className="flex min-h-0 flex-1 justify-center px-4 py-4 xl:px-6">
             <div className="flex w-full max-w-[1128px] min-w-0 overflow-hidden rounded-lg bg-white ring-1 ring-black/10">
-              <div className="hidden xl:flex">{list}</div>
+              <div className={aside === undefined ? "hidden xl:flex" : "hidden 2xl:flex"}>
+                {list}
+              </div>
               {thread}
               {evidence}
             </div>
@@ -325,7 +327,7 @@ export function ChatDesktop({
         ) : (
           <div className="flex min-h-0 flex-1">
             {look.rail !== undefined && <IconRail kind={look.rail} />}
-            <div className="hidden xl:flex">{list}</div>
+            <div className={aside === undefined ? "hidden xl:flex" : "hidden 2xl:flex"}>{list}</div>
             {thread}
             {evidence}
           </div>

@@ -134,7 +134,12 @@ function DenseInboxList({ rows, onOpen }: { rows: InboxRow[]; onOpen: (id: strin
               >
                 {row.label === undefined ? t("triage.unlabelled") : t(`triage.${row.label}`)}
               </span>
-              <span className={cn("w-16 shrink-0 text-right text-xs", unread && "font-bold")}>
+              <span
+                className={cn(
+                  "shrink-0 text-right text-xs whitespace-nowrap",
+                  unread && "font-bold",
+                )}
+              >
                 {row.date}
               </span>
             </button>

@@ -644,9 +644,11 @@ export function MailBody({
         {mail.showFromAddress && !detailsOpen && (
           <DetailRow id={mail.from.id} label={t("mail.from")} value={mail.from.address} {...flag} />
         )}
-        {!detailsOpen && <p className="mt-1 text-xs text-slate-500">{t("mail.tapSender")}</p>}
+        {!detailsOpen && (
+          <p className="mt-1 text-xs text-slate-500 lg:ml-14">{t("mail.tapSender")}</p>
+        )}
         {detailsOpen && (
-          <div className="mt-1 space-y-0.5 rounded-xl border border-slate-200 bg-white p-2 shadow-sm">
+          <div className="mt-1 space-y-0.5 rounded-xl border border-slate-200 bg-white p-2 shadow-sm lg:ml-14 lg:max-w-[640px]">
             <DetailRow
               id={mail.from.id}
               label={t("mail.from")}
