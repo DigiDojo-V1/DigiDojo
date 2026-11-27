@@ -111,7 +111,7 @@ export function TriageLabelBar({
   const t = useT();
   const labels: TriageLabel[] = ["legit", "scam", "needs-checking"];
   return (
-    <div className="sticky bottom-0 z-30 space-y-2 border-t border-slate-200 bg-white/95 p-3 backdrop-blur">
+    <div className="sticky bottom-0 z-30 space-y-2 border-t border-slate-200 bg-white/95 p-3 backdrop-blur lg:static lg:border-0 lg:bg-transparent lg:p-0 lg:backdrop-blur-none">
       <p className="text-xs font-medium text-slate-500">{t("triage.prompt")}</p>
       <div className="grid grid-cols-3 gap-2">
         {labels.map((label) => (

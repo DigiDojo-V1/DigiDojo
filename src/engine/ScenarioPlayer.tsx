@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "motion/react";
 import { RotateCcw } from "lucide-react";
+import { AppChrome } from "@/components/layout/AppChrome";
 import { TopBar } from "@/components/TopBar";
 import { Button } from "@/components/ui/button";
 import { useLocale, useT, useText } from "@/i18n/hooks";
@@ -16,6 +17,7 @@ import { UpiShell } from "@/shells/UpiShell";
 import { Debrief } from "./Debrief";
 import { Flagging, useFlagActions } from "./Flagging";
 import { HowToPlay } from "./HowToPlay";
+import { PlayerFrame } from "./PlayerFrame";
 import { messageRevealIds } from "./evidence";
 import {
   ChoiceFooter,
@@ -63,6 +65,7 @@ export function ScenarioPlayer({ scenario, backHref, notesGraded }: ScenarioPlay
   const markTutorialSeen = useProgressStore((s) => s.markTutorialSeen);
   const rewind = useRunStore((s) => s.rewind);
   const openDebrief = useRunStore((s) => s.openDebrief);
+  const text = useText();
 
   // A fresh run every time the player opens the scenario. "How to play" opens the very first one.
   // Runs on the client only, after the saved progress has loaded.
@@ -78,35 +81,41 @@ export function ScenarioPlayer({ scenario, backHref, notesGraded }: ScenarioPlay
 
   if (phase === "tutorial") {
     return (
-      <HowToPlay
-        onDone={() => {
-          markTutorialSeen();
-          finishTutorial();
-        }}
-      />
+      <AppChrome>
+        <HowToPlay
+          onDone={() => {
+            markTutorialSeen();
+            finishTutorial();
+          }}
+        />
+      </AppChrome>
     );
   }
 
   if (phase === "primer" && scenario.primer !== undefined) {
     return (
-      <ScenarioIntro
-        primer={scenario.primer}
-        backHref={backHref}
-        onStart={beginSimulation}
-        onHowToPlay={openTutorial}
-      />
+      <AppChrome>
+        <ScenarioIntro
+          primer={scenario.primer}
+          backHref={backHref}
+          onStart={beginSimulation}
+          onHowToPlay={openTutorial}
+        />
+      </AppChrome>
     );
   }
 
   if (phase === "debrief") {
     return (
-      <Debrief
-        scenario={scenario}
-        outcome={node?.kind === "outcome" ? node : undefined}
-        run={{ seen, flags, visited, classifications }}
-        backHref={backHref}
-        onReplay={() => start(key, scenario)}
-      />
+      <AppChrome>
+        <Debrief
+          scenario={scenario}
+          outcome={node?.kind === "outcome" ? node : undefined}
+          run={{ seen, flags, visited, classifications }}
+          backHref={backHref}
+          onReplay={() => start(key, scenario)}
+        />
+      </AppChrome>
     );
   }
 
@@ -115,36 +124,40 @@ export function ScenarioPlayer({ scenario, backHref, notesGraded }: ScenarioPlay
   if (node.kind === "outcome") {
     const rewindTarget = node.rewindToNodeId;
     return (
-      <OutcomeView
-        outcome={node}
-        backHref={backHref}
-        onRewind={rewindTarget !== undefined ? () => rewind(rewindTarget) : undefined}
-        onDebrief={openDebrief}
-      />
+      <AppChrome>
+        <OutcomeView
+          outcome={node}
+          backHref={backHref}
+          onRewind={rewindTarget !== undefined ? () => rewind(rewindTarget) : undefined}
+          onDebrief={openDebrief}
+        />
+      </AppChrome>
     );
   }
 
   // Remount for every visit so each screen starts fresh (messages reveal again, instantly if seen).
   const visitKey = `${trail.length}-${rewinds}`;
   return (
-    <Flagging scenario={scenario} graded={notesGraded}>
-      {node.kind === "thread" && (
-        <ThreadView key={visitKey} scenario={scenario} node={node} backHref={backHref} />
-      )}
-      {node.kind === "email" && nodeId !== undefined && (
-        <EmailView
-          key={visitKey}
-          scenario={scenario}
-          nodeId={nodeId}
-          node={node}
-          backHref={backHref}
-        />
-      )}
-      {node.kind === "compose" && <ComposeView key={visitKey} node={node} backHref={backHref} />}
-      {node.kind === "triage" && (
-        <TriageView key={visitKey} scenario={scenario} node={node} backHref={backHref} />
-      )}
-    </Flagging>
+    <PlayerFrame title={text(scenario.title)} backHref={backHref}>
+      <Flagging scenario={scenario} graded={notesGraded}>
+        {node.kind === "thread" && (
+          <ThreadView key={visitKey} scenario={scenario} node={node} backHref={backHref} />
+        )}
+        {node.kind === "email" && nodeId !== undefined && (
+          <EmailView
+            key={visitKey}
+            scenario={scenario}
+            nodeId={nodeId}
+            node={node}
+            backHref={backHref}
+          />
+        )}
+        {node.kind === "compose" && <ComposeView key={visitKey} node={node} backHref={backHref} />}
+        {node.kind === "triage" && (
+          <TriageView key={visitKey} scenario={scenario} node={node} backHref={backHref} />
+        )}
+      </Flagging>
+    </PlayerFrame>
   );
 }
 
@@ -241,7 +254,7 @@ function ThreadView({
   };
 
   return (
-    <div className="flex flex-1 flex-col">
+    <div className="flex flex-1 flex-col lg:min-h-0">
       <Shell app={node.app} {...shellProps} />
       {evidence.sheet}
     </div>
@@ -282,7 +295,7 @@ function OutcomeView({
   const style = OUTCOME_STYLE[outcome.result];
   const Icon = style.icon;
   return (
-    <main className="flex flex-1 flex-col gap-4 p-4">
+    <main className="flex flex-1 flex-col gap-4 p-4 md:rounded-lg md:bg-white md:p-6 md:ring-1 md:ring-black/10">
       <TopBar back={{ href: backHref, label: "nav.backToDojo" }} />
       <div className="flex flex-1 flex-col justify-center gap-4">
         <motion.div
