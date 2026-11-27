@@ -248,9 +248,10 @@ Build:
 5. `ChatShell` with three themes (WhatsApp green, Telegram blue, Instagram gradient-free purple). Use our own simple look, not copies of the real apps' branding. Placeholder components for `SmsShell`, `UpiShell` and `CallShell` that render "Coming soon: <name> shell".
 6. Registry with the 4 dojos in §2, each with a `index.ts`. Easy Money contains the example scenario below. The other three each contain one placeholder scenario with a single outcome node, titled "Coming soon".
 7. Screens:
-   - **Home** (`/`): app name, a one-line tagline, and the 4 dojos as a vertical path of cards (order number, name, tagline, scenario count, progress). All clickable for now.
-   - **Dojo** (`/dojo/[dojoId]`): dojo name and tagline, list of scenarios with completed ticks, back button. Unknown id → 404.
-   - **Player** (`/dojo/[dojoId]/[scenarioId]`): how to play (first visit only) → intro (if the scenario has a primer) → threads → outcome → debrief → "Back to dojo". Unknown id → 404.
+   - **Landing** (`/`): placeholder hero ("digi dojo") until the real landing page; its call to action will link to `/digidojo`.
+   - **Home** (`/digidojo`): app name, a one-line tagline, and the 4 dojos as a vertical path of cards (order number, name, tagline, scenario count, progress). All clickable for now.
+   - **Dojo** (`/digidojo/dojo/[dojoId]`): dojo name and tagline, list of scenarios with completed ticks, back button. Unknown id → 404.
+   - **Player** (`/digidojo/dojo/[dojoId]/[scenarioId]`): how to play (first visit only) → intro (if the scenario has a primer) → threads → outcome → debrief → "Back to dojo". Unknown id → 404.
    - Every simulation screen shows the `SimulationBadge`.
 8. Example scenario `easy-money/task-scam-starter` (keep it short, it's a pattern to copy):
    - `dm` (instagram, "Priya · HR"): "Hi! Saw your profile. Part-time work from home, earn ₹3,000/day just by liking YouTube videos" (red flag `pay-far-above-work`, tactic `too-good-to-be-true`), "No experience needed. Interested?". Choices: "Yes, interested!" → `task`; "Ignore and block" → `safe-early`.
