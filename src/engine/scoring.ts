@@ -89,7 +89,8 @@ function liveEvidence(liveCalls: RunRecord["liveCalls"]): LiveEvidence {
   const flags: LiveEvidence["flags"] = [];
   for (const call of Object.values(liveCalls ?? {})) {
     const report = call.report;
-    if (typeof report !== "object") continue;
+    // A rough local report (the judge failed) has no flag matches: don't count them as false alarms.
+    if (typeof report !== "object" || !report.analysed) continue;
     for (const h of report.heard) if (!heard.has(h.redFlagId)) heard.set(h.redFlagId, h.quote);
     call.flags.forEach((flag, i) =>
       flags.push({

@@ -276,4 +276,18 @@ describe("scoring a live call", () => {
     expect(result.caught).toEqual([]);
     expect(result.falseAlarms).toEqual([]);
   });
+
+  it("doesn't punish flags when only a rough report came back", () => {
+    const result = computeDebrief(
+      kycCall,
+      run({
+        "kyc-call": record({
+          report: report({ analysed: false, flagMatches: [null] }),
+          flags: [{ quote: "frozen in two hours", tactic: "urgency", atMs: 9_000 }],
+        }),
+      }),
+    );
+    expect(result.falseAlarms).toEqual([]);
+    expect(result.score.points).toBe(0);
+  });
 });
