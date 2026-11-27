@@ -51,7 +51,8 @@ src/
     registry.ts                        # ordered list of dojos (imports each dojo's index.ts)
     easy-money/
       index.ts                         # defineDojo({...}) with its scenarios
-      scenarios/task-scam-starter.ts   # the example scenario (see §6)
+      content/                         # shared world, red flags, evidence panels, emails
+      scenarios/                       # task-scam, mule-recruitment, paid-user-study
       components/                      # dojo-only components, if any
     dream-job/   index.ts  scenarios/
     trust-me-bro/ index.ts scenarios/
@@ -253,7 +254,7 @@ Build:
    - **Dojo** (`/digidojo/dojo/[dojoId]`): dojo name and tagline, list of scenarios with completed ticks, back button. Unknown id → 404.
    - **Player** (`/digidojo/dojo/[dojoId]/[scenarioId]`): how to play (first visit only) → intro (if the scenario has a primer) → threads → outcome → debrief → "Back to dojo". Unknown id → 404.
    - Every simulation screen shows the `SimulationBadge`.
-8. Example scenario `easy-money/task-scam-starter` (keep it short, it's a pattern to copy):
+8. Example scenario `easy-money/task-scam-starter` (keep it short, it's a pattern to copy). Since replaced by the full Easy Money dojo (`task-scam`, `mule-recruitment`, `paid-user-study`, scripts in `docs/scenarios/easy-money/`):
    - `dm` (instagram, "Priya · HR"): "Hi! Saw your profile. Part-time work from home, earn ₹3,000/day just by liking YouTube videos" (red flag `pay-far-above-work`, tactic `too-good-to-be-true`), "No experience needed. Interested?". Choices: "Yes, interested!" → `task`; "Ignore and block" → `safe-early`.
    - `task` (instagram): "Task: like 3 videos, send screenshots. ₹50 per like.", system "₹150 credited to your UPI" (red flag `instant-small-payout`, tactic `small-win-first`), "More tasks in our Telegram group". Choice: "Join the group" → `group`.
    - `group` (telegram, "Earn Daily VIP · 1,204 members"): sender Rahul "Got ₹2,800 today [screenshot]" (flag `payout-screenshots`, `social-proof`); sender Mentor "Prepaid task: send ₹1,000, receive ₹1,300 in 10 min" (flag `pay-to-earn`, `pay-to-earn`); Mentor "Only 3 slots left!" (flag `slots-left`, `urgency`). Choices: "Pay ₹1,000" → `lost`; "Leave and report the group" → `safe-late`.
