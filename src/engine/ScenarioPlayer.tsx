@@ -40,10 +40,12 @@ interface ScenarioPlayerProps {
   scenario: Scenario;
   /** Where "Back" and "Back to dojo" go. */
   backHref: string;
+  /** Whether the AI marks the player's written explanations (FLAG_AI on). */
+  notesGraded: boolean;
 }
 
 /** Plays one scenario: how to play (first time only) → primer → threads → outcome → debrief. */
-export function ScenarioPlayer({ scenario, backHref }: ScenarioPlayerProps) {
+export function ScenarioPlayer({ scenario, backHref, notesGraded }: ScenarioPlayerProps) {
   const key = scenarioKey(scenario.dojoId, scenario.id);
   const activeKey = useRunStore((s) => s.scenarioKey);
   const phase = useRunStore((s) => s.phase);
@@ -125,7 +127,7 @@ export function ScenarioPlayer({ scenario, backHref }: ScenarioPlayerProps) {
   // Remount for every visit so each screen starts fresh (messages reveal again, instantly if seen).
   const visitKey = `${trail.length}-${rewinds}`;
   return (
-    <Flagging scenario={scenario}>
+    <Flagging scenario={scenario} graded={notesGraded}>
       {node.kind === "thread" && (
         <ThreadView key={visitKey} scenario={scenario} node={node} backHref={backHref} />
       )}

@@ -4,6 +4,7 @@ import { DOJOS, getScenario } from "@/dojos/registry";
 import { ScenarioPlayer } from "@/engine/ScenarioPlayer";
 import { DEFAULT_LOCALE } from "@/i18n/locale";
 import { resolveText } from "@/i18n/text";
+import { aiStatus } from "@/server/ai-config";
 
 /** Only ids in the registry exist. Anything else is a 404. */
 export const dynamicParams = false;
@@ -28,5 +29,11 @@ export default async function ScenarioPage({ params }: PageProps<"/dojo/[dojoId]
   const scenario = getScenario(dojoId, scenarioId);
   if (scenario === undefined) notFound();
 
-  return <ScenarioPlayer scenario={scenario} backHref={`/dojo/${dojoId}`} />;
+  return (
+    <ScenarioPlayer
+      scenario={scenario}
+      backHref={`/dojo/${dojoId}`}
+      notesGraded={"on" in aiStatus(process.env)}
+    />
+  );
 }

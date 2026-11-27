@@ -4,8 +4,8 @@ import { aiStatus, modelsFrom } from "./ai-config";
 import type { LlmLike } from "./flag-api";
 
 /**
- * OpenAI for the flag API. Off unless `FLAG_AI=on` and `OPENAI_API_KEY` is set; then the reason
- * chips and explanation marking use it, with JSON answers forced by a strict schema.
+ * OpenAI for the flag API. Off unless `FLAG_AI=on` and `OPENAI_API_KEY` is set; then it marks the
+ * player's written explanations, with JSON answers forced by a strict schema.
  */
 
 let cached: LlmLike | null | undefined;
@@ -21,7 +21,7 @@ export function getLlm(): LlmLike | null {
     return cached;
   }
 
-  // No retries: a slow answer is replaced by the built-in chips, so waiting longer doesn't help.
+  // No retries: marking is a bonus, so a failed call is shown as "couldn't mark" instead.
   const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY, maxRetries: 0 });
   const models = modelsFrom(process.env);
 
@@ -36,7 +36,7 @@ export function getLlm(): LlmLike | null {
           text: {
             format: {
               type: "json_schema",
-              name: model === "chips" ? "reason_chips" : "explanation_mark",
+              name: "explanation_mark",
               schema: schema as Record<string, unknown>,
               strict: true,
             },

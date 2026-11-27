@@ -2,7 +2,7 @@ import { z } from "zod";
 import type { Locale } from "@/i18n/locale";
 import { resolveText } from "@/i18n/text";
 import { collectFlaggables } from "./evidence";
-import { findTarget, matchHighlight, targetText, type Chip } from "./highlight";
+import { findTarget, matchHighlight, splitSentences, targetText, type Chip } from "./highlight";
 import { TacticSchema, type ScenarioData, type Tactic } from "./schema";
 
 /** How the AI rated the player's own explanation. */
@@ -16,7 +16,7 @@ export const JudgeResultSchema = z.object({
 });
 export type JudgeResult = z.infer<typeof JudgeResultSchema>;
 
-/** `skipped`: nothing to grade (no note, or the highlight caught no red flag) or grading is off. */
+/** `skipped`: nothing to grade (no note, or the flag caught no red flag) or grading is off. */
 export type JudgeState = JudgeResult | "pending" | "error" | "skipped";
 
 export const ChipSchema = z.object({ tactic: TacticSchema, label: z.string().max(80).optional() });
@@ -26,12 +26,12 @@ export const MAX_NOTE_CHARS = 200;
 /** Shortest explanation that can stand in for a reason chip. */
 export const MIN_NOTE_CHARS = 10;
 
-/** One thing the player flagged: words they highlighted, or a whole item such as a Reply-To line. */
+/** One thing the player flagged: a sentence, or a whole item such as a Reply-To line. */
 export interface FlagRecord {
   id: string;
   /** A text target id (message or email paragraph) or a flaggable item id. */
   targetId: string;
-  /** Character range in the target's text, for highlights. Absent for whole items. */
+  /** Character range of the flagged sentence in the target's text. Absent for whole items. */
   start?: number;
   end?: number;
   /** What the player flagged, as they saw it. */
@@ -47,7 +47,7 @@ export interface FlagRecord {
   judge?: JudgeState;
 }
 
-/** Where a flag is made: a highlight in a text, or a whole item. */
+/** Where a flag is made: a sentence in a text, or a whole item. */
 export interface FlagSpot {
   targetId: string;
   start?: number;
@@ -68,7 +68,9 @@ export function resolveSpot(
     if (target === undefined || spot.start === undefined || spot.end === undefined)
       return undefined;
     const full = targetText(target, locale);
-    if (spot.start < 0 || spot.end > full.length || spot.start >= spot.end) return undefined;
+    // Only whole sentences can be flagged.
+    const { start, end } = spot;
+    if (!splitSentences(full).some((s) => s.start === start && s.end === end)) return undefined;
     return {
       text: full.slice(spot.start, spot.end),
       catches: matchHighlight(target, locale, spot.start, spot.end),
