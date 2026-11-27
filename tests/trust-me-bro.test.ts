@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { trustMeBro } from "@/dojos/trust-me-bro";
 import { ScenarioSchema, type Scenario } from "@/engine/schema";
 import { toBubble } from "@/engine/transcript";
+import { voiceNoteSrc } from "@/engine/voice";
 import { formatVoiceLength, waveform } from "@/shells/VoiceNote";
 import { validScenarioInput } from "./fixtures";
 
@@ -102,5 +103,32 @@ describe("voice notes", () => {
       expect(h).toBeGreaterThanOrEqual(0.25);
       expect(h).toBeLessThanOrEqual(1);
     }
+  });
+});
+
+describe("voice note recordings", () => {
+  const ask = scenario("bhai-urgent").nodes["the-ask"];
+  const message = ask?.kind === "thread" ? ask.messages[0]! : undefined;
+
+  it("points at the pre-generated file for the player's language", () => {
+    if (message === undefined) throw new Error("fixture");
+    expect(voiceNoteSrc("trust-me-bro", "bhai-urgent", message, "en")).toBe(
+      "/voices/trust-me-bro/bhai-urgent/ask-voice.mp3",
+    );
+  });
+
+  it("plays the English recording to a Hinglish player until the transcript has Hinglish", () => {
+    if (message === undefined) throw new Error("fixture");
+    expect(voiceNoteSrc("trust-me-bro", "bhai-urgent", message, "hinglish")).toBe(
+      "/voices/trust-me-bro/bhai-urgent/ask-voice.mp3",
+    );
+    const translated = {
+      ...message,
+      text: { en: "Hi", hinglish: "Haan bhai" },
+      segments: undefined,
+    };
+    expect(voiceNoteSrc("trust-me-bro", "x", translated, "hinglish")).toBe(
+      "/voices/trust-me-bro/x/ask-voice.hinglish.mp3",
+    );
   });
 });

@@ -19,19 +19,3 @@ export function modelsFrom(env: Record<string, string | undefined>) {
     judge: env.OPENAI_JUDGE_MODEL || DEFAULT_MODELS.judge,
   };
 }
-
-/** Default model for voice notes: it follows tone instructions (accent, mood). */
-export const DEFAULT_VOICE_MODEL = "gpt-4o-mini-tts";
-
-/** Whether voice notes play generated audio. Separate from FLAG_AI so each can be switched alone. */
-export function voiceStatus(
-  env: Record<string, string | undefined>,
-): { on: true } | { off: string } {
-  if ((env.VOICE_AI ?? "off").trim().toLowerCase() !== "on") return { off: "VOICE_AI is not on" };
-  if (!env.OPENAI_API_KEY) return { off: "VOICE_AI is on but OPENAI_API_KEY is not set" };
-  return { on: true };
-}
-
-export function voiceModelFrom(env: Record<string, string | undefined>): string {
-  return env.OPENAI_VOICE_MODEL || DEFAULT_VOICE_MODEL;
-}

@@ -6,6 +6,7 @@ import { RotateCcw } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
 import { Button } from "@/components/ui/button";
 import { useLocale, useT, useText } from "@/i18n/hooks";
+import type { Locale } from "@/i18n/locale";
 import { formatRupees } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { CallShell } from "@/shells/CallShell";
@@ -191,11 +192,11 @@ function ThreadView({
               ...b,
               voiceNote: {
                 ...b.voiceNote,
-                src: voiceNoteSrc(scenario.dojoId, scenario.id, b.id, locale),
+                src: voiceSrcFor(scenario, b.id, locale),
               },
             },
       ),
-    [prior, node.messages, revealed, locale, scenario.dojoId, scenario.id],
+    [prior, node.messages, revealed, locale, scenario],
   );
 
   const typing = next !== undefined && next.from === "them" && !seenBefore.has(next.id);
@@ -272,6 +273,16 @@ function Shell({ app, ...props }: ShellProps & { app: ThreadApp }) {
     case "call":
       return <CallShell {...props} />;
   }
+}
+
+/** The recording for a voice note bubble, found by its message id. */
+function voiceSrcFor(scenario: Scenario, messageId: string, locale: Locale): string | undefined {
+  for (const node of Object.values(scenario.nodes)) {
+    if (node.kind !== "thread") continue;
+    const message = node.messages.find((m) => m.id === messageId);
+    if (message !== undefined) return voiceNoteSrc(scenario.dojoId, scenario.id, message, locale);
+  }
+  return undefined;
 }
 
 /* ------------------------------------------------------------------ */
