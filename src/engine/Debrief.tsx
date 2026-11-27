@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, type ReactNode } from "react";
 import {
   Check,
+  ChevronDown,
   CircleDashed,
   Eye,
   Flag,
@@ -12,6 +13,7 @@ import {
   Loader2,
   Phone,
   RotateCcw,
+  Route,
   Trophy,
   X,
 } from "lucide-react";
@@ -128,15 +130,6 @@ export function Debrief({ scenario, outcome, run, backHref, onReplay }: DebriefP
 
       {result.triage.length > 0 && <TriageSection rows={result.triage} />}
 
-      {result.notReached.length > 0 && (
-        <FlagSection
-          title={t("debrief.notReached")}
-          icon={<Flag className="size-4 text-muted-foreground" />}
-          flags={result.notReached}
-          muted
-        />
-      )}
-
       <Card className="bg-primary text-primary-foreground ring-0">
         <CardHeader>
           <CardTitle className="flex items-center gap-1.5 text-sm font-medium opacity-80">
@@ -160,6 +153,8 @@ export function Debrief({ scenario, outcome, run, backHref, onReplay }: DebriefP
         </CardContent>
       </Card>
 
+      {result.notReached.length > 0 && <OtherPathsSection flags={result.notReached} />}
+
       <div className="mt-2 grid grid-cols-2 gap-2">
         <Button variant="outline" size="lg" onClick={onReplay}>
           <RotateCcw /> {t("debrief.playAgain")}
@@ -178,20 +173,16 @@ function FlagSection({
   flags,
   empty,
   note,
-  muted = false,
 }: {
   title: string;
   icon: ReactNode;
   flags: DebriefFlag[];
   empty?: string;
   note?: string;
-  muted?: boolean;
 }) {
-  const t = useT();
-  const text = useText();
   if (flags.length === 0 && empty === undefined) return null;
   return (
-    <section className={cn("space-y-2", muted && "opacity-70")}>
+    <section className="space-y-2">
       <h2 className="flex items-center gap-1.5 text-sm font-semibold">
         {icon} {title}
       </h2>
@@ -200,28 +191,73 @@ function FlagSection({
         <p className="text-sm text-muted-foreground">{note}</p>
       )}
       {flags.map((flag) => (
-        <Card key={flag.redFlagId} size="sm">
-          <CardContent className="space-y-1.5">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="font-medium">{text(flag.label)}</span>
-              <Badge variant="secondary">{t(`tactic.${flag.tactic}.label`)}</Badge>
-            </div>
-            <p className="text-xs font-medium text-muted-foreground">
-              {t(`debrief.where.${flag.where}`)}
-            </p>
-            {flag.player === undefined ? (
-              <Quote text={flag.evidenceText} />
-            ) : (
-              <PlayerFlag player={flag.player} tactic={flag.tactic} />
-            )}
-            <p className="text-sm">{text(flag.explanation)}</p>
-            <p className="text-xs text-muted-foreground">
-              {t(`tactic.${flag.tactic}.explanation`)}
-            </p>
-          </CardContent>
-        </Card>
+        <FlagCard key={flag.redFlagId} flag={flag} />
       ))}
     </section>
+  );
+}
+
+/**
+ * Red flags on routes the player never played. Shown last and collapsed, because they are
+ * extra reading, not part of the result: they never count toward the score.
+ */
+function OtherPathsSection({ flags }: { flags: DebriefFlag[] }) {
+  const t = useT();
+  return (
+    <details className="group border-t border-foreground/10 pt-1">
+      <summary className="flex cursor-pointer list-none items-center gap-2 py-3 text-sm font-semibold select-none [&::-webkit-details-marker]:hidden">
+        <Route className="size-4 text-muted-foreground" aria-hidden />
+        <span className="flex-1">{t("debrief.notReached")(flags.length)}</span>
+        <ChevronDown
+          aria-hidden
+          className="size-4 text-muted-foreground transition-transform group-open:rotate-180"
+        />
+      </summary>
+      <div className="space-y-2 pb-2">
+        <p className="text-sm text-muted-foreground">{t("debrief.notReachedNote")}</p>
+        {flags.map((flag) => (
+          <FlagCard key={flag.redFlagId} flag={flag} tag={t("debrief.notReachedTag")} muted />
+        ))}
+      </div>
+    </details>
+  );
+}
+
+function FlagCard({
+  flag,
+  tag,
+  muted = false,
+}: {
+  flag: DebriefFlag;
+  tag?: string;
+  muted?: boolean;
+}) {
+  const t = useT();
+  const text = useText();
+  return (
+    <Card size="sm" className={cn(muted && "bg-muted/40")}>
+      <CardContent className="space-y-1.5">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="font-medium">{text(flag.label)}</span>
+          <Badge variant="secondary">{t(`tactic.${flag.tactic}.label`)}</Badge>
+          {tag !== undefined && (
+            <Badge variant="outline" className="text-muted-foreground">
+              {tag}
+            </Badge>
+          )}
+        </div>
+        <p className="text-xs font-medium text-muted-foreground">
+          {t(`debrief.where.${flag.where}`)}
+        </p>
+        {flag.player === undefined ? (
+          <Quote text={flag.evidenceText} />
+        ) : (
+          <PlayerFlag player={flag.player} tactic={flag.tactic} />
+        )}
+        <p className="text-sm">{text(flag.explanation)}</p>
+        <p className="text-xs text-muted-foreground">{t(`tactic.${flag.tactic}.explanation`)}</p>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -268,6 +304,9 @@ function ScoreCard({
           </p>
         ) : (
           <p className="text-sm">{t("debrief.noFlags")}</p>
+        )}
+        {result.notReached.length > 0 && (
+          <p className="text-xs text-muted-foreground">{t("score.pathOnly")}</p>
         )}
         <p className="text-xs text-muted-foreground">{t("score.howItWorks")}</p>
       </CardContent>
