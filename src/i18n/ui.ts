@@ -250,7 +250,11 @@ const en = {
   "debrief.falseAlarms": "False alarms",
   "debrief.falseAlarmNote":
     "This one was fine. Being careful is good, but suspecting everything means missing real chances.",
-  "debrief.notReached": "On paths you didn't take",
+  "debrief.notReached": (n: number) =>
+    `Bonus: ${n} red flag${n === 1 ? "" : "s"} on paths you didn't take`,
+  "debrief.notReachedNote":
+    "These were on routes you didn't play. They don't count toward your score. Play again to try them.",
+  "debrief.notReachedTag": "Not on your path",
   "debrief.notInspected": "You didn't check",
   "debrief.notInspectedNote": "These were one tap away. Inspect before you decide.",
   "debrief.triage": "Inbox labels",
@@ -283,6 +287,7 @@ const en = {
   "score.points": (points: number, max: number) => `${points} / ${max} points`,
   "score.accuracy": (caught: number, total: number, falseAlarms: number) =>
     `${caught} of ${total} red flags · ${falseAlarms} false alarm${falseAlarms === 1 ? "" : "s"}`,
+  "score.pathOnly": "Scored only on the red flags on the path you played.",
   "score.howItWorks":
     "Right reason (or a spot-on explanation) +3 · wrong reason +1 · false alarm −1 · good explanation +1",
   "rank.rookie": "Rookie",
