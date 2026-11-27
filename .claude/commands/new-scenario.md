@@ -9,7 +9,7 @@ Script: $ARGUMENTS
 
 Follow these steps in order:
 
-1. Read `CLAUDE.md`, `docs/CONTEXT.md` (sections 3 and 5), the script file, and `src/dojos/easy-money/scenarios/task-scam-starter.ts` as the reference pattern.
+1. Read `CLAUDE.md`, `docs/CONTEXT.md` (sections 3 and 5), the script file, and an existing scenario as the reference pattern: `src/dojos/easy-money/scenarios/task-scam.ts` for chats, `src/dojos/dream-job/scenarios/medium-whatsapp.ts` for emails and evidence panels.
 2. Check the script is complete. Stop and list the gaps as questions, without writing code, if any of these is true:
    - a choice points to a scene or outcome that doesn't exist
    - an outcome has no result type
