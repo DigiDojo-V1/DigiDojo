@@ -76,7 +76,6 @@ const en = {
   "desktop.navMessaging": "Messaging",
   "desktop.navNotifications": "Notifications",
   "desktop.navMe": "Me",
-  "desktop.phone": "Phone",
 
   // Primer
   "primer.eyebrow": "The trick",
