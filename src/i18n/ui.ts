@@ -207,7 +207,6 @@ const en = {
   "mail.forward": "Forward",
   "mail.newMessage": "New message",
   "mail.send": "Send",
-  "mail.range": (n: number) => `1–${n} of ${n}`,
   "mail.compose": "Compose",
   "mail.inboxLabel": "Inbox",
   "mail.details": "Details",
