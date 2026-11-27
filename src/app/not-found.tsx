@@ -3,6 +3,7 @@ import { AppChrome } from "@/components/layout/AppChrome";
 import { TopBar } from "@/components/TopBar";
 import { buttonVariants } from "@/components/ui/button";
 import { T } from "@/i18n/T";
+import { APP_HOME } from "@/lib/routes";
 
 export default function NotFound() {
   return (
@@ -14,7 +15,7 @@ export default function NotFound() {
           <p className="text-muted-foreground">
             <T k="notFound.body" />
           </p>
-          <Link href="/" className={buttonVariants({ variant: "outline" })}>
+          <Link href={APP_HOME} className={buttonVariants({ variant: "outline" })}>
             <T k="nav.backToHome" />
           </Link>
         </div>

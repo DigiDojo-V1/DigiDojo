@@ -21,6 +21,9 @@ const en = {
   "simulation.badge": "Simulation",
   "simulation.badgeAria": "This is a simulation",
 
+  // Landing (placeholder until the real landing page)
+  "landing.title": "digi dojo",
+
   // Home
   "home.title": "DigiDojo",
   "home.tagline": "Real scams, fake apps. Practise here, lose nothing.",
