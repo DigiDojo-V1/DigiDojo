@@ -34,7 +34,10 @@ export type Rank = (typeof RANKS)[number];
 
 export interface DebriefScore {
   points: number;
-  /** Points for catching every red flag on screens the player reached, with the right reason. */
+  /**
+   * Points for catching every red flag on screens the player reached, with the right reason.
+   * Red flags on routes the player never played (`notReached`) never add to it.
+   */
   max: number;
   rank: Rank;
 }
@@ -56,7 +59,7 @@ export interface DebriefResult {
   missed: DebriefFlag[];
   /** Red flags on a screen the player reached, hidden behind an inspection they never did. */
   notInspected: DebriefFlag[];
-  /** Red flags on screens the player never reached on this path. */
+  /** Red flags on screens the player never reached. Shown as extras; never scored. */
   notReached: DebriefFlag[];
   /** Flags that caught no red flag. */
   falseAlarms: { id: string; text: string; tactic?: Tactic }[];

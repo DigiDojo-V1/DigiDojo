@@ -3,14 +3,16 @@
 import { ArrowLeft } from "lucide-react";
 import { MotionConfig, motion } from "motion/react";
 import { useT } from "@/i18n/hooks";
+import { cn } from "@/lib/utils";
 import { PanelBody } from "./evidence/PanelViews";
 import { PdfViewer } from "./evidence/PdfViewer";
 import { SimulationBar } from "./SimulationBar";
 import type { FlagProps, PanelView } from "./types";
 
 /**
- * A full-screen overlay showing a profile, company page, official record, web page or PDF.
- * Every field is flaggable.
+ * An overlay showing a profile, company page, official record, web page or PDF. Every field is
+ * flaggable. Phones: full screen. Desktop: a drawer from the right (a centred viewer for PDFs),
+ * over the fake app only, so the Dojo panel stays in view.
  */
 export function EvidenceSheet({
   panel,
@@ -18,6 +20,7 @@ export function EvidenceSheet({
   ...flag
 }: FlagProps & { panel: PanelView; onClose: () => void }) {
   const t = useT();
+  const isDocument = panel.kind === "document";
   const kindLabel =
     panel.variant === "official-record"
       ? t("evidence.open.record")
@@ -29,15 +32,30 @@ export function EvidenceSheet({
         role="dialog"
         aria-modal="true"
         aria-label={panel.title}
-        className="fixed inset-0 z-50 flex justify-center bg-black/40"
+        className={cn(
+          "fixed inset-0 z-50 flex justify-center bg-black/40 lg:right-[340px]",
+          isDocument ? "lg:items-center lg:p-6" : "lg:justify-end",
+        )}
       >
+        <button
+          type="button"
+          tabIndex={-1}
+          aria-hidden
+          onClick={onClose}
+          className="absolute inset-0 hidden cursor-default lg:block"
+        />
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.2 }}
-          className="flex w-full max-w-[420px] flex-col"
+          className={cn(
+            "relative flex w-full max-w-[420px] flex-col md:max-w-[640px]",
+            isDocument
+              ? "lg:h-full lg:max-h-[960px] lg:max-w-[860px] lg:overflow-hidden lg:rounded-xl lg:shadow-2xl"
+              : "lg:max-w-[min(760px,70%)] lg:shadow-2xl",
+          )}
         >
-          {panel.kind === "document" ? (
+          {isDocument ? (
             <PdfViewer panel={panel} onClose={onClose} {...flag} />
           ) : (
             <div className="flex h-full flex-col overflow-y-auto bg-slate-100">

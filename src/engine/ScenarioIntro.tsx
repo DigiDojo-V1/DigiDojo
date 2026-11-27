@@ -45,7 +45,7 @@ export function ScenarioIntro({
   let i = 0;
 
   return (
-    <main className="flex flex-1 flex-col p-4">
+    <main className="flex flex-1 flex-col p-4 md:rounded-lg md:bg-white md:p-6 md:ring-1 md:ring-black/10">
       <div className="flex h-9 items-center justify-between gap-2">
         <Link
           href={backHref}

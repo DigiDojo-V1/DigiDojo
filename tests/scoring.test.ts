@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { computeDebrief, POINTS, rankFor, type RunRecord } from "@/engine/scoring";
+import { collectFlaggables } from "@/engine/evidence";
+import { mediumWhatsapp } from "@/dojos/dream-job/scenarios/medium-whatsapp";
 import { flagsById, makeFlag, richScenario, validScenario } from "./fixtures";
 
 const run = (partial: Partial<RunRecord>): RunRecord => ({
@@ -47,7 +49,7 @@ describe("computeDebrief", () => {
     expect(result.caught).toEqual([]);
     expect(result.spotted.map((f) => f.redFlagId)).toEqual(["pay-first"]);
     expect(result.spotted[0]?.player).toMatchObject({
-      text: "Send ₹500 to earn",
+      text: "Send ₹500 to earn ₹5,000",
       tactic: "urgency",
     });
   });
@@ -135,14 +137,14 @@ describe("computeDebrief with evidence", () => {
     expect(result.caught[0]?.evidenceText).toEqual({ en: "Pay ₹999 to register." });
   });
 
-  it("treats a highlighted harmless phrase as a false alarm", () => {
+  it("treats a flagged harmless sentence as a false alarm", () => {
     const s = richScenario();
     const flag = makeFlag(s, "dm-1", { phrase: "in Bengaluru", tactic: "authority" });
     const result = computeDebrief(
       s,
       run({ seen: ["dm-1"], flags: flagsById(flag), visited: ["dm"] }),
     );
-    expect(result.falseAlarms.map((a) => a.text)).toEqual(["in Bengaluru"]);
+    expect(result.falseAlarms.map((a) => a.text)).toEqual(["The role is in Bengaluru."]);
   });
 
   it("catches a phrase inside an email paragraph", () => {
@@ -192,5 +194,49 @@ describe("computeDebrief with evidence", () => {
     expect(wrong.triage[0]?.isCorrect).toBe(false);
     const none = computeDebrief(richScenario(), run({}));
     expect(none.triage[0]).toMatchObject({ chosen: undefined, isCorrect: false });
+  });
+});
+
+describe("score only covers the route the player played (medium-whatsapp)", () => {
+  const s = mediumWhatsapp;
+  const items = collectFlaggables(s);
+  /** A run with no flags that saw everything on screen at each visited node. */
+  const played = (visited: string[]): RunRecord =>
+    run({
+      visited,
+      seen: items
+        .filter((i) => !i.hidden && i.nodeIds.some((n) => visited.includes(n)))
+        .map((i) => i.id),
+    });
+  const scored = (r: ReturnType<typeof computeDebrief>) =>
+    r.caught.length + r.spotted.length + r.missed.length + r.notInspected.length;
+  const total = Object.keys(s.redFlags).length;
+  const LINKEDIN = ["li-open", "li-move"];
+
+  it.each([
+    ["declines WhatsApp", [...LINKEDIN, "safe-early"], 2],
+    ["pays the deposit", [...LINKEDIN, "wa-screen", "wa-paid"], 5],
+    ["reports the email", [...LINKEDIN, "wa-screen", "gmail-medium", "safe"], total],
+    ["sends the reply", [...LINKEDIN, "wa-screen", "gmail-medium", "reply", "reply-sent"], total],
+  ])("%s: scores only the red flags on that route", (_name, visited, expected) => {
+    const result = computeDebrief(s, played(visited));
+    expect(scored(result)).toBe(expected);
+    expect(result.notReached).toHaveLength(total - expected);
+    expect(result.score.max).toBe(expected * POINTS.rightReason);
+  });
+
+  it("still scores a branch the player played and then rewound away from", () => {
+    const result = computeDebrief(
+      s,
+      played([...LINKEDIN, "wa-screen", "wa-paid", "gmail-medium", "safe"]),
+    );
+    expect(result.notReached).toEqual([]);
+    expect(result.score.max).toBe(total * POINTS.rightReason);
+  });
+
+  it("leaves the WhatsApp and email red flags out when the player stopped on LinkedIn", () => {
+    const result = computeDebrief(s, played([...LINKEDIN, "safe-early"]));
+    expect(result.notReached.map((f) => f.redFlagId)).not.toContain("li-off-platform");
+    expect(result.notReached.map((f) => f.redFlagId)).toContain("wa-deposit");
   });
 });

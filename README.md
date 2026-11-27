@@ -55,7 +55,7 @@ docs/CONTEXT.md             the project brief
 The usual way: write a script from [`docs/SCENARIO_TEMPLATE.md`](docs/SCENARIO_TEMPLATE.md) and run `/new-scenario <path>` in Claude Code (see [`docs/HOW_WE_WORK.md`](docs/HOW_WE_WORK.md)). The steps below are what that does by hand.
 
 1. Branch from `main`: `git checkout -b <dojo-id>/<short-desc>` (e.g. `easy-money/upi-mule`).
-2. Copy `src/dojos/easy-money/scenarios/task-scam-starter.ts` into `src/dojos/<your-dojo>/scenarios/<scenario-id>.ts`.
+2. Copy a scenario close to yours (a chat one like `src/dojos/easy-money/scenarios/task-scam.ts`, or an email one like `src/dojos/dream-job/scenarios/legit-offer.ts`) into `src/dojos/<your-dojo>/scenarios/<scenario-id>.ts`.
 3. Rename the export, set `id` (kebab-case) and `dojoId`, and write `title`, `summary`, `legit`, and a `primer` (or `coldRun: true`).
 4. Write the `nodes`: `thread` nodes (app, contact, messages, choices) leading to `outcome` nodes (safe / loss / partial-loss / missed-opportunity). Put `rewindToNodeId` on losses.
 5. Put a `redFlagId` on each message that carries a cue, and define each one in `redFlags` with a `tactic` from the `TACTICS` list in `src/engine/schema.ts`.

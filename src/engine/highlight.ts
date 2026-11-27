@@ -4,9 +4,9 @@ import type { Email, LocalizedText, ScenarioData, Segment, Tactic } from "./sche
 import { TACTICS } from "./schema";
 
 /**
- * Free highlighting. The player selects any words in a message or an email paragraph; red flags
- * are hidden spans inside that text, never shown as tappable. A highlight catches a red flag when
- * it covers enough of the span without being far longer than it.
+ * Sentence flagging. Every sentence in other people's messages and email paragraphs can be
+ * flagged; red flags are hidden spans inside that text. A flagged sentence catches a red flag
+ * when it holds at least half of the span.
  */
 
 /** A part of a highlightable text. Parts with a `redFlagId` are the hidden answer spans. */
@@ -24,14 +24,6 @@ export interface TextTarget {
   parts: TargetPart[];
 }
 
-/** A word or the whitespace between words, with character offsets into the target's text. */
-export interface Token {
-  text: string;
-  start: number;
-  end: number;
-  word: boolean;
-}
-
 export interface AnswerSpan {
   redFlagId: string;
   carrierId?: string;
@@ -39,23 +31,34 @@ export interface AnswerSpan {
   end: number;
 }
 
-/** A highlight is never longer than this, so selecting a whole paragraph catches nothing. */
-export const MAX_HIGHLIGHT_CHARS = 160;
-/** A short span may be over-highlighted up to this many characters. */
-const MIN_SLACK_CHARS = 40;
+/** A sentence: character offsets into a target's text, without surrounding spaces. */
+export interface SentenceRange {
+  start: number;
+  end: number;
+}
 
-export function tokenize(text: string): Token[] {
-  const tokens: Token[] = [];
-  const re = /\s+|[^\s]+/g;
+/**
+ * Splits a text into the sentences the player can flag. A sentence ends after `.`, `!`, `?` or
+ * `…` (with any closing quotes or brackets) followed by whitespace, or at a blank line. A single
+ * line break doesn't end one, so a list stays together with the line that introduces it.
+ */
+export function splitSentences(text: string): SentenceRange[] {
+  const out: SentenceRange[] = [];
+  const push = (from: number, to: number) => {
+    const raw = text.slice(from, to);
+    const start = from + (raw.length - raw.trimStart().length);
+    const end = to - (raw.length - raw.trimEnd().length);
+    if (end > start) out.push({ start, end });
+  };
+  const re = /[.!?…]+["'”’)\]]*(?=\s)|\n\s*\n/g;
+  let from = 0;
   for (let m = re.exec(text); m !== null; m = re.exec(text)) {
-    tokens.push({
-      text: m[0],
-      start: m.index,
-      end: m.index + m[0].length,
-      word: !/^\s+$/.test(m[0]),
-    });
+    const to = m.index + m[0].length;
+    push(from, to);
+    from = to;
   }
-  return tokens;
+  push(from, text.length);
+  return out;
 }
 
 /** The id of the text target for paragraph `p` of an email shown at `ownerId` (node or triage item). */
@@ -143,18 +146,14 @@ export function answerSpans(target: TextTarget, locale: Locale): AnswerSpan[] {
   return spans;
 }
 
-/** True if a highlight [start, end) counts as catching the span. */
-export function highlightCatches(span: AnswerSpan, start: number, end: number): boolean {
-  const length = end - start;
-  if (length <= 0 || length > MAX_HIGHLIGHT_CHARS) return false;
-  const spanLength = span.end - span.start;
+/** True if the flagged sentence [start, end) holds at least half of the span. */
+export function sentenceCatches(span: AnswerSpan, start: number, end: number): boolean {
+  if (end <= start) return false;
   const overlap = Math.min(end, span.end) - Math.max(start, span.start);
-  if (overlap <= 0) return false;
-  if (overlap < 0.5 * Math.min(length, spanLength)) return false;
-  return length <= Math.max(3 * spanLength, MIN_SLACK_CHARS);
+  return overlap > 0 && overlap >= 0.5 * (span.end - span.start);
 }
 
-/** The red flags a highlight catches, without duplicates. */
+/** The red flags a flagged sentence catches, without duplicates. */
 export function matchHighlight(
   target: TextTarget,
   locale: Locale,
@@ -162,7 +161,7 @@ export function matchHighlight(
   end: number,
 ): string[] {
   const caught = answerSpans(target, locale)
-    .filter((span) => highlightCatches(span, start, end))
+    .filter((span) => sentenceCatches(span, start, end))
     .map((span) => span.redFlagId);
   return [...new Set(caught)];
 }
@@ -202,10 +201,10 @@ export function shuffle<T>(items: readonly T[], seed: string): T[] {
 }
 
 /**
- * Chips without an LLM: the right tactics (if the highlight caught a red flag), then distractors
+ * Reason chips: the right tactics (if the flag caught a red flag), then distractors
  * from the tactics this scenario uses, then from every tactic. Shuffled, so position gives nothing away.
  */
-export function fallbackChips(
+export function reasonChips(
   scenario: ScenarioData,
   correct: readonly Tactic[],
   seed: string,
@@ -219,63 +218,11 @@ export function fallbackChips(
   return shuffle(picked, `${seed}:order`).map((tactic) => ({ tactic }));
 }
 
-/** Fewest chips worth showing: with fewer, the right one would stand out. */
-export const MIN_CHIPS = 3;
-
-/**
- * Makes chips from any source safe to show: known tactics only, no duplicates, exactly `count`
- * (3 or 4), every correct tactic present, in a shuffled order.
- */
-export function finalizeChips(
-  proposed: readonly Chip[],
-  scenario: ScenarioData,
-  correct: readonly Tactic[],
-  seed: string,
-  count: number = CHIP_COUNT,
-): Chip[] {
-  const size = Math.min(CHIP_COUNT, Math.max(MIN_CHIPS, count));
-  const known = new Set<string>(TACTICS);
-  const unique: Chip[] = [];
-  for (const chip of proposed) {
-    if (!known.has(chip.tactic) || unique.some((c) => c.tactic === chip.tactic)) continue;
-    unique.push(chip);
-  }
-  const missing = [...new Set(correct)].filter((t) => !unique.some((c) => c.tactic === t));
-  // Make room for the right answers by dropping proposed distractors from the end.
-  let chips = unique.slice(0, Math.max(0, size - missing.length));
-  for (const tactic of missing) chips.push({ tactic });
-  for (const filler of fallbackChips(scenario, [], seed)) {
-    if (chips.length >= size) break;
-    if (!chips.some((c) => c.tactic === filler.tactic)) chips.push(filler);
-  }
-  chips = chips.slice(0, size);
-  return shuffle(chips, `${seed}:order`);
-}
-
-/** The tactics of the red flags a highlight caught. */
+/** The tactics of the red flags a flag caught. */
 export function correctTactics(scenario: ScenarioData, redFlagIds: readonly string[]): Tactic[] {
   return [
     ...new Set(
       redFlagIds.flatMap((id) => (scenario.redFlags[id] ? [scenario.redFlags[id].tactic] : [])),
     ),
   ];
-}
-
-/**
- * Widens a free text selection [start, end) to whole words. Returns the first and last word
- * token indexes, or undefined if the selection holds no word (only spaces).
- */
-export function snapToWords(
-  tokens: readonly Token[],
-  start: number,
-  end: number,
-): { first: number; last: number } | undefined {
-  let first = -1;
-  let last = -1;
-  tokens.forEach((token, i) => {
-    if (!token.word || token.end <= start || token.start >= end) return;
-    if (first === -1) first = i;
-    last = i;
-  });
-  return first === -1 ? undefined : { first, last };
 }

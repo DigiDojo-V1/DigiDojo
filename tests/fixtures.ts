@@ -1,5 +1,5 @@
 import { resolveSpot, type FlagRecord, type FlagSpot, type JudgeState } from "@/engine/flags";
-import { findTarget, targetText } from "@/engine/highlight";
+import { findTarget, splitSentences, targetText } from "@/engine/highlight";
 import { ScenarioSchema, type Scenario, type ScenarioInput, type Tactic } from "@/engine/schema";
 
 /**
@@ -192,7 +192,7 @@ export function richScenario(): Scenario {
 }
 
 /**
- * A flag as the player would make it: a highlight of `phrase` inside text target `targetId`,
+ * A flag as the player would make it: the sentence holding `phrase` in text target `targetId`,
  * or a whole item when `phrase` is omitted.
  */
 export function makeFlag(
@@ -204,9 +204,12 @@ export function makeFlag(
   if (options.phrase !== undefined) {
     const target = findTarget(scenario, targetId);
     if (target === undefined) throw new Error(`no text target ${targetId}`);
-    const start = targetText(target, "en").indexOf(options.phrase);
-    if (start === -1) throw new Error(`"${options.phrase}" not in ${targetId}`);
-    spot = { targetId, start, end: start + options.phrase.length };
+    const text = targetText(target, "en");
+    const at = text.indexOf(options.phrase);
+    if (at === -1) throw new Error(`"${options.phrase}" not in ${targetId}`);
+    const sentence = splitSentences(text).find((r) => r.start <= at && at < r.end);
+    if (sentence === undefined) throw new Error(`no sentence at "${options.phrase}"`);
+    spot = { targetId, start: sentence.start, end: sentence.end };
   }
   const resolved = resolveSpot(scenario, spot, "en");
   if (resolved === undefined) throw new Error(`can't flag ${targetId}`);

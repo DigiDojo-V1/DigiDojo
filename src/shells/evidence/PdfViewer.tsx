@@ -60,7 +60,7 @@ export function PdfViewer({
   };
 
   return (
-    <div className="flex h-full w-full max-w-[420px] flex-col bg-[#2a2a2c] text-white">
+    <div className="flex h-full w-full flex-col bg-[#2a2a2c] text-white">
       <SimulationBar />
       <header className="flex h-14 shrink-0 items-center gap-2 bg-[#1f1f21] pr-3 pl-1">
         <button

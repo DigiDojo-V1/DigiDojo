@@ -21,9 +21,9 @@ Every dojo also contains at least one **legit** scenario (a real internship, a r
 
 ## 3. How a scenario works (the learning loop)
 
-0. **How to play (first scenario only, ~40 s).** A hands-on walkthrough in `src/engine/HowToPlay.tsx`: flag a practice message with the real highlighting and reason sheet, judge one genuine message and one scam ("not everything is a scam"), then see how a run is scored. Unlike the game it gives instant feedback. It shows once (`tutorialSeen` in persisted progress, cold runs included, since it teaches controls, not the scam) and can be replayed from the intro's "How to play" button.
+0. **How to play (first scenario only, ~40 s).** A hands-on walkthrough in `src/engine/HowToPlay.tsx`: flag a practice message with the real sentence flagging and reason sheet, judge one genuine message and one scam ("not everything is a scam"), then see how a run is scored. Unlike the game it gives instant feedback. It shows once (`tutorialSeen` in persisted progress, cold runs included, since it teaches controls, not the scam) and can be replayed from the intro's "How to play" button.
 1. **Primer (optional, ~45 s).** The intro screen (`src/engine/ScenarioIntro.tsx`): **your situation** (`setup`, who you are and what just happened), the trick's name and a short body, **ask yourself** (`watchFor`, 1 to 4 questions, easy scenarios only, never pointing at a specific red flag), and the goals: spot the red flags, avoid false alarms, make the right call. A **cold run** scenario skips the primer and any hints, to show players they are vulnerable.
-2. **Simulation (2 to 3 min).** Messages arrive in real time (typing indicator, delays) inside a fake app shell. The player **highlights any words** that look suspicious (nothing marks where the red flags are), or taps the flag next to a detail such as a Reply-To line, then picks **why** from 4 reason chips and can explain in their own words for bonus points. At 3 to 4 **decision points** the player picks a reply.
+2. **Simulation (2 to 3 min).** Messages arrive in real time (typing indicator, delays) inside a fake app shell. The player **taps any sentence** that looks suspicious (nothing marks where the red flags are), or taps the flag next to a detail such as a Reply-To line, then picks **why** from 4 reason chips and, when AI marking is on, can explain in their own words for bonus points. At 3 to 4 **decision points** the player picks a reply.
 3. **Consequence.** Each path ends in an outcome: safe, a money loss, a partial loss, or a missed opportunity (for legit scenarios the player wrongly rejected). Losses show exact rupee amounts.
 4. **Rewind.** Loss outcomes offer "Rewind" back to the decision node where the player could have stopped.
 5. **Debrief.** Red flags seen vs caught, false alarms (flagged messages that were fine), the tactic behind each flag (urgency, social proof, small win first, sunk cost, authority, pay to earn...), one rule to remember, and the real-life action (call 1930, report at cybercrime.gov.in).
@@ -42,7 +42,7 @@ Design rules from the research, which every dojo follows:
 ```
 src/
   app/
-    layout.tsx                         # phone-width frame, fonts, providers
+    layout.tsx                         # fonts, providers (each screen picks its own frame)
     page.tsx                           # home: dojo path
     dojo/[dojoId]/page.tsx             # dojo intro + scenario list
     dojo/[dojoId]/[scenarioId]/page.tsx  # scenario player
@@ -51,7 +51,8 @@ src/
     registry.ts                        # ordered list of dojos (imports each dojo's index.ts)
     easy-money/
       index.ts                         # defineDojo({...}) with its scenarios
-      scenarios/task-scam-starter.ts   # the example scenario (see §6)
+      content/                         # shared world, red flags, evidence panels, emails
+      scenarios/                       # task-scam, mule-recruitment, paid-user-study
       components/                      # dojo-only components, if any
     dream-job/   index.ts  scenarios/
     trust-me-bro/ index.ts scenarios/
@@ -61,9 +62,14 @@ src/
     define.ts                          # defineScenario(), defineDojo() helpers (validate in dev)
     store.ts                           # zustand: current run (node, flags, history) + persisted progress
     ScenarioPlayer.tsx                 # renders the current node with the right shell
+    PlayerFrame.tsx                    # phone column, or desktop app + docked Dojo panel (choices, flags, exit)
     Debrief.tsx
   shells/
-    ChatShell.tsx                      # generic chat: header, bubbles, typing indicator, flag-on-tap; theme: whatsapp | telegram | instagram
+    ChatShell.tsx                      # generic chat: header, bubbles, typing indicator, flag-on-tap; theme: whatsapp | telegram | instagram | linkedin
+    ChatDesktop.tsx                    # ChatShell's desktop web layout (chat list, thread, evidence column)
+    MailShell.tsx                      # mail app; webmail layout on desktop (folders, list, reading pane, compose window)
+    PhoneFrame.tsx                     # phone mockup for phone-only apps on desktop
+    panel-slot.tsx                     # <DojoPanel> / useInDojoPanel(): render game controls into the docked panel
     SmsShell.tsx                       # placeholder in scaffold
     UpiShell.tsx                       # placeholder in scaffold
     CallShell.tsx                      # placeholder in scaffold
@@ -76,7 +82,8 @@ src/
     LanguageToggle.tsx                 # "EN | Hinglish" segmented toggle
     coverage.ts                        # counts text fields missing Hinglish (npm run i18n:report)
   components/ui/                       # shadcn
-  lib/
+  components/layout/                   # AppChrome (top nav + 3 columns from md/lg), ProgressCard, RightRail
+  lib/                                 # useIsDesktop(), placePopover()
 tests/
   scenarios.test.ts                    # validates every registered scenario
 ```
@@ -209,13 +216,12 @@ Validation (in `defineScenario` during dev and in `tests/scenarios.test.ts`):
 Engine behaviour:
 
 - Messages in a thread reveal one by one using `delayMs`, with a typing indicator before each `them` message. Choices appear after the last message.
-- **Flagging is free highlighting** (`src/engine/highlight.ts`). Other people's messages and email paragraphs are plain text the player selects like any text (click-and-drag, or long-press on a phone; the selection snaps to whole words) or word by word (tap a word, tap another to extend), then "Flag this". Segments with a `redFlagId` (or a whole message with one) are hidden answer spans, never drawn as tappable. A highlight catches a span when it overlaps at least half of the shorter of the two and is no longer than `max(3 × span, 40 chars)`; nothing over 160 characters catches anything. Short items (addresses, attachments, links, panel fields, the compose To) are flagged whole with their flag button.
-- Every flag opens **"Why is this suspicious?"**. With `FLAG_AI=on` (and `OPENAI_API_KEY`), a small OpenAI model writes 3 or 4 options from the highlighted words only, plus the dojo's takeaways as learning goals (`POST /api/flag/chips`). It's told which tactic must be among them and writes the decoys as equally convincing misreadings, with no giveaway words like "fake" or "scam". The server still guarantees the right tactic is there and shuffles them.
-  - **No options:** a trivial highlight (one common word, a bare name, a greeting, almost no letters) gets no options. The player has to explain it in their own words.
-  - **Own words count on their own:** a note of at least 10 characters saves a flag without a chip, and tapping a picked chip unpicks it. A note-only flag that the marker (`POST /api/flag/judge`) judges "good" counts as the right reason; otherwise it counts as spotted. Any note is marked against the red flag's explanation.
-  - With `FLAG_AI` off, or when the model is slow or failing, chips come from `fallbackChips()`, a chip is required and the note box is hidden. See `docs/DEPLOY_AI.md`.
+- **Flagging is by sentence** (`src/engine/highlight.ts`). Every sentence in other people's messages and email paragraphs is a tap target: it turns red on hover (desktop) and a click or tap opens the reason sheet at once. `splitSentences()` breaks after `.`, `!`, `?` or `…` (with closing quotes) followed by a space, and at blank lines; a single line break doesn't, so a bullet list stays with its lead-in. Every sentence looks the same, so nothing marks where the red flags are. A flagged sentence catches a red flag when it holds at least half of the hidden span (`sentenceCatches`). The server accepts only exact sentence ranges. `tests/scenarios.test.ts` checks that every red-flag span in every scenario can be caught by one sentence. Short items (addresses, attachments, links, panel fields, the compose To) are flagged whole with their flag button.
+- Every flag opens **"Why is this suspicious?"** with 4 built-in options from `reasonChips()`: the right tactic (if the sentence caught a red flag) plus decoys from the scenario's other tactics, shuffled with a fixed seed. No network call, so they appear instantly.
+  - **Own words:** with `FLAG_AI=on` (and `OPENAI_API_KEY`), an "In your own words" box shows too. A note of at least 10 characters saves a flag without a chip, and tapping a picked chip unpicks it. The AI (`POST /api/flag/judge`) marks the note in the background for the debrief; a note-only flag judged "good" counts as the right reason, otherwise as spotted. This is the only AI call. The page reads `FLAG_AI` on the server and passes `notesGraded` to the player.
+  - With `FLAG_AI` off, a chip is required and the note box is hidden. See `docs/DEPLOY_AI.md`.
 - **No feedback during play.** Chips never show whether a reason is right; everything is graded in the debrief, so playing never reveals where the red flags are.
-- Flags (`FlagRecord` in `src/engine/flags.ts`) persist across nodes for the whole run, including after a rewind. Tapping a highlight reopens it to change the reason or remove it.
+- Flags (`FlagRecord` in `src/engine/flags.ts`) persist across nodes for the whole run, including after a rewind. Tapping a flagged sentence reopens it to change the reason or remove it.
 - Debrief: **caught** = flagged with the right reason; **spotted** = flagged with the wrong reason; **missed**, **didn't check**, **not reached** as above; **false alarms** = flags that catch no red flag. Score: right reason +3, wrong reason +1, false alarm −1, explanation graded "good" +1; the rank (Rookie, Sharp, Scam-proof) is the share of the maximum for red flags on screens the player reached. Flagging everything scores low.
 - Rewind keeps flags but returns to the target node.
 - Finishing a scenario (reaching the debrief) marks it complete in persisted progress.
@@ -285,11 +291,12 @@ Build:
 5. `ChatShell` with three themes (WhatsApp green, Telegram blue, Instagram gradient-free purple). Use our own simple look, not copies of the real apps' branding. Placeholder components for `SmsShell`, `UpiShell` and `CallShell` that render "Coming soon: <name> shell".
 6. Registry with the 4 dojos in §2, each with a `index.ts`. Easy Money contains the example scenario below. The other three each contain one placeholder scenario with a single outcome node, titled "Coming soon".
 7. Screens:
-   - **Home** (`/`): app name, a one-line tagline, and the 4 dojos as a vertical path of cards (order number, name, tagline, scenario count, progress). All clickable for now.
-   - **Dojo** (`/dojo/[dojoId]`): dojo name and tagline, list of scenarios with completed ticks, back button. Unknown id → 404.
-   - **Player** (`/dojo/[dojoId]/[scenarioId]`): how to play (first visit only) → intro (if the scenario has a primer) → threads → outcome → debrief → "Back to dojo". Unknown id → 404.
+   - **Landing** (`/`): placeholder hero ("digi dojo") until the real landing page; its call to action will link to `/digidojo`.
+   - **Home** (`/digidojo`): app name, a one-line tagline, and the 4 dojos as a vertical path of cards (order number, name, tagline, scenario count, progress). All clickable for now.
+   - **Dojo** (`/digidojo/dojo/[dojoId]`): dojo name and tagline, list of scenarios with completed ticks, back button. Unknown id → 404.
+   - **Player** (`/digidojo/dojo/[dojoId]/[scenarioId]`): how to play (first visit only) → intro (if the scenario has a primer) → threads → outcome → debrief → "Back to dojo". Unknown id → 404.
    - Every simulation screen shows the `SimulationBadge`.
-8. Example scenario `easy-money/task-scam-starter` (keep it short, it's a pattern to copy):
+8. Example scenario `easy-money/task-scam-starter` (keep it short, it's a pattern to copy). Since replaced by the full Easy Money dojo (`task-scam`, `mule-recruitment`, `paid-user-study`, scripts in `docs/scenarios/easy-money/`):
    - `dm` (instagram, "Priya · HR"): "Hi! Saw your profile. Part-time work from home, earn ₹3,000/day just by liking YouTube videos" (red flag `pay-far-above-work`, tactic `too-good-to-be-true`), "No experience needed. Interested?". Choices: "Yes, interested!" → `task`; "Ignore and block" → `safe-early`.
    - `task` (instagram): "Task: like 3 videos, send screenshots. ₹50 per like.", system "₹150 credited to your UPI" (red flag `instant-small-payout`, tactic `small-win-first`), "More tasks in our Telegram group". Choice: "Join the group" → `group`.
    - `group` (telegram, "Earn Daily VIP · 1,204 members"): sender Rahul "Got ₹2,800 today [screenshot]" (flag `payout-screenshots`, `social-proof`); sender Mentor "Prepaid task: send ₹1,000, receive ₹1,300 in 10 min" (flag `pay-to-earn`, `pay-to-earn`); Mentor "Only 3 slots left!" (flag `slots-left`, `urgency`). Choices: "Pay ₹1,000" → `lost`; "Leave and report the group" → `safe-late`.
@@ -304,7 +311,7 @@ Acceptance:
 
 - `npm run dev`: home shows 4 dojos → Easy Money → the example scenario plays end to end with delays, typing indicator, flag-on-tap, choices, outcome, rewind and debrief (caught, missed, false alarms).
 - The other 3 dojos open and show their "Coming soon" scenario.
-- Looks right at 390 px and centred at desktop width.
+- Looks right at 390 px, 768 px and 1280 px (desktop: the app's desktop layout with the Dojo panel).
 - `npm run lint && npm run typecheck && npm test && npm run build` all pass.
 
 Not in the scaffold (later phases): database and auth, the belt test, the before/after pilot test, Day-7 rematch, share card, PWA, analytics (PostHog), final visual design.
@@ -322,7 +329,8 @@ Not in the scaffold (later phases): database and auth, the belt test, the before
 ## 8. Guardrails
 
 - All people, companies, agencies and apps in scenarios are fictional. No real logos or brand names.
-  - Exception agreed by the lead: Dream Job's player-facing text keeps the blueprint's platform names (LinkedIn, Gmail, WhatsApp, `@gmail.com` addresses, an `@okaxis` UPI handle), because spotting a free-mail sender is the lesson. The shells still use our own look and no logos. All companies, people and domains stay fictional (`*.example`).
+  - Exception agreed by the lead: Dream Job's player-facing text keeps the blueprint's platform names (LinkedIn, Gmail, WhatsApp, `@gmail.com` addresses, an `@okaxis` UPI handle), because spotting a free-mail sender is the lesson. All companies, people and domains stay fictional (`*.example`).
+  - Desktop layouts may closely copy the real apps' desktop structure and colours (webmail, professional network, messengers), so the practice transfers. Never their logos, wordmarks or brand icons: app names in the chrome are generic ("Mail", "Messaging") and marks are plain shapes.
 - Never ask players for real OTPs, PINs, card numbers or passwords.
 - No "play the scammer" mode. Sextortion appears only as a text guidance card, never a simulation.
 - No political content.

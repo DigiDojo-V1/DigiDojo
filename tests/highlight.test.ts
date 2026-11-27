@@ -3,16 +3,13 @@ import { resolveSpot } from "@/engine/flags";
 import {
   answerSpans,
   CHIP_COUNT,
-  fallbackChips,
-  finalizeChips,
   findTarget,
-  highlightCatches,
-  MAX_HIGHLIGHT_CHARS,
   matchHighlight,
-  snapToWords,
+  reasonChips,
+  sentenceCatches,
+  splitSentences,
   targetText,
   textTargets,
-  tokenize,
   type TextTarget,
 } from "@/engine/highlight";
 import { richScenario, validScenario } from "./fixtures";
@@ -22,14 +19,52 @@ const range = (target: TextTarget, phrase: string, locale: "en" | "hinglish" = "
   if (start === -1) throw new Error(`"${phrase}" not found`);
   return [start, start + phrase.length] as const;
 };
+const spot = (target: TextTarget, phrase: string) => {
+  const [start, end] = range(target, phrase);
+  return { start, end };
+};
 
-describe("tokenize", () => {
-  it("splits words and spaces with offsets that rebuild the text", () => {
-    const text = "Pay ₹999  now.\nOK";
-    const tokens = tokenize(text);
-    expect(tokens.map((t) => t.text).join("")).toBe(text);
-    expect(tokens.filter((t) => t.word).map((t) => t.text)).toEqual(["Pay", "₹999", "now.", "OK"]);
-    for (const t of tokens) expect(text.slice(t.start, t.end)).toBe(t.text);
+const sentences = (text: string) => splitSentences(text).map((r) => text.slice(r.start, r.end));
+
+describe("splitSentences", () => {
+  it("splits after . ! ? and … followed by a space", () => {
+    expect(sentences("Hi Ananya! I'm Karan. Want a job? Great… Pay now.")).toEqual([
+      "Hi Ananya!",
+      "I'm Karan.",
+      "Want a job?",
+      "Great…",
+      "Pay now.",
+    ]);
+  });
+
+  it("keeps repeated marks and closing quotes with their sentence", () => {
+    expect(sentences('Congrats!! 🎉 You won. Reply "YES." Then pay.')).toEqual([
+      "Congrats!!",
+      "🎉 You won.",
+      'Reply "YES."',
+      "Then pay.",
+    ]);
+  });
+
+  it("doesn't split inside amounts, times or addresses", () => {
+    expect(sentences("Pay ₹1,499 by 8:00 PM to karan.sethi@okaxis today")).toEqual([
+      "Pay ₹1,499 by 8:00 PM to karan.sethi@okaxis today",
+    ]);
+  });
+
+  it("splits at blank lines, but keeps a list together with its lead-in", () => {
+    expect(sentences("First line\n\nSecond. Third")).toEqual(["First line", "Second.", "Third"]);
+    expect(sentences("Upload these:\n• Aadhaar\n• PAN\n\nThanks")).toEqual([
+      "Upload these:\n• Aadhaar\n• PAN",
+      "Thanks",
+    ]);
+  });
+
+  it("gives ranges without surrounding spaces", () => {
+    const text = "  One.  Two.  ";
+    for (const r of splitSentences(text)) {
+      expect(text.slice(r.start, r.end)).toBe(text.slice(r.start, r.end).trim());
+    }
   });
 });
 
@@ -61,52 +96,51 @@ describe("text targets", () => {
 describe("matchHighlight", () => {
   const dm = findTarget(richScenario(), "dm-1")!;
 
-  it("catches a highlight inside the span", () => {
-    expect(matchHighlight(dm, "en", ...range(dm, "₹999"))).toEqual(["fee"]);
+  it("catches a red flag with the sentence that holds it", () => {
+    expect(matchHighlight(dm, "en", ...range(dm, "Pay ₹999 to register."))).toEqual(["fee"]);
   });
 
-  it("catches a highlight that covers the span with a little extra", () => {
-    expect(matchHighlight(dm, "en", ...range(dm, "Hi! Pay ₹999 to register."))).toEqual(["fee"]);
+  it("misses with a harmless sentence", () => {
+    expect(matchHighlight(dm, "en", ...range(dm, "Hi!"))).toEqual([]);
+    expect(matchHighlight(dm, "en", ...range(dm, "The role is in Bengaluru."))).toEqual([]);
   });
 
-  it("misses a highlight that only grazes the span", () => {
-    expect(matchHighlight(dm, "en", ...range(dm, "register. The role is in Bengaluru."))).toEqual(
-      [],
-    );
-  });
-
-  it("misses a highlight of harmless words", () => {
-    expect(matchHighlight(dm, "en", ...range(dm, "Bengaluru"))).toEqual([]);
-  });
-
-  it("never catches anything with a whole-paragraph highlight", () => {
-    const span = { redFlagId: "x", start: 0, end: 20 };
-    expect(highlightCatches(span, 0, MAX_HIGHLIGHT_CHARS + 1)).toBe(false);
-    // Too long relative to a short span.
-    expect(highlightCatches({ redFlagId: "x", start: 50, end: 60 }, 0, 120)).toBe(false);
+  it("needs at least half of a span that runs across sentences", () => {
+    const span = { redFlagId: "x", start: 10, end: 30 };
+    expect(sentenceCatches(span, 0, 20)).toBe(true);
+    expect(sentenceCatches(span, 21, 40)).toBe(false);
+    expect(sentenceCatches(span, 30, 40)).toBe(false);
   });
 
   it("treats a whole message with a red flag as one span", () => {
     const m2 = findTarget(validScenario(), "m2")!;
-    expect(matchHighlight(m2, "en", ...range(m2, "₹5,000"))).toEqual(["pay-first"]);
+    expect(matchHighlight(m2, "en", ...range(m2, "Send ₹500 to earn ₹5,000"))).toEqual([
+      "pay-first",
+    ]);
   });
 });
 
 describe("resolveSpot", () => {
-  it("resolves highlights and whole items, and rejects bad spots", () => {
+  it("resolves sentences and whole items, and rejects bad spots", () => {
     const s = richScenario();
-    const [start, end] = range(findTarget(s, "dm-1")!, "Pay ₹999");
+    const dm = findTarget(s, "dm-1")!;
+    const [start, end] = range(dm, "Pay ₹999 to register.");
     expect(resolveSpot(s, { targetId: "dm-1", start, end }, "en")).toEqual({
-      text: "Pay ₹999",
+      text: "Pay ₹999 to register.",
       catches: ["fee"],
     });
+    // Only whole sentences: part of one, or two at once, is rejected.
+    expect(resolveSpot(s, { targetId: "dm-1", ...spot(dm, "Pay ₹999") }, "en")).toBeUndefined();
+    expect(
+      resolveSpot(s, { targetId: "dm-1", ...spot(dm, "Hi! Pay ₹999 to register.") }, "en"),
+    ).toBeUndefined();
     expect(resolveSpot(s, { targetId: "e-reply-to" }, "en")).toEqual({
       text: "desk@free.example",
       catches: ["reply-to"],
     });
     expect(resolveSpot(s, { targetId: "dm-1", start: 5, end: 999 }, "en")).toBeUndefined();
     expect(resolveSpot(s, { targetId: "nope" }, "en")).toBeUndefined();
-    // Text targets can only be flagged by highlighting words.
+    // Text targets can only be flagged sentence by sentence.
     expect(resolveSpot(s, { targetId: "dm-pay" }, "en")).toBeUndefined();
   });
 });
@@ -115,53 +149,10 @@ describe("chips", () => {
   const s = richScenario();
 
   it("gives the same chips for the same seed, always including the right tactic", () => {
-    const a = fallbackChips(s, ["pay-to-earn"], "seed");
-    expect(a).toEqual(fallbackChips(s, ["pay-to-earn"], "seed"));
+    const a = reasonChips(s, ["pay-to-earn"], "seed");
+    expect(a).toEqual(reasonChips(s, ["pay-to-earn"], "seed"));
     expect(a).toHaveLength(CHIP_COUNT);
     expect(a.map((c) => c.tactic)).toContain("pay-to-earn");
     expect(new Set(a.map((c) => c.tactic)).size).toBe(CHIP_COUNT);
-  });
-
-  it("cleans up model chips: known tactics, no duplicates, right answer added", () => {
-    const chips = finalizeChips(
-      [
-        { tactic: "urgency", label: "Rushes you" },
-        { tactic: "urgency", label: "Again" },
-        { tactic: "flattery", label: "Praise" },
-        { tactic: "authority", label: "Boss" },
-        { tactic: "social-proof", label: "Others" },
-      ],
-      s,
-      ["pay-to-earn"],
-      "seed",
-    );
-    const tactics = chips.map((c) => c.tactic);
-    expect(tactics).toHaveLength(CHIP_COUNT);
-    expect(tactics).toContain("pay-to-earn");
-    expect(new Set(tactics).size).toBe(CHIP_COUNT);
-    expect(chips.find((c) => c.tactic === "urgency")?.label).toBe("Rushes you");
-  });
-});
-
-describe("snapToWords", () => {
-  const tokens = tokenize("Pay ₹999 to register now.");
-
-  it("widens a selection that starts or ends mid-word to whole words", () => {
-    // "y ₹99" → "Pay ₹999"
-    const snapped = snapToWords(tokens, 2, 7)!;
-    expect(tokens[snapped.first]!.text).toBe("Pay");
-    expect(tokens[snapped.last]!.text).toBe("₹999");
-  });
-
-  it("ignores spaces at the edges of a selection", () => {
-    const text = "Pay ₹999 to register now.";
-    const start = text.indexOf(" to ");
-    const snapped = snapToWords(tokens, start, start + 4)!;
-    expect(snapped.first).toBe(snapped.last);
-    expect(tokens[snapped.first]!.text).toBe("to");
-  });
-
-  it("returns nothing for a selection of only spaces", () => {
-    expect(snapToWords(tokens, 3, 4)).toBeUndefined();
   });
 });

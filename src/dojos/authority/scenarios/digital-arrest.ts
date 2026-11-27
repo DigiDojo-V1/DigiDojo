@@ -318,9 +318,10 @@ export const digitalArrest = defineScenario({
           from: "them",
           delayMs: 1300,
           segments: [
+            { text: "Stay calm. If you cooperate, I can help you. " },
             {
               id: "arrest-calm-only",
-              text: "Stay calm. If you cooperate, I can help you. Don't tell anyone, I'm your only chance.",
+              text: "Don't tell anyone, I'm your only chance.",
               redFlagId: "arrest-fake-sympathy",
             },
           ],
@@ -434,9 +435,10 @@ export const digitalArrest = defineScenario({
           delayMs: 1400,
           segments: [
             { text: "FINAL NOTICE. Non-cooperation recorded under case NNIW/CC/2611. " },
+            { text: "Arrest team dispatched to your address. " },
             {
               id: "arrest-final-team",
-              text: "Arrest team dispatched to your address. Call back within 15 minutes to stop it.",
+              text: "Call back within 15 minutes to stop it.",
               redFlagId: "arrest-final-notice",
             },
           ],

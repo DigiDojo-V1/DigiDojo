@@ -10,7 +10,6 @@ export interface Limiter {
 }
 
 export const LIMITS = {
-  chips: { requests: 30, window: "1 m", prefix: "digidojo:flag:chips" },
   judge: { requests: 10, window: "1 m", prefix: "digidojo:flag:judge" },
   /** One token per live call. */
   callToken: { requests: 8, window: "10 m", prefix: "digidojo:call:token" },

@@ -6,6 +6,7 @@ import { PhoneOff, type LucideIcon } from "lucide-react";
 import { useT } from "@/i18n/hooks";
 import { cn } from "@/lib/utils";
 import { HighlightableText } from "../HighlightableText";
+import { PhoneFrame } from "../PhoneFrame";
 import { SimulationBar } from "../SimulationBar";
 
 /**
@@ -14,18 +15,21 @@ import { SimulationBar } from "../SimulationBar";
  */
 
 export function CallFrame({ children, className }: { children: ReactNode; className?: string }) {
+  // Calls are phone-only: on desktop they sit in the phone mockup next to the Dojo panel.
   return (
-    <div
-      className={cn(
-        "relative flex min-h-dvh flex-col bg-gradient-to-b from-slate-800 via-slate-900 to-slate-950 text-white",
-        className,
-      )}
-    >
-      <div className="sticky top-0 z-40">
-        <SimulationBar />
+    <PhoneFrame>
+      <div
+        className={cn(
+          "relative flex min-h-dvh flex-col bg-gradient-to-b from-slate-800 via-slate-900 to-slate-950 text-white lg:min-h-full",
+          className,
+        )}
+      >
+        <div className="sticky top-0 z-40">
+          <SimulationBar />
+        </div>
+        {children}
       </div>
-      {children}
-    </div>
+    </PhoneFrame>
   );
 }
 
