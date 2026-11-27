@@ -191,6 +191,7 @@ interface Email {
 interface Address { id: string; address: string; redFlagId?: string }
 ```
 
+- Voice notes: a thread message may set `voiceNote: { durationSec }` (not on `system` messages). The shell draws a play button, waveform and length, and the message text becomes the transcript under it, highlightable as usual. Play reads the transcript with the browser's speech voice where there is one; there is never a real recording.
 - Display hints (optional, visual only, never scored): `Message.time` ("09:14") shows next to the sender in card-style chats; `Field.slot` (`name | headline | location | connections`, profile panels only) draws a field in the profile header; `EvidencePanel.variant: "official-record"` (company panels only) draws a registry record card; `ThreadNode.layout: "split"` shows the messages and the node's evidence panels as two panes with a switch.
 - Threads and email nodes take `evidence: [panelId, …]`: buttons such as "View profile" or "Check careers page".
 - Every flaggable item (message, red-flag phrase, address, attachment, link, panel field) shares one id space per scenario. Phrases matter only as hidden answer spans: a segment without a `redFlagId` needs no id. `src/engine/evidence.ts` (`collectFlaggables`) is the one place that lists them.
