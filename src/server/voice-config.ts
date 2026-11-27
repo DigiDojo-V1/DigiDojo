@@ -3,8 +3,8 @@
 export const DEFAULT_VOICE_MODELS = {
   /** Real-time voice for the caller. */
   live: "gemini-3.8-live",
-  /** Reviews the call transcript afterwards. */
-  judge: "gemini-3.8-flash",
+  /** Reviews the call transcript afterwards. Flash-Lite answers in 2 to 3 s; 3.8 Flash often missed the 25 s timeout. */
+  judge: "gemini-3.5-flash-lite",
 } as const;
 
 export function voiceStatus(

@@ -49,11 +49,11 @@ Without Upstash the API isn't rate limited, and a warning is printed in developm
 
 The Authority dojo's calls can be answered with your voice. Three endpoints serve them:
 
-| Endpoint                | Default model      | What it does                                                                 |
-| ----------------------- | ------------------ | ---------------------------------------------------------------------------- |
-| `GET /api/call/status`  | (none)             | Tells the call screen whether voice is on                                    |
-| `POST /api/call/token`  | `gemini-3.8-live`  | Mints a single-use Live API token with the caller's whole config locked in   |
-| `POST /api/call/report` | `gemini-3.8-flash` | Reviews the finished call: rating out of 10, good moves, mistakes, red flags |
+| Endpoint                | Default model           | What it does                                                                 |
+| ----------------------- | ----------------------- | ---------------------------------------------------------------------------- |
+| `GET /api/call/status`  | (none)                  | Tells the call screen whether voice is on                                    |
+| `POST /api/call/token`  | `gemini-3.8-live`       | Mints a single-use Live API token with the caller's whole config locked in   |
+| `POST /api/call/report` | `gemini-3.5-flash-lite` | Reviews the finished call: rating out of 10, good moves, mistakes, red flags |
 
 - **The switch:** voice is on when `GEMINI_API_KEY` is set (mark it Sensitive). `VOICE_AI=off` turns it off without removing the key. When it's off, players answer every call with reply options instead, and the rest of the game is unchanged.
 - **Models:** override them with `GEMINI_LIVE_MODEL` and `GEMINI_JUDGE_MODEL`.
