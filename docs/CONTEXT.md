@@ -42,7 +42,7 @@ Design rules from the research, which every dojo follows:
 ```
 src/
   app/
-    layout.tsx                         # phone-width frame, fonts, providers
+    layout.tsx                         # fonts, providers (each screen picks its own frame)
     page.tsx                           # home: dojo path
     dojo/[dojoId]/page.tsx             # dojo intro + scenario list
     dojo/[dojoId]/[scenarioId]/page.tsx  # scenario player
@@ -61,9 +61,14 @@ src/
     define.ts                          # defineScenario(), defineDojo() helpers (validate in dev)
     store.ts                           # zustand: current run (node, flags, history) + persisted progress
     ScenarioPlayer.tsx                 # renders the current node with the right shell
+    PlayerFrame.tsx                    # phone column, or desktop app + docked Dojo panel (choices, flags, exit)
     Debrief.tsx
   shells/
-    ChatShell.tsx                      # generic chat: header, bubbles, typing indicator, flag-on-tap; theme: whatsapp | telegram | instagram
+    ChatShell.tsx                      # generic chat: header, bubbles, typing indicator, flag-on-tap; theme: whatsapp | telegram | instagram | linkedin
+    ChatDesktop.tsx                    # ChatShell's desktop web layout (chat list, thread, evidence column)
+    MailShell.tsx                      # mail app; webmail layout on desktop (folders, list, reading pane, compose window)
+    PhoneFrame.tsx                     # phone mockup for phone-only apps on desktop
+    panel-slot.tsx                     # <DojoPanel> / useInDojoPanel(): render game controls into the docked panel
     SmsShell.tsx                       # placeholder in scaffold
     UpiShell.tsx                       # placeholder in scaffold
     CallShell.tsx                      # placeholder in scaffold
@@ -76,7 +81,8 @@ src/
     LanguageToggle.tsx                 # "EN | Hinglish" segmented toggle
     coverage.ts                        # counts text fields missing Hinglish (npm run i18n:report)
   components/ui/                       # shadcn
-  lib/
+  components/layout/                   # AppChrome (top nav + 3 columns from md/lg), ProgressCard, RightRail
+  lib/                                 # useIsDesktop(), placePopover()
 tests/
   scenarios.test.ts                    # validates every registered scenario
 ```
@@ -261,7 +267,7 @@ Acceptance:
 
 - `npm run dev`: home shows 4 dojos → Easy Money → the example scenario plays end to end with delays, typing indicator, flag-on-tap, choices, outcome, rewind and debrief (caught, missed, false alarms).
 - The other 3 dojos open and show their "Coming soon" scenario.
-- Looks right at 390 px and centred at desktop width.
+- Looks right at 390 px, 768 px and 1280 px (desktop: the app's desktop layout with the Dojo panel).
 - `npm run lint && npm run typecheck && npm test && npm run build` all pass.
 
 Not in the scaffold (later phases): database and auth, the AI voice call (Vapi), the belt test, the before/after pilot test, Day-7 rematch, share card, PWA, analytics (PostHog), final visual design.
@@ -279,7 +285,8 @@ Not in the scaffold (later phases): database and auth, the AI voice call (Vapi),
 ## 8. Guardrails
 
 - All people, companies, agencies and apps in scenarios are fictional. No real logos or brand names.
-  - Exception agreed by the lead: Dream Job's player-facing text keeps the blueprint's platform names (LinkedIn, Gmail, WhatsApp, `@gmail.com` addresses, an `@okaxis` UPI handle), because spotting a free-mail sender is the lesson. The shells still use our own look and no logos. All companies, people and domains stay fictional (`*.example`).
+  - Exception agreed by the lead: Dream Job's player-facing text keeps the blueprint's platform names (LinkedIn, Gmail, WhatsApp, `@gmail.com` addresses, an `@okaxis` UPI handle), because spotting a free-mail sender is the lesson. All companies, people and domains stay fictional (`*.example`).
+  - Desktop layouts may closely copy the real apps' desktop structure and colours (webmail, professional network, messengers), so the practice transfers. Never their logos, wordmarks or brand icons: app names in the chrome are generic ("Mail", "Messaging") and marks are plain shapes.
 - Never ask players for real OTPs, PINs, card numbers or passwords.
 - No "play the scammer" mode. Sextortion appears only as a text guidance card, never a simulation.
 - No political content.

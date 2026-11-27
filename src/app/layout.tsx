@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { ChromeDataProvider } from "@/components/layout/chrome-data";
+import { dojoSummaries } from "@/components/layout/dojo-summaries";
 import { HtmlLang } from "@/i18n/HtmlLang";
 import { DEFAULT_LOCALE, HTML_LANG } from "@/i18n/locale";
 import "./globals.css";
@@ -33,10 +35,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-dvh bg-neutral-200">
         <HtmlLang />
-        {/* Phone-width column: full width on mobile, centred 420px on desktop. */}
-        <div className="relative mx-auto flex min-h-dvh w-full max-w-[420px] flex-col bg-background shadow-xl">
-          {children}
-        </div>
+        {/* Each screen picks its own frame: AppChrome for DigiDojo's pages, PlayerFrame for the fake apps. */}
+        <ChromeDataProvider dojos={dojoSummaries()}>{children}</ChromeDataProvider>
       </body>
     </html>
   );

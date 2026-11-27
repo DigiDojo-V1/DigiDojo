@@ -60,7 +60,7 @@ export function Debrief({ scenario, outcome, run, backHref, onReplay }: DebriefP
   const style = outcome !== undefined ? OUTCOME_STYLE[outcome.result] : undefined;
 
   return (
-    <main className="flex flex-1 flex-col gap-4 p-4 pb-8">
+    <main className="flex flex-1 flex-col gap-4 p-4 pb-8 md:rounded-lg md:bg-white md:p-6 md:ring-1 md:ring-black/10">
       <TopBar back={{ href: backHref, label: "nav.backToDojo" }} className="-mb-2" />
       <header className="flex items-center gap-2">
         <div className="min-w-0">

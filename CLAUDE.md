@@ -22,7 +22,7 @@ Next.js (App Router) · TypeScript (strict) · Tailwind CSS v4 · shadcn/ui · m
 
 - **Scenarios are data.** Write them as typed objects with `defineScenario()` in `src/dojos/<dojo-id>/scenarios/`. Never hard-code a scenario's story in JSX.
 - **Stay in your folder.** Never import from another dojo's folder. Need something shared? Propose it for `src/engine/` or `src/shells/` in its own PR.
-- **Mobile-first.** Design at 390 px wide. On desktop the app renders in a centred phone-width column (max 420 px).
+- **Mobile-first, responsive.** Design at 390 px, then check 768 px and 1280 px. Phones: one 420 px column. From `lg` (1024 px) each fake app uses its real desktop layout (webmail, professional-network messaging, messenger web) with the Dojo panel docked on the right; phone-only apps (SMS, UPI, calls) sit in `PhoneFrame`. DigiDojo's own pages use `AppChrome`. In a shell, branch on `useInDojoPanel()` for desktop structure; use `lg:` classes for styling only.
 - **Everything fictional.** No real company, bank, agency, app brand, logo or officer names. Every simulation screen carries a small "Simulation" label.
 - **Never collect real secrets.** The app never asks for real OTPs, PINs, card numbers or passwords. Fields that look like it accept anything and store nothing.
 - **Language.** Write all player-facing text in English. Hinglish is added later with /translate-hinglish; never change en text while translating.

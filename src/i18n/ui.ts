@@ -42,6 +42,41 @@ const en = {
   // 404
   "notFound.body": "We couldn't find this page.",
 
+  // App chrome (wide screens)
+  "chrome.nav": "Main",
+  "chrome.home": "Home",
+  "chrome.progressTitle": "Your training",
+  "chrome.progressBody": (done: number, total: number) =>
+    `${done} of ${total} scenario${total === 1 ? "" : "s"} done`,
+  "chrome.howTitle": "How it works",
+  "chrome.how1": "Live through a real scam inside a fake app.",
+  "chrome.how2": "Flag anything suspicious, then make your call.",
+  "chrome.how3": "See what you caught, and what you missed, in the debrief.",
+  "chrome.helpTitle": "Lost money to a scam?",
+  "chrome.helpBody": "Call 1930 right away and report it at cybercrime.gov.in.",
+
+  // Dojo panel (the side panel next to a fake app on wide screens)
+  "panel.label": "Dojo controls",
+  "panel.instructions":
+    "Click any sentence that looks suspicious. Use the flag next to details like addresses, links and files.",
+  "panel.waiting": "Read carefully. Your options appear here when it's time to decide.",
+  "panel.flagged": (n: number) => `${n} flagged`,
+  "panel.exit": "Exit simulation",
+
+  // Fake app chrome on wide screens (decorative)
+  "desktop.search": "Search",
+  "desktop.chats": "Chats",
+  "desktop.messages": "Messages",
+  "desktop.typeMessage": "Type a message",
+  "desktop.focused": "Focused",
+  "desktop.other": "Other",
+  "desktop.navHome": "Home",
+  "desktop.navNetwork": "My Network",
+  "desktop.navJobs": "Jobs",
+  "desktop.navMessaging": "Messaging",
+  "desktop.navNotifications": "Notifications",
+  "desktop.navMe": "Me",
+
   // Primer
   "primer.eyebrow": "The trick",
   "primer.start": "Start simulation",
@@ -161,6 +196,16 @@ const en = {
   "mail.appName": "Mail",
   "mail.search": "Search in mail",
   "mail.primary": "Primary",
+  "mail.promotions": "Promotions",
+  "mail.social": "Social",
+  "mail.starred": "Starred",
+  "mail.snoozed": "Snoozed",
+  "mail.sent": "Sent",
+  "mail.drafts": "Drafts",
+  "mail.more": "More",
+  "mail.forward": "Forward",
+  "mail.newMessage": "New message",
+  "mail.send": "Send",
   "mail.compose": "Compose",
   "mail.inboxLabel": "Inbox",
   "mail.details": "Details",

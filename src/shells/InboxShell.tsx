@@ -5,6 +5,7 @@ import type { TriageLabel } from "@/engine/schema";
 import { useT } from "@/i18n/hooks";
 import { cn } from "@/lib/utils";
 import { MailAvatar } from "./MailShell";
+import { useInDojoPanel } from "./panel-slot";
 
 export interface InboxRow {
   id: string;
@@ -27,6 +28,8 @@ const LABEL_STYLE: Record<TriageLabel, string> = {
 /** The inbox list. Tapping a row opens it; the chosen label shows as a chip under the preview. */
 export function InboxList({ rows, onOpen }: { rows: InboxRow[]; onOpen: (id: string) => void }) {
   const t = useT();
+  const desktop = useInDojoPanel();
+  if (desktop) return <DenseInboxList rows={rows} onOpen={onOpen} />;
   return (
     <ul className="pb-32">
       {rows.map((row) => {
@@ -92,6 +95,61 @@ export function InboxList({ rows, onOpen }: { rows: InboxRow[]; onOpen: (id: str
   );
 }
 
+/** Desktop webmail rows: one line each, sender | subject - preview | label | date. */
+function DenseInboxList({ rows, onOpen }: { rows: InboxRow[]; onOpen: (id: string) => void }) {
+  const t = useT();
+  return (
+    <ul>
+      {rows.map((row) => {
+        const unread = row.opened !== true;
+        return (
+          <li key={row.id}>
+            <button
+              type="button"
+              onClick={() => onOpen(row.id)}
+              className={cn(
+                "relative flex h-10 w-full items-center gap-3 border-b border-[#f1f3f4] px-4 text-left text-sm text-[#1f1f1f] hover:z-10 hover:shadow-[inset_1px_0_0_#dadce0,inset_-1px_0_0_#dadce0,0_1px_2px_0_rgba(60,64,67,.3),0_1px_3px_1px_rgba(60,64,67,.15)]",
+                unread ? "bg-white" : "bg-[#f2f6fc]",
+              )}
+            >
+              <span
+                aria-hidden
+                className="size-[18px] shrink-0 rounded-sm border-2 border-[#c4c7c5]"
+              />
+              <Star aria-hidden className="size-[18px] shrink-0 text-[#c4c7c5]" />
+              <span className={cn("w-[180px] shrink-0 truncate", unread && "font-bold")}>
+                {row.displayName}
+              </span>
+              <span className="min-w-0 flex-1 truncate">
+                <span className={cn(unread && "font-bold")}>{row.subject}</span>
+                <span className="text-[#5f6368]"> - {row.preview}</span>
+              </span>
+              <span
+                className={cn(
+                  "shrink-0 rounded px-1.5 py-0.5 text-xs font-medium ring-1",
+                  row.label === undefined
+                    ? "bg-slate-50 text-slate-500 ring-slate-200"
+                    : LABEL_STYLE[row.label],
+                )}
+              >
+                {row.label === undefined ? t("triage.unlabelled") : t(`triage.${row.label}`)}
+              </span>
+              <span
+                className={cn(
+                  "shrink-0 text-right text-xs whitespace-nowrap",
+                  unread && "font-bold",
+                )}
+              >
+                {row.date}
+              </span>
+            </button>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
 const LABEL_ACTIVE: Record<TriageLabel, string> = {
   legit: "border-emerald-700 bg-emerald-700 text-white",
   scam: "border-red-700 bg-red-700 text-white",
@@ -111,7 +169,7 @@ export function TriageLabelBar({
   const t = useT();
   const labels: TriageLabel[] = ["legit", "scam", "needs-checking"];
   return (
-    <div className="sticky bottom-0 z-30 space-y-2 border-t border-slate-200 bg-white/95 p-3 backdrop-blur">
+    <div className="sticky bottom-0 z-30 space-y-2 border-t border-slate-200 bg-white/95 p-3 backdrop-blur lg:static lg:border-0 lg:bg-transparent lg:p-0 lg:backdrop-blur-none">
       <p className="text-xs font-medium text-slate-500">{t("triage.prompt")}</p>
       <div className="grid grid-cols-3 gap-2">
         {labels.map((label) => (
