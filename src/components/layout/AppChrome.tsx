@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { useDojoSummaries } from "./chrome-data";
 import { ProgressCard } from "./ProgressCard";
 import { RightRail } from "./RightRail";
+import { APP_HOME, dojoHref } from "@/lib/routes";
 
 /**
  * The frame around DigiDojo's own screens (home, dojo, primer, outcome, debrief).
@@ -59,21 +60,25 @@ function DesktopNav() {
   return (
     <header className="sticky top-0 z-40 hidden h-[52px] border-b border-black/10 bg-white md:block">
       <div className="mx-auto flex h-full max-w-[1128px] items-center gap-4 px-6">
-        <Link href="/" className="flex shrink-0 items-center gap-2" aria-label={t("home.title")}>
+        <Link
+          href={APP_HOME}
+          className="flex shrink-0 items-center gap-2"
+          aria-label={t("home.title")}
+        >
           <span className="flex size-[34px] items-center justify-center rounded-md bg-primary text-primary-foreground">
             <ShieldCheck className="size-5" aria-hidden />
           </span>
           <span className="text-lg font-bold tracking-tight">{t("home.title")}</span>
         </Link>
         <nav aria-label={t("chrome.nav")} className="ml-auto flex h-full items-stretch">
-          <NavItem href="/" active={pathname === "/"} label={t("chrome.home")}>
+          <NavItem href={APP_HOME} active={pathname === APP_HOME} label={t("chrome.home")}>
             <House className="size-6" aria-hidden />
           </NavItem>
           {dojos.map((dojo) => (
             <NavItem
               key={dojo.id}
-              href={`/dojo/${dojo.id}`}
-              active={pathname.startsWith(`/dojo/${dojo.id}`)}
+              href={dojoHref(dojo.id)}
+              active={pathname.startsWith(dojoHref(dojo.id))}
               label={text(dojo.name)}
             >
               <span

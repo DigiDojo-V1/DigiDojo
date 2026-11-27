@@ -6,6 +6,7 @@ import { DojoProgress } from "@/components/progress/DojoProgress";
 import { useHydrated, useProgressStore } from "@/engine/store";
 import { useT, useText } from "@/i18n/hooks";
 import { useDojoSummaries } from "./chrome-data";
+import { dojoHref } from "@/lib/routes";
 
 /** Left column on desktop: the player's card, like a profile card, with progress per dojo. */
 export function ProgressCard() {
@@ -35,7 +36,7 @@ export function ProgressCard() {
       <ul className="divide-y divide-black/5 border-t border-black/10">
         {dojos.map((dojo) => (
           <li key={dojo.id}>
-            <Link href={`/dojo/${dojo.id}`} className="block px-4 py-2.5 hover:bg-black/[0.03]">
+            <Link href={dojoHref(dojo.id)} className="block px-4 py-2.5 hover:bg-black/[0.03]">
               <span className="mb-1 block truncate text-xs font-semibold text-black/75">
                 {text(dojo.name)}
               </span>

@@ -15,6 +15,7 @@ import { scenarioKey } from "@/engine/keys";
 import { DEFAULT_LOCALE } from "@/i18n/locale";
 import { L, T } from "@/i18n/T";
 import { resolveText } from "@/i18n/text";
+import { APP_HOME, scenarioHref } from "@/lib/routes";
 
 /** Only ids in the registry exist. Anything else is a 404. */
 export const dynamicParams = false;
@@ -23,14 +24,16 @@ export function generateStaticParams() {
   return DOJOS.map((dojo) => ({ dojoId: dojo.id }));
 }
 
-export async function generateMetadata({ params }: PageProps<"/dojo/[dojoId]">): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: PageProps<"/digidojo/dojo/[dojoId]">): Promise<Metadata> {
   const { dojoId } = await params;
   const dojo = getDojo(dojoId);
   const name = dojo === undefined ? "Dojo" : resolveText(dojo.name, DEFAULT_LOCALE);
   return { title: `${name} · DigiDojo` };
 }
 
-export default async function DojoPage({ params }: PageProps<"/dojo/[dojoId]">) {
+export default async function DojoPage({ params }: PageProps<"/digidojo/dojo/[dojoId]">) {
   const { dojoId } = await params;
   const dojo = getDojo(dojoId);
   if (dojo === undefined) notFound();
@@ -56,7 +59,7 @@ export default async function DojoPage({ params }: PageProps<"/dojo/[dojoId]">) 
   return (
     <AppChrome right={<RightRail>{takeawaysCard}</RightRail>}>
       <main className="flex flex-1 flex-col gap-6 p-5 pb-10 md:p-0">
-        <TopBar back={{ href: "/", label: "nav.backToHome" }} />
+        <TopBar back={{ href: APP_HOME, label: "nav.backToHome" }} />
 
         <header className="relative overflow-hidden rounded-3xl bg-primary p-5 text-primary-foreground">
           {/* Faint dot grid, top right. Decoration only. */}
@@ -102,7 +105,7 @@ export default async function DojoPage({ params }: PageProps<"/dojo/[dojoId]">) 
               return (
                 <li key={scenario.id}>
                   <Link
-                    href={`/dojo/${dojo.id}/${scenario.id}`}
+                    href={scenarioHref(dojo.id, scenario.id)}
                     className="group flex items-start gap-3"
                   >
                     <span className="pt-3">
