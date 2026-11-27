@@ -39,7 +39,9 @@ export function AppChrome({
           "lg:max-w-[1128px] lg:grid-cols-[225px_minmax(0,1fr)_300px]",
         )}
       >
-        <aside className="hidden lg:sticky lg:top-[76px] lg:block">{left ?? <ProgressCard />}</aside>
+        <aside className="hidden lg:sticky lg:top-[76px] lg:block">
+          {left ?? <ProgressCard />}
+        </aside>
         <div className="flex min-w-0 flex-1 flex-col">{children}</div>
         <aside className="hidden md:sticky md:top-[76px] md:block">{right ?? <RightRail />}</aside>
       </div>
@@ -107,7 +109,8 @@ function NavItem({
       aria-current={active ? "page" : undefined}
       className={cn(
         "relative flex w-[72px] flex-col items-center justify-center gap-0.5 text-black/60 transition-colors hover:text-black/90 lg:w-[88px]",
-        active && "text-black/90 after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:bg-black/90",
+        active &&
+          "text-black/90 after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:bg-black/90",
       )}
     >
       {children}

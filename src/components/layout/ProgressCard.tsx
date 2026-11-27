@@ -28,7 +28,9 @@ export function ProgressCard() {
           <UserRound className="size-9" />
         </span>
         <h2 className="mt-2 text-lg leading-tight font-semibold">{t("chrome.progressTitle")}</h2>
-        <p className="mt-0.5 text-xs text-black/60">{t("chrome.progressBody")(done, keys.length)}</p>
+        <p className="mt-0.5 text-xs text-black/60">
+          {t("chrome.progressBody")(done, keys.length)}
+        </p>
       </div>
       <ul className="divide-y divide-black/5 border-t border-black/10">
         {dojos.map((dojo) => (
