@@ -61,6 +61,26 @@ export function collectTexts(scenario: Scenario): TextField[] {
           add(`${at}.items.${item.id}.explanation`, item.explanation);
         }
         break;
+      case "live-call":
+        add(`${at}.caller.name`, node.caller.name);
+        add(`${at}.caller.label`, node.caller.label);
+        node.player.details.forEach((d, i) => add(`${at}.player.details.${i}.label`, d.label));
+        for (const [eventId, event] of Object.entries(node.events ?? {})) {
+          const e = `${at}.events.${eventId}`;
+          if (event.kind === "sms") add(`${e}.text`, event.text);
+          if (event.kind === "payment") {
+            add(`${e}.payee`, event.payee);
+            add(`${e}.note`, event.note);
+          }
+          if (event.kind === "document") add(`${e}.sender`, event.sender);
+        }
+        for (const lifeline of node.lifelines ?? []) {
+          const l = `${at}.lifelines.${lifeline.id}`;
+          add(`${l}.name`, lifeline.name);
+          add(`${l}.message`, lifeline.message);
+          add(`${l}.reply`, lifeline.reply);
+        }
+        break;
       case "outcome":
         add(`${at}.title`, node.title);
         add(`${at}.body`, node.body);

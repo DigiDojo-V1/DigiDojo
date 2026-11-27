@@ -32,6 +32,7 @@ import {
   type DebriefTriageRow,
   type RunRecord,
 } from "./scoring";
+import { CallReportCard } from "./CallReportCard";
 import { OUTCOME_STYLE } from "./outcome-style";
 import type { LocalizedText, OutcomeNode, Scenario, Tactic } from "./schema";
 import { scenarioKey } from "./keys";
@@ -75,6 +76,10 @@ export function Debrief({ scenario, outcome, run, backHref, onReplay }: DebriefP
           </Badge>
         )}
       </header>
+
+      {Object.values(run.liveCalls ?? {}).map((record) => (
+        <CallReportCard key={record.nodeId} scenario={scenario} record={record} />
+      ))}
 
       <ScoreCard result={result} found={found} reached={reachedCount} />
 

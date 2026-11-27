@@ -70,7 +70,10 @@ interface DesktopLook {
   headerIcons: LucideIcon[];
 }
 
-const LOOKS: Record<ChatTheme, DesktopLook> = {
+/** Apps with a desktop web version. SMS is phone-only: it shows in a phone mockup instead. */
+export type DesktopChatTheme = Exclude<ChatTheme, "sms">;
+
+const LOOKS: Record<DesktopChatTheme, DesktopLook> = {
   whatsapp: {
     rail: "messenger",
     page: "bg-[#f0f2f5]",
@@ -177,7 +180,7 @@ export function ChatDesktop({
   onContactClick,
   aside,
   transition,
-}: ShellProps & { theme: ChatTheme }) {
+}: ShellProps & { theme: DesktopChatTheme }) {
   const tr = useT();
   const look = LOOKS[theme];
   const style: ThemeStyle = { ...THEMES[theme], ...look.bubbles };

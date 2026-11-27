@@ -10,12 +10,12 @@ Why it matters: Indians lost ₹22,845 crore to cyber fraud in 2024 across 36 la
 
 ## 2. The four dojos
 
-| Order | Dojo id        | Name         | Scenarios (planned)                                                                                                                                   |
-| ----- | -------------- | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1     | `easy-money`   | Easy Money   | Task scam (Instagram ad → Telegram "prepaid tasks"), money-mule recruitment ("rent your UPI"), "sent by mistake, please refund" + UPI collect request |
-| 2     | `dream-job`    | Dream Job    | Fake internship with a "laptop and training fee", including a live AI voice call from "HR"; fake offer letter                                         |
-| 3     | `trust-me-bro` | Trust Me Bro | Voice-cloned friend ("bhai urgent ₹5k bhej"); free gaming currency → fake login page                                                                  |
-| 4     | `authority`    | Authority    | "Digital arrest" video call from a fake cyber crime officer; fake KYC "account blocked in 2 hours"                                                    |
+| Order | Dojo id        | Name         | Scenarios (planned)                                                                                                                                     |
+| ----- | -------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1     | `easy-money`   | Easy Money   | Task scam (Instagram ad → Telegram "prepaid tasks"), money-mule recruitment ("rent your UPI"), "sent by mistake, please refund" + UPI collect request   |
+| 2     | `dream-job`    | Dream Job    | Fake internship with a "laptop and training fee", including a live AI voice call from "HR"; fake offer letter                                           |
+| 3     | `trust-me-bro` | Trust Me Bro | Voice-cloned friend ("bhai urgent ₹5k bhej"); free gaming currency → fake login page                                                                    |
+| 4     | `authority`    | Authority    | Live AI voice calls: fake KYC "account frozen in 2 hours"; "digital arrest" video call from a fake narcotics officer; a genuine card-fraud call (legit) |
 
 Every dojo also contains at least one **legit** scenario (a real internship, a real bank message) that the player should engage with normally. Rejecting everything must not win.
 
@@ -226,6 +226,48 @@ Engine behaviour:
 - Rewind keeps flags but returns to the target node.
 - Finishing a scenario (reaching the debrief) marks it complete in persisted progress.
 
+### Live voice calls (added for Authority)
+
+A `live-call` node is a phone call the player answers with their own voice. An AI (Gemini Live) plays the caller in real time, from a script that is scenario data. Source for the Authority dojo: `docs/scenarios/authority/voice-call-scam-awareness-guide.pdf`.
+
+```ts
+| {
+    kind: "live-call"; app: "call"; video?: boolean;   // video = the "digital arrest" look: an illustration, never the player's camera
+    caller: { name: LocalizedText; number: string; label?: LocalizedText };
+    player: { name: string; details: { label: LocalizedText; value: string }[] }; // made-up identity, shown on a card
+    agent: {                                          // English, never shown to the player
+      voice: string;                                  // Gemini prebuilt voice, e.g. "Orus"
+      character: string;
+      stages: { name: string; say: string; redFlagIds?: string[] }[];
+      responses?: { ifPlayer: string; reply: string; redFlagIds?: string[] }[]; // the guide's "response paths"
+      rules?: string[];
+    };
+    events?: Record<string, CallEvent>;               // things the caller makes happen on the phone
+    lifelines?: { id; name; message; reply }[];       // someone the player can quietly text mid-call
+    rubric: { goodMoves: string[]; mistakes: string[]; examples?: { player: string; rating: number }[] };
+    outcomes: { id; when: string; events?: Signal[]; nextNodeId }[]; // priority order, last = default
+    scriptedNodeId: string;                           // the same call with reply options (no mic, or voice off)
+    declineNodeId?: string;                           // where Decline goes
+    maxMinutes?: number;                              // default 6
+  }
+
+type CallEvent =
+  | { kind: "sms"; sender: string; text: LocalizedText; otp?: true; cue: string } // "{otp}" in text: a fresh code per call
+  | { kind: "payment"; payee: LocalizedText; amount: number; note?: LocalizedText; cue: string }
+  | { kind: "document"; app: "whatsapp" | "sms"; sender: LocalizedText; fileName: string; panelId: string; cue: string };
+// Signals: "<smsId>.read" (the player said the code out loud), "<paymentId>.paid" / ".declined",
+// "<documentId>.opened", "<lifelineId>.sent".
+```
+
+- **Flow.** Ringing screen (Answer with voice / Answer without mic / Decline) → the call (captions, mute, a "My details" card, Flag, lifelines, hang up; texts, files and payment requests drop in when the caller calls `trigger_event`) → "Call ended" → the outcome's next node → … → debrief. Without `GEMINI_API_KEY`, or without a mic, Answer goes to `scriptedNodeId`.
+- **Scripted calls** are ordinary `thread` nodes with `app: "call"` (`CallShell`): caller lines are captions the player can highlight, optionally read aloud by the browser. A choice with `hangUp: true` is the red button; give every call screen exactly one. Long `system` lines (a text arriving mid-call) are drawn as flaggable notification cards. `app: "sms"` threads use `SmsShell`.
+- **Where a call leads.** An outcome whose `events` signals happened wins outright (reading out the OTP, paying). Otherwise the call judge picks by `when`, falling back to the last outcome.
+- **Call judge** (`POST /api/call/report`, `src/server/call-api.ts`). After the call, a Gemini text model reads the transcript, the rubric (calibrated with the guide's example users) and the signals, and returns a rating out of 10 (Highly vulnerable < 4 ≤ Moderately safe < 8 ≤ Scam-savvy), what the player did well and wrong (quoting them), what to do better, which red flags the caller actually used, and which red flag each in-call Flag caught. If the judge fails, the player gets a rough local rating. The debrief shows it all as "Your call", with the transcript.
+- **Scoring.** Red flags heard on a call join the normal debrief (`where: "call"`): flagged with the right reason = caught, wrong reason = spotted, heard but not flagged = missed. In-call flags that match nothing are false alarms. Every red flag still needs a carrier in the scripted call (the "every red flag is used" rule still applies).
+- **Security.** The Gemini key never reaches the browser. `POST /api/call/token` builds the whole session config (system prompt, voice, tools) from scenario data and mints a single-use token with that config locked. The browser talks to the Live API directly with it. Both endpoints are rate limited. Our server never stores or logs audio or transcripts. See `docs/DEPLOY_AI.md`.
+- **Never collect real secrets.** The player gets a made-up identity card, every OTP is generated per call, payments are simulated, and the ringing screen says never to say real details.
+- New tactics: `fear`, `blocks-verification`, `fake-proof`, `secret-code`, `small-ask`, `pay-to-clear`.
+
 ### Language
 
 Scenarios are written in **English**. Every player-facing field above is a `LocalizedText`: write a plain string, which counts as English, and leave Hinglish to the translation pass. `/translate-hinglish <scenario file>` turns each string into `{ en, hinglish }` and never changes `en`. Dojo `name` and `tagline` are `LocalizedText` too.
@@ -272,7 +314,7 @@ Acceptance:
 - Looks right at 390 px, 768 px and 1280 px (desktop: the app's desktop layout with the Dojo panel).
 - `npm run lint && npm run typecheck && npm test && npm run build` all pass.
 
-Not in the scaffold (later phases): database and auth, the AI voice call (Vapi), the belt test, the before/after pilot test, Day-7 rematch, share card, PWA, analytics (PostHog), final visual design.
+Not in the scaffold (later phases): database and auth, the belt test, the before/after pilot test, Day-7 rematch, share card, PWA, analytics (PostHog), final visual design.
 
 ## 7. Ownership
 

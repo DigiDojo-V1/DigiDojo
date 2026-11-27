@@ -63,6 +63,12 @@ export const TACTICS = [
   "data-harvest",
   "malicious-file",
   "disguised-link",
+  "fear",
+  "blocks-verification",
+  "fake-proof",
+  "secret-code",
+  "small-ask",
+  "pay-to-clear",
 ] as const;
 export const TacticSchema = z.enum(TACTICS);
 export type Tactic = z.infer<typeof TacticSchema>;
@@ -105,6 +111,11 @@ export type Message = z.output<typeof MessageSchema>;
 export const ChoiceSchema = z.strictObject({
   label: LocalizedTextSchema,
   nextNodeId: kebabCase,
+  /**
+   * Display only, call screens only: this choice is the red hang-up button. At most one per
+   * node. On a real call you can always hang up, so every call node should offer it.
+   */
+  hangUp: z.boolean().optional(),
 });
 export type Choice = z.output<typeof ChoiceSchema>;
 
@@ -292,6 +303,153 @@ export const TriageNodeSchema = z.strictObject({
 });
 export type TriageNode = z.output<typeof TriageNodeSchema>;
 
+/* ------------------------------------------------------------------ */
+/* Live voice calls (added for Authority)                              */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Text for the voice agent or the call judge, never shown to the player. Always English: the
+ * agent is told separately which language to speak.
+ */
+const AgentText = z.string().trim().min(1);
+
+/** Something the caller makes happen on the player's phone during a live call. */
+export const CallEventSchema = z.discriminatedUnion("kind", [
+  z.strictObject({
+    /** A text message drops in from the top of the screen. */
+    kind: z.literal("sms"),
+    /** Sender id, e.g. "AX-NIMBNK". Never translated. */
+    sender: z.string().min(1),
+    /** With `otp`, write `{otp}` where the code goes. */
+    text: LocalizedTextSchema,
+    /**
+     * The message carries a one-time code, made up fresh for every call. If the player reads it
+     * out, the call records the signal `<eventId>.read`.
+     */
+    otp: z.literal(true).optional(),
+    /** For the agent: when to trigger it. */
+    cue: AgentText,
+  }),
+  z.strictObject({
+    /** A payment request sheet. Paying records `<eventId>.paid`, declining `<eventId>.declined`. */
+    kind: z.literal("payment"),
+    payee: LocalizedTextSchema,
+    /** Rupees. */
+    amount: z.number().int().positive(),
+    note: LocalizedTextSchema.optional(),
+    cue: AgentText,
+  }),
+  z.strictObject({
+    /** A file arrives in a chat app. Opening it shows an evidence panel and records `<eventId>.opened`. */
+    kind: z.literal("document"),
+    app: z.enum(["whatsapp", "sms"]),
+    sender: LocalizedTextSchema,
+    fileName: z.string().min(1),
+    /** The evidence panel (kind "document") that opens. */
+    panelId: kebabCase,
+    cue: AgentText,
+  }),
+]);
+export type CallEvent = z.output<typeof CallEventSchema>;
+
+/** Someone the player can quietly message during the call. Sending records `<id>.sent`. */
+export const LifelineSchema = z.strictObject({
+  id: kebabCase,
+  name: LocalizedTextSchema,
+  /** What the player sends. */
+  message: LocalizedTextSchema,
+  /** Their answer. */
+  reply: LocalizedTextSchema,
+});
+export type Lifeline = z.output<typeof LifelineSchema>;
+
+/** Signals a live call can record, from its events and lifelines. */
+export const CALL_SIGNAL_RE = /^[a-z0-9]+(-[a-z0-9]+)*\.(read|paid|declined|opened|sent)$/;
+
+export const LiveCallNodeSchema = z.strictObject({
+  kind: z.literal("live-call"),
+  app: z.literal("call"),
+  /** A video call (the "digital arrest" look). Display only. */
+  video: z.boolean().optional(),
+  caller: z.strictObject({
+    name: LocalizedTextSchema,
+    /** Never translated, e.g. "+91 70000 48213". */
+    number: z.string().min(1),
+    /** A line under the number, e.g. "Mobile · Delhi". */
+    label: LocalizedTextSchema.optional(),
+  }),
+  /** The made-up identity the player uses on the call, so they never say real details. */
+  player: z.strictObject({
+    name: z.string().min(1),
+    details: z
+      .array(z.strictObject({ label: LocalizedTextSchema, value: z.string().min(1) }))
+      .min(1),
+  }),
+  /** The voice agent: who it plays and how the call goes. English, never shown to the player. */
+  agent: z.strictObject({
+    /** A Gemini prebuilt voice, e.g. "Orus". */
+    voice: z.string().min(1),
+    /** Who the caller is and how they talk. */
+    character: AgentText,
+    /** The call's stages in order. `redFlagIds` are the red flags the caller uses there. */
+    stages: z
+      .array(
+        z.strictObject({
+          name: AgentText,
+          say: AgentText,
+          redFlagIds: z.array(kebabCase).optional(),
+        }),
+      )
+      .min(1),
+    /** How the caller answers each kind of player. */
+    responses: z
+      .array(
+        z.strictObject({
+          ifPlayer: AgentText,
+          reply: AgentText,
+          redFlagIds: z.array(kebabCase).optional(),
+        }),
+      )
+      .optional(),
+    /** Extra rules for this caller. */
+    rules: z.array(AgentText).optional(),
+  }),
+  events: z.record(kebabCase, CallEventSchema).optional(),
+  lifelines: z.array(LifelineSchema).optional(),
+  /** How the call judge rates the player. English. */
+  rubric: z.strictObject({
+    goodMoves: z.array(AgentText).min(1),
+    mistakes: z.array(AgentText).min(1),
+    /** Calibration: how a player like this should be rated (the source guide's three users). */
+    examples: z
+      .array(z.strictObject({ player: AgentText, rating: z.number().min(0).max(10) }))
+      .optional(),
+  }),
+  /**
+   * Where the call leads, in priority order. An outcome whose `events` signals happened is chosen
+   * outright; otherwise the judge picks one by `when`. The last outcome must have no `events`:
+   * it is the default.
+   */
+  outcomes: z
+    .array(
+      z.strictObject({
+        id: kebabCase,
+        when: AgentText,
+        events: z.array(z.string().regex(CALL_SIGNAL_RE)).min(1).optional(),
+        nextNodeId: kebabCase,
+      }),
+    )
+    .min(1),
+  /** The same call with reply options, for players without a mic or when voice is off. */
+  scriptedNodeId: kebabCase,
+  /** Where declining the call leads. Without it there is no Decline button. */
+  declineNodeId: kebabCase.optional(),
+  /** The call ends by itself after this long. Default 6. */
+  maxMinutes: z.number().int().min(1).max(12).optional(),
+});
+export type LiveCallNode = z.output<typeof LiveCallNodeSchema>;
+export type LiveCallNodeInput = z.input<typeof LiveCallNodeSchema>;
+
 export const OUTCOME_RESULTS = [
   "safe",
   "loss",
@@ -319,6 +477,7 @@ export const ScenarioNodeSchema = z.discriminatedUnion("kind", [
   EmailNodeSchema,
   ComposeNodeSchema,
   TriageNodeSchema,
+  LiveCallNodeSchema,
   OutcomeNodeSchema,
 ]);
 export type ScenarioNode = z.output<typeof ScenarioNodeSchema>;
@@ -391,7 +550,7 @@ function checkScenarioGraph(s: ScenarioData, ctx: z.RefinementCtx): void {
         } else if (target.kind === "outcome") {
           issue(
             [...at, "rewindToNodeId"],
-            `rewindToNodeId "${node.rewindToNodeId}" must point to a thread, email, compose or triage node`,
+            `rewindToNodeId "${node.rewindToNodeId}" must point to a thread, email, compose, triage or live-call node`,
           );
         }
       }
@@ -400,6 +559,16 @@ function checkScenarioGraph(s: ScenarioData, ctx: z.RefinementCtx): void {
 
     for (const next of nextNodeIds(node)) {
       if (!nodeIds.has(next)) issue(at, `nextNodeId "${next}" is not a node`);
+    }
+
+    if (node.kind === "live-call") checkLiveCall(node, at, s, panelIds, issue);
+
+    if (node.kind === "thread") {
+      const hangUps = node.choices.filter((c) => c.hangUp === true).length;
+      if (hangUps > 0 && node.app !== "call") {
+        issue([...at, "choices"], `hangUp choices are for call screens (app "call") only`);
+      }
+      if (hangUps > 1) issue([...at, "choices"], `a node can have at most one hangUp choice`);
     }
 
     if (node.kind === "thread" || node.kind === "email") {
@@ -510,6 +679,85 @@ function checkScenarioGraph(s: ScenarioData, ctx: z.RefinementCtx): void {
 
   if (nodeIds.has(s.startNodeId) && !canReachOutcome(s)) {
     issue(["startNodeId"], "no outcome node can be reached from startNodeId");
+  }
+}
+
+/** A live call's references, signals and outcome order. */
+function checkLiveCall(
+  node: LiveCallNode,
+  at: PropertyKey[],
+  s: ScenarioData,
+  panelIds: ReadonlySet<string>,
+  issue: (path: PropertyKey[], message: string) => void,
+): void {
+  const events = node.events ?? {};
+  const signals = new Set<string>();
+  for (const [eventId, event] of Object.entries(events)) {
+    switch (event.kind) {
+      case "sms":
+        if (event.otp === true) {
+          signals.add(`${eventId}.read`);
+          const texts = [event.text.en, event.text.hinglish].filter((t) => t !== undefined);
+          if (texts.some((t) => !t.includes("{otp}"))) {
+            issue([...at, "events", eventId, "text"], `an otp message must contain "{otp}"`);
+          }
+        }
+        break;
+      case "payment":
+        signals.add(`${eventId}.paid`);
+        signals.add(`${eventId}.declined`);
+        break;
+      case "document":
+        signals.add(`${eventId}.opened`);
+        if (!panelIds.has(event.panelId)) {
+          issue([...at, "events", eventId, "panelId"], `panelId "${event.panelId}" is not a panel`);
+        } else if (s.evidence?.[event.panelId]?.kind !== "document") {
+          issue(
+            [...at, "events", eventId, "panelId"],
+            `panel "${event.panelId}" must be a document`,
+          );
+        }
+        break;
+    }
+  }
+  const lifelineIds = new Set<string>();
+  for (const lifeline of node.lifelines ?? []) {
+    if (lifelineIds.has(lifeline.id) || lifeline.id in events) {
+      issue([...at, "lifelines"], `lifeline id "${lifeline.id}" is used more than once`);
+    }
+    lifelineIds.add(lifeline.id);
+    signals.add(`${lifeline.id}.sent`);
+  }
+
+  const lines = [
+    ...node.agent.stages.map((line, i) => ({ line, path: ["stages", i] })),
+    ...(node.agent.responses ?? []).map((line, i) => ({ line, path: ["responses", i] })),
+  ];
+  for (const { line, path } of lines) {
+    for (const redFlagId of line.redFlagIds ?? []) {
+      if (!(redFlagId in s.redFlags)) {
+        issue(
+          [...at, "agent", ...path, "redFlagIds"],
+          `redFlagId "${redFlagId}" is not defined in redFlags`,
+        );
+      }
+    }
+  }
+
+  const outcomeIds = new Set<string>();
+  node.outcomes.forEach((outcome, i) => {
+    if (outcomeIds.has(outcome.id)) {
+      issue([...at, "outcomes", i, "id"], `outcome id "${outcome.id}" is used more than once`);
+    }
+    outcomeIds.add(outcome.id);
+    for (const signal of outcome.events ?? []) {
+      if (!signals.has(signal)) {
+        issue([...at, "outcomes", i, "events"], `signal "${signal}" can't happen on this call`);
+      }
+    }
+  });
+  if (node.outcomes.at(-1)?.events !== undefined) {
+    issue([...at, "outcomes"], "the last outcome is the default and must have no events");
   }
 }
 

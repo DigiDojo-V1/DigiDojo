@@ -17,6 +17,7 @@ import { UpiShell } from "@/shells/UpiShell";
 import { Debrief } from "./Debrief";
 import { Flagging, useFlagActions } from "./Flagging";
 import { HowToPlay } from "./HowToPlay";
+import { LiveCallView } from "./LiveCallView";
 import { PlayerFrame } from "./PlayerFrame";
 import { messageRevealIds } from "./evidence";
 import {
@@ -56,6 +57,7 @@ export function ScenarioPlayer({ scenario, backHref, notesGraded }: ScenarioPlay
   const flags = useRunStore((s) => s.flags);
   const visited = useRunStore((s) => s.visited);
   const classifications = useRunStore((s) => s.classifications);
+  const liveCalls = useRunStore((s) => s.liveCalls);
   const rewinds = useRunStore((s) => s.rewinds);
   const start = useRunStore((s) => s.start);
   const reset = useRunStore((s) => s.reset);
@@ -111,7 +113,7 @@ export function ScenarioPlayer({ scenario, backHref, notesGraded }: ScenarioPlay
         <Debrief
           scenario={scenario}
           outcome={node?.kind === "outcome" ? node : undefined}
-          run={{ seen, flags, visited, classifications }}
+          run={{ seen, flags, visited, classifications, liveCalls }}
           backHref={backHref}
           onReplay={() => start(key, scenario)}
         />
@@ -155,6 +157,15 @@ export function ScenarioPlayer({ scenario, backHref, notesGraded }: ScenarioPlay
         {node.kind === "compose" && <ComposeView key={visitKey} node={node} backHref={backHref} />}
         {node.kind === "triage" && (
           <TriageView key={visitKey} scenario={scenario} node={node} backHref={backHref} />
+        )}
+        {node.kind === "live-call" && nodeId !== undefined && (
+          <LiveCallView
+            key={visitKey}
+            scenario={scenario}
+            nodeId={nodeId}
+            node={node}
+            backHref={backHref}
+          />
         )}
       </Flagging>
     </PlayerFrame>
@@ -211,7 +222,10 @@ function ThreadView({
   const evidence = useEvidence(scenario);
   const network = node.app === "linkedin";
   const footer = done ? (
-    <ChoiceFooter choices={node.choices} variant={network ? "composer" : "default"} />
+    <ChoiceFooter
+      choices={node.choices}
+      variant={node.app === "call" ? "call" : network ? "composer" : "default"}
+    />
   ) : undefined;
   const transition = useMemo(
     () => channelTransition(scenario, trail, locale),
