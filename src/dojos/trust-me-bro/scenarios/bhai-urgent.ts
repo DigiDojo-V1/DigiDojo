@@ -17,7 +17,7 @@ export const bhaiUrgent = defineScenario({
   legit: false,
   primer: {
     title: "The cloned voice",
-    body: "A few seconds of someone's voice from a reel is enough for an app to copy it. Scammers use a copied voice to ask friends and family for money, fast, from a number you've never seen.",
+    body: "Just 3 seconds of someone's voice from a reel can be enough for an app to copy it. Scammers use a copied voice to ask friends and family for money, fast, from a number you've never seen.",
     setup:
       "It's Saturday evening. Your friend Arjun was at Rohan's party last night. A number you don't know messages you on WhatsApp.",
     watchFor: [
@@ -312,7 +312,7 @@ export const bhaiUrgent = defineScenario({
       label: '"You know my voice"',
       tactic: "impersonation",
       explanation:
-        "A voice can be copied from a few seconds of video. It proves nothing on its own.",
+        "A voice can be copied from as little as 3 seconds of audio. It proves nothing on its own.",
     },
     "dodges-question": {
       label: "Dodges a simple check",

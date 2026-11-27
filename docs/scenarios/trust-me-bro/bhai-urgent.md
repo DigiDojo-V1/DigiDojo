@@ -17,7 +17,7 @@
 ## Primer
 
 **Title:** The cloned voice
-**Text:** A few seconds of someone's voice from a reel is enough for an app to copy it. Scammers use a copied voice to ask friends and family for money, fast, from a number you've never seen.
+**Text:** Just 3 seconds of someone's voice from a reel can be enough for an app to copy it. Scammers use a copied voice to ask friends and family for money, fast, from a number you've never seen.
 **Your situation:** It's Saturday evening. Your friend Arjun was at Rohan's party last night. A number you don't know messages you on WhatsApp.
 **Ask yourself:** How do I know who is really on the other end? · Can I reach this person some other way before I pay? · Whose name is on the account I'm paying?
 

@@ -13,7 +13,7 @@ export const trustMeBro = defineDojo({
   },
   scenarios: [bhaiUrgent, freeGems, realFriend],
   takeaways: [
-    "A familiar voice proves nothing. A few seconds from a reel is enough to copy it.",
+    "A familiar voice proves nothing. Just 3 seconds of audio from a reel can be enough to copy it.",
     "Before you send a friend money, call them on the number you already have.",
     'A "new number", a stranger\'s UPI name, "don\'t tell anyone" and "can\'t talk right now" together mean stop.',
     "Free coins, skins and passes show up inside the game, never through a link in a DM.",
