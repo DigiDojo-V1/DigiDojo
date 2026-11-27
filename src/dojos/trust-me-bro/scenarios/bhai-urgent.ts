@@ -63,7 +63,7 @@ export const bhaiUrgent = defineScenario({
         {
           id: "ask-voice",
           from: "them",
-          voiceNote: { durationSec: 14, voice: "male", mood: "urgent" },
+          voiceNote: { durationSec: 16, voice: "male", mood: "urgent" },
           segments: [
             { text: "Bhai listen, I'm at City Care hospital with Papa. " },
             {
@@ -121,7 +121,7 @@ export const bhaiUrgent = defineScenario({
         {
           id: "ct-voice",
           from: "them",
-          voiceNote: { durationSec: 6, voice: "male", mood: "pleading" },
+          voiceNote: { durationSec: 8, voice: "male", mood: "pleading" },
           segments: [
             {
               id: "ct-my-voice",

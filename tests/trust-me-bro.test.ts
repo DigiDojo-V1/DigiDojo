@@ -65,7 +65,7 @@ describe("Trust Me Bro dojo", () => {
     const ask = scenario("bhai-urgent").nodes["the-ask"];
     if (ask?.kind !== "thread") throw new Error("the-ask is not a thread");
     const bubble = toBubble(ask.messages[0]!, "en");
-    expect(bubble.voiceNote).toEqual({ durationSec: 14 });
+    expect(bubble.voiceNote).toEqual({ durationSec: 16 });
     expect(ask.messages[0]!.voiceNote?.mood).toBe("urgent");
     expect(bubble.text).toContain("₹5,000 deposit");
     expect(bubble.flaggable).toBe(true);
@@ -130,5 +130,21 @@ describe("voice note recordings", () => {
     expect(voiceNoteSrc("trust-me-bro", "x", translated, "hinglish")).toBe(
       "/voices/trust-me-bro/x/ask-voice.hinglish.mp3",
     );
+  });
+});
+
+describe("recorded voice files", () => {
+  it("has a non-empty MP3 for every English voice note", async () => {
+    const { statSync } = await import("node:fs");
+    for (const s of trustMeBro.scenarios) {
+      for (const node of Object.values(s.nodes)) {
+        if (node.kind !== "thread") continue;
+        for (const m of node.messages) {
+          if (m.voiceNote === undefined) continue;
+          const file = `public${voiceNoteSrc("trust-me-bro", s.id, m, "en")}`;
+          expect(statSync(file).size, file).toBeGreaterThan(1000);
+        }
+      }
+    }
   });
 });

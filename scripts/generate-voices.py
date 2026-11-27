@@ -65,14 +65,24 @@ async def record(note):
         # aiohttp ignores proxy env vars, so pass one on when there is one.
         proxy=os.environ.get("HTTPS_PROXY") or os.environ.get("https_proxy"),
     )
-    await speech.save(str(path))
+    # Write to a temp file first, so a failed run never leaves an empty "recording" behind.
+    tmp = path.with_suffix(".part")
+    await speech.save(str(tmp))
+    if tmp.stat().st_size == 0:
+        tmp.unlink()
+        raise RuntimeError(f"empty recording for {note['path']}")
+    tmp.replace(path)
     print(f"recorded {note['path']}")
 
 
 async def main():
     force = "--force" in sys.argv[1:]
     notes = voice_notes()
-    todo = [n for n in notes if force or not (ROOT / n["path"]).exists()]
+    def recorded(note):
+        path = ROOT / note["path"]
+        return path.exists() and path.stat().st_size > 0
+
+    todo = [n for n in notes if force or not recorded(n)]
     for note in todo:
         await record(note)
     print(f"{len(todo)} recorded, {len(notes) - len(todo)} already there")
