@@ -1,5 +1,6 @@
 import { collectFlaggables, type EvidenceWhere, type Flaggable } from "./evidence";
 import type { FlagRecord, JudgeState } from "./flags";
+import type { LiveCallRecord } from "./live-call";
 import type { LocalizedText, RedFlag, Scenario, Tactic, TriageLabel } from "./schema";
 
 export interface DebriefFlag {
@@ -70,6 +71,32 @@ export interface RunRecord {
   /** Nodes entered during the run. */
   visited: readonly string[];
   classifications: Readonly<Record<string, TriageLabel>>;
+  /** Live voice calls taken during the run, by node id. */
+  liveCalls?: Readonly<Record<string, LiveCallRecord>>;
+}
+
+/** What the reviewed live calls add: red flags the caller used, and what the player flagged. */
+interface LiveEvidence {
+  heard: Map<string, string>;
+  flags: { redFlagId: string | null; tactic: Tactic; quote: string }[];
+}
+
+function liveEvidence(liveCalls: RunRecord["liveCalls"]): LiveEvidence {
+  const heard = new Map<string, string>();
+  const flags: LiveEvidence["flags"] = [];
+  for (const call of Object.values(liveCalls ?? {})) {
+    const report = call.report;
+    if (typeof report !== "object") continue;
+    for (const h of report.heard) if (!heard.has(h.redFlagId)) heard.set(h.redFlagId, h.quote);
+    call.flags.forEach((flag, i) =>
+      flags.push({
+        redFlagId: report.flagMatches[i] ?? null,
+        tactic: flag.tactic,
+        quote: flag.quote,
+      }),
+    );
+  }
+  return { heard, flags };
 }
 
 export function rankFor(points: number, max: number, falseAlarms: number): Rank {
@@ -110,6 +137,7 @@ export function computeDebrief(scenario: Scenario, run: RunRecord): DebriefResul
   const visited = new Set(run.visited);
   const flags = Object.values(run.flags);
   const items = collectFlaggables(scenario);
+  const live = liveEvidence(run.liveCalls);
   const result: DebriefResult = {
     caught: [],
     spotted: [],
@@ -142,6 +170,15 @@ export function computeDebrief(scenario: Scenario, run: RunRecord): DebriefResul
     const reachable = carriers.find((c) => c.hidden && c.nodeIds.some((id) => visited.has(id)));
     const shown = seenCarrier ?? carriers[0];
 
+    const liveCatching = live.flags.filter((f) => f.redFlagId === redFlagId);
+    const heardQuote = live.heard.get(redFlagId);
+    const onCall = (quote: string, player?: DebriefFlag["player"]): DebriefFlag => ({
+      ...entry(undefined),
+      evidenceText: { en: quote },
+      where: "call",
+      player,
+    });
+
     if (catching.length > 0) {
       const flag = bestFlag(catching, redFlag.tactic)!;
       const right = reasonIsRight(flag, redFlag.tactic);
@@ -149,8 +186,18 @@ export function computeDebrief(scenario: Scenario, run: RunRecord): DebriefResul
       points += right ? POINTS.rightReason : POINTS.wrongReason;
       if (goodNote(flag)) points += POINTS.goodNote;
       result.score.max += POINTS.rightReason;
+    } else if (liveCatching.length > 0) {
+      const flag = liveCatching.find((f) => f.tactic === redFlag.tactic) ?? liveCatching[0]!;
+      const right = flag.tactic === redFlag.tactic;
+      const item = onCall(heardQuote ?? flag.quote, { text: flag.quote, tactic: flag.tactic });
+      (right ? result.caught : result.spotted).push(item);
+      points += right ? POINTS.rightReason : POINTS.wrongReason;
+      result.score.max += POINTS.rightReason;
     } else if (seenCarrier !== undefined) {
       result.missed.push(entry(seenCarrier));
+      result.score.max += POINTS.rightReason;
+    } else if (heardQuote !== undefined) {
+      result.missed.push(onCall(heardQuote));
       result.score.max += POINTS.rightReason;
     } else if (reachable !== undefined) {
       result.notInspected.push(entry(reachable));
@@ -165,6 +212,11 @@ export function computeDebrief(scenario: Scenario, run: RunRecord): DebriefResul
     result.falseAlarms.push({ id: flag.id, text: flag.text, tactic: flag.tactic });
     points += POINTS.falseAlarm;
   }
+  live.flags.forEach((flag, i) => {
+    if (flag.redFlagId !== null && flag.redFlagId in scenario.redFlags) return;
+    result.falseAlarms.push({ id: `live-${i}`, text: flag.quote, tactic: flag.tactic });
+    points += POINTS.falseAlarm;
+  });
 
   for (const node of Object.values(scenario.nodes)) {
     if (node.kind !== "triage") continue;

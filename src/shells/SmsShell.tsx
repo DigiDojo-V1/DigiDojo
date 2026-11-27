@@ -1,7 +1,7 @@
-import { ComingSoonShell } from "./ComingSoonShell";
+import { ChatShell } from "./ChatShell";
 import type { ShellProps } from "./types";
 
-/** Placeholder. Build the real SMS shell here, keeping the ShellProps interface. */
+/** The phone's own text messages: a plain chat with grey bubbles. `contact.name` is the sender id. */
 export function SmsShell(props: ShellProps) {
-  return <ComingSoonShell {...props} name="SMS" />;
+  return <ChatShell theme="sms" {...props} />;
 }

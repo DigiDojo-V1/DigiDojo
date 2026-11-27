@@ -104,6 +104,7 @@ export function textTargets(scenario: ScenarioData): TextTarget[] {
         for (const item of node.items) out.push(...emailTargets(item.email, item.id));
         break;
       case "compose":
+      case "live-call":
       case "outcome":
         break;
     }
