@@ -1,6 +1,6 @@
 ---
 description: Add Hinglish to every text field of one scenario that doesn't have it yet
-argument-hint: <path to scenario file, e.g. src/dojos/easy-money/scenarios/task-scam-starter.ts>
+argument-hint: <path to scenario file, e.g. src/dojos/easy-money/scenarios/task-scam.ts>
 ---
 
 You are adding Hinglish to ONE DigiDojo scenario. The English is already written and reviewed; your job is the translation pass only.
@@ -9,7 +9,7 @@ Scenario file: $ARGUMENTS
 
 Follow these steps in order:
 
-1. Read `CLAUDE.md`, `docs/CONTEXT.md` §5 (the `LocalizedText` part), the scenario file, and `src/dojos/easy-money/scenarios/task-scam-starter.ts` as the reference for tone. If the path isn't a scenario file under `src/dojos/<dojo-id>/scenarios/`, stop and say so.
+1. Read `CLAUDE.md`, `docs/CONTEXT.md` §5 (the `LocalizedText` part), the scenario file, and the tone examples at the end of this file. If the path isn't a scenario file under `src/dojos/<dojo-id>/scenarios/`, stop and say so.
 2. Find every player-facing text field that has no Hinglish yet:
    - scenario `title`, `summary`, `primer.title`, `primer.body`
    - per thread: `contact.name`, `contact.subtitle`, each message's `text` and `sender`, each choice's `label`
@@ -34,3 +34,16 @@ Follow these steps in order:
    | ----- | --- | -------- |
 
    Use the field path as `npm run i18n:report` would name it (e.g. `nodes.dm.messages.dm-offer.text`). Below the table, list any line where you were unsure of the tone or meaning, so the reviewer checks those first.
+
+## Tone examples
+
+From the original example scenario (en → hinglish):
+
+- them: "Hi! Saw your profile 😊 It's part-time work from home, just like videos and earn ₹3,000/day" → "Hi! Aapka profile dekha 😊 Part-time work from home hai, bas videos like karo aur ₹3,000/day kamao"
+- them: "No experience needed. Interested?" → "Koi experience nahi chahiye. Interested ho?"
+- system: "₹150 credited to your UPI account" → "₹150 aapke UPI account mein credit ho gaye"
+- them: "Prepaid task: send ₹1,000, get ₹1,300 back in 10 min" → "Prepaid task: ₹1,000 bhejo, 10 min mein ₹1,300 wapas pao"
+- choice: "Leave the group and report it" → "Group chhodo aur report karo"
+- outcome: "You blocked them right at the start. ₹3,000 a day just for likes? Nobody pays that much for easy work." → "Tumne shuru mein hi block kar diya. Sirf likes ke liye ₹3,000 roz? Itna aasaan paisa koi nahi deta."
+- red flag: "The rush is there so you don't stop and think." → "Jaldi ka pressure isliye diya jaata hai taaki tum ruk ke soch na sako."
+- debrief: "If you have to pay to get paid, it's a scam." → "Agar paise kamane ke liye pehle paise bharne pade, toh woh scam hai."
