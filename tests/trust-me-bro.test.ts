@@ -65,6 +65,7 @@ describe("Trust Me Bro dojo", () => {
     if (ask?.kind !== "thread") throw new Error("the-ask is not a thread");
     const bubble = toBubble(ask.messages[0]!, "en");
     expect(bubble.voiceNote).toEqual({ durationSec: 14 });
+    expect(ask.messages[0]!.voiceNote?.mood).toBe("urgent");
     expect(bubble.text).toContain("₹5,000 deposit");
     expect(bubble.flaggable).toBe(true);
   });

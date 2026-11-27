@@ -32,7 +32,7 @@ export const realFriend = defineScenario({
         {
           id: "fv-voice",
           from: "them",
-          voiceNote: { durationSec: 11 },
+          voiceNote: { durationSec: 11, voice: "female", mood: "casual" },
           text: "Okay so early-bird tickets for the Lagori Fest open in ten minutes and my card got blocked this morning. Can you book mine with yours? It's ₹800, I'll send it back as soon as I'm home.",
           delayMs: 1800,
         },

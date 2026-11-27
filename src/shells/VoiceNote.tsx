@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { Mic, Play, Square } from "lucide-react";
+import { Loader2, Mic, Play, Square } from "lucide-react";
 import { useT } from "@/i18n/hooks";
 import { cn } from "@/lib/utils";
 
@@ -46,19 +46,22 @@ function speechAvailable(): boolean {
 }
 
 /**
- * A voice note in a chat bubble. Play reads the transcript aloud with the browser's own
- * speech voice, when it has one, and moves the waveform along. There is no recording: the
- * point of the lesson is that a familiar voice proves nothing.
+ * A voice note in a chat bubble. Play uses the generated audio at `src` when the server has
+ * it, and otherwise reads the transcript with the browser's own speech voice. The waveform
+ * moves along either way. The point of the lesson is that a familiar voice proves nothing.
  */
 export function VoiceNote({
   id,
   durationSec,
+  src,
   speech,
   transcript,
   tone,
 }: {
   id: string;
   durationSec: number;
+  /** Generated audio. If it fails to load, the speech voice takes over. */
+  src?: string;
   /** What the speech voice reads, in the player's language. */
   speech: string;
   /** The highlightable transcript. */
@@ -67,23 +70,40 @@ export function VoiceNote({
 }) {
   const t = useT();
   const [playing, setPlaying] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [elapsed, setElapsed] = useState(0);
+  const [totalMs, setTotalMs] = useState(durationSec * 1000);
   const spoke = useRef(false);
+  const audio = useRef<HTMLAudioElement | null>(null);
+  const audioFailed = useRef(false);
   const bars = waveform(id);
-  const total = durationSec * 1000;
-  const progress = Math.min(1, elapsed / total);
+  const progress = Math.min(1, elapsed / totalMs);
+
+  // A new language means a new recording.
+  useEffect(() => {
+    audioFailed.current = false;
+    return () => {
+      audio.current?.pause();
+      audio.current = null;
+    };
+  }, [src]);
 
   useEffect(() => {
     if (!playing) return;
     const timer = setInterval(() => {
+      const el = audio.current;
+      if (el !== null && !el.paused) {
+        setElapsed(el.currentTime * 1000);
+        return;
+      }
       setElapsed((ms) => {
         const next = ms + TICK_MS;
-        if (next >= total) setPlaying(false);
-        return Math.min(next, total);
+        if (next >= totalMs) setPlaying(false);
+        return Math.min(next, totalMs);
       });
     }, TICK_MS);
     return () => clearInterval(timer);
-  }, [playing, total]);
+  }, [playing, totalMs]);
 
   // Stop talking when the note leaves the screen.
   useEffect(
@@ -95,12 +115,14 @@ export function VoiceNote({
 
   const stop = () => {
     setPlaying(false);
+    setLoading(false);
     setElapsed(0);
+    audio.current?.pause();
     if (spoke.current && speechAvailable()) window.speechSynthesis.cancel();
   };
 
-  const play = () => {
-    setElapsed(0);
+  const speak = () => {
+    setTotalMs(durationSec * 1000);
     setPlaying(true);
     if (!speechAvailable()) return;
     window.speechSynthesis.cancel();
@@ -110,27 +132,67 @@ export function VoiceNote({
     // The bar follows the voice when it finishes first.
     utterance.onend = () => {
       setPlaying(false);
-      setElapsed(total);
+      setElapsed(durationSec * 1000);
     };
     spoke.current = true;
     window.speechSynthesis.speak(utterance);
   };
 
-  const length = formatVoiceLength(playing || elapsed > 0 ? elapsed / 1000 : durationSec);
+  const play = () => {
+    setElapsed(0);
+    if (src === undefined || audioFailed.current || typeof Audio === "undefined") {
+      speak();
+      return;
+    }
+    // A fresh element each time; the browser keeps the downloaded file in its cache.
+    audio.current?.pause();
+    const el = new Audio(src);
+    audio.current = el;
+    const fallBack = () => {
+      if (audioFailed.current) return;
+      audioFailed.current = true;
+      // A failed element can still report itself as not paused, so drop it.
+      el.pause();
+      audio.current = null;
+      setLoading(false);
+      speak();
+    };
+    el.onloadedmetadata = () => {
+      if (Number.isFinite(el.duration) && el.duration > 0) setTotalMs(el.duration * 1000);
+    };
+    el.onended = () => {
+      setPlaying(false);
+      setElapsed(Number.isFinite(el.duration) ? el.duration * 1000 : totalMs);
+    };
+    el.onerror = fallBack;
+    setLoading(true);
+    el.play().then(() => {
+      setLoading(false);
+      setPlaying(true);
+    }, fallBack);
+  };
+
+  const busy = playing || loading;
+  const length = formatVoiceLength(
+    playing || elapsed > 0 ? elapsed / 1000 : totalMs > 0 ? totalMs / 1000 : durationSec,
+  );
 
   return (
     <div className="flex w-[15.5rem] max-w-full flex-col gap-1.5">
       <div className="flex items-center gap-2.5">
         <button
           type="button"
-          onClick={playing ? stop : play}
-          aria-label={playing ? t("voice.stop") : t("voice.play")}
+          onClick={busy ? stop : play}
+          aria-label={busy ? t("voice.stop") : t("voice.play")}
+          aria-busy={loading}
           className={cn(
             "flex size-9 shrink-0 items-center justify-center rounded-full transition-transform active:scale-95",
             tone.button,
           )}
         >
-          {playing ? (
+          {loading ? (
+            <Loader2 className="size-4 animate-spin" aria-hidden />
+          ) : playing ? (
             <Square className="size-3.5 fill-current" aria-hidden />
           ) : (
             <Play className="ml-0.5 size-4 fill-current" aria-hidden />

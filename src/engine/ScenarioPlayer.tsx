@@ -33,6 +33,7 @@ import { scenarioKey } from "./keys";
 import { ScenarioIntro } from "./ScenarioIntro";
 import { currentNodeId, useProgressStore, useRunStore } from "./store";
 import { channelTransition, priorTranscript, toBubble } from "./transcript";
+import { voiceNoteSrc } from "./voice";
 
 const DEFAULT_DELAY_MS = 800;
 
@@ -182,8 +183,19 @@ function ThreadView({
   // Text is resolved on every render, so switching language mid-run just re-renders this screen.
   const prior = useMemo(() => priorTranscript(scenario, trail, locale), [scenario, trail, locale]);
   const messages = useMemo(
-    () => [...prior, ...node.messages.slice(0, revealed).map((m) => toBubble(m, locale))],
-    [prior, node.messages, revealed, locale],
+    () =>
+      [...prior, ...node.messages.slice(0, revealed).map((m) => toBubble(m, locale))].map((b) =>
+        b.voiceNote === undefined
+          ? b
+          : {
+              ...b,
+              voiceNote: {
+                ...b.voiceNote,
+                src: voiceNoteSrc(scenario.dojoId, scenario.id, b.id, locale),
+              },
+            },
+      ),
+    [prior, node.messages, revealed, locale, scenario.dojoId, scenario.id],
   );
 
   const typing = next !== undefined && next.from === "them" && !seenBefore.has(next.id);

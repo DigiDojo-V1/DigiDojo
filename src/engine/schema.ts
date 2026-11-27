@@ -89,6 +89,10 @@ export type Segment = z.output<typeof SegmentSchema>;
 export const VoiceNoteSchema = z.strictObject({
   /** Length shown on the note, in seconds. */
   durationSec: z.number().int().min(1).max(300),
+  /** Which generated voice reads it. Default "male". */
+  voice: z.enum(["male", "female"]).optional(),
+  /** How it's spoken. Default "casual". */
+  mood: z.enum(["casual", "urgent", "pleading"]).optional(),
 });
 export type VoiceNote = z.output<typeof VoiceNoteSchema>;
 

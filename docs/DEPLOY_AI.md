@@ -26,9 +26,19 @@ If OpenAI is slow, failing or over the rate limit, that one request quietly fall
 - **Marking:** the highlighted words, the red flag's label and explanation (the rubric), and the player's note.
   - Player text sits in tagged data blocks, and the prompt says to ignore any instructions inside them.
 
+## Voice notes: `VOICE_AI`
+
+Voice notes in chats (Trust Me Bro's cloned-friend scenario, for one) can play generated audio.
+
+- **`VOICE_AI=on` and `OPENAI_API_KEY` set:** `GET /api/voice/<dojo>/<scenario>/<message>?locale=en|hinglish` returns an MP3 made by `gpt-4o-mini-tts` (override with `OPENAI_VOICE_MODEL`). The message's `voiceNote.voice` picks a male or female voice, `mood` sets the tone, and the prompt asks for a young Indian speaker in the player's language.
+- **Otherwise:** the endpoint answers 503 and the player falls back to the browser's own speech voice. Nothing breaks.
+- The client only names a message, never the words, so only voice notes already in a scenario can be spoken.
+- Responses are cached in memory and by the CDN (`s-maxage` 30 days, reset on each deploy), so each note costs about one generation per deploy. Rate limit: 20 requests per minute per caller.
+- The voices are OpenAI's stock voices, not clones of anyone. Keep it that way.
+
 ## Vercel env vars
 
-Add `FLAG_AI=on` and `OPENAI_API_KEY` (mark it Sensitive) in Project → Settings → Environment Variables, for Production and Preview.
+Add `FLAG_AI=on`, `VOICE_AI=on` and `OPENAI_API_KEY` (mark it Sensitive) in Project → Settings → Environment Variables, for Production and Preview.
 
 ## Rate limiting (Upstash Redis)
 

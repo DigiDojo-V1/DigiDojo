@@ -470,6 +470,7 @@ function MessageBody({ message, tone }: { message: ChatBubble; tone: VoiceNoteTo
     <VoiceNote
       id={message.id}
       durationSec={message.voiceNote.durationSec}
+      src={message.voiceNote.src}
       speech={message.text}
       transcript={<MessageText message={message} />}
       tone={tone}
