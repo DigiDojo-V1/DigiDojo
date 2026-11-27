@@ -1,7 +1,17 @@
 "use client";
 
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { useLocale, useT } from "@/i18n/hooks";
+import type { Box } from "@/lib/popover";
 import { FlagPopover } from "@/shells/FlagPopover";
 import { HighlightProvider, type HighlightMark } from "@/shells/HighlightableText";
 import {
@@ -30,6 +40,33 @@ interface Draft {
   chips: Chip[];
   tactic?: Tactic;
   note: string;
+  /** Where the tapped text is on screen, for the desktop popover. */
+  anchor?: Box;
+}
+
+const toBox = (r: DOMRect): Box => ({ top: r.top, left: r.left, width: r.width, height: r.height });
+
+/**
+ * Remembers the last thing clicked, so the reason popover can sit next to it on desktop.
+ * Falls back to the focused element (keyboard flagging).
+ */
+function useLastClickAnchor() {
+  const last = useRef<{ box: Box; at: number } | null>(null);
+  useEffect(() => {
+    const onClick = (e: MouseEvent) => {
+      const el = e.target instanceof Element ? e.target.closest("[role=button], button") : null;
+      if (el !== null) last.current = { box: toBox(el.getBoundingClientRect()), at: Date.now() };
+    };
+    document.addEventListener("click", onClick, true);
+    return () => document.removeEventListener("click", onClick, true);
+  }, []);
+  return useCallback((): Box | undefined => {
+    if (last.current !== null && Date.now() - last.current.at < 500) return last.current.box;
+    const focused = document.activeElement;
+    if (focused instanceof HTMLElement && focused !== document.body)
+      return toBox(focused.getBoundingClientRect());
+    return undefined;
+  }, []);
 }
 
 interface FlagActions {
@@ -113,6 +150,7 @@ export function Flagging({
   const removeFlag = useRunStore((s) => s.removeFlag);
   const setJudge = useRunStore((s) => s.setJudge);
   const [draft, setDraft] = useState<Draft | null>(null);
+  const anchorNow = useLastClickAnchor();
 
   const start = useCallback(
     (spot: FlagSpot) => {
@@ -120,24 +158,35 @@ export function Flagging({
       if (resolved === undefined) return;
       const seed = `${spot.targetId}:${spot.start ?? ""}:${spot.end ?? ""}`;
       const chips = reasonChips(scenario, correctTactics(scenario, resolved.catches), seed);
-      setDraft({ spot, text: resolved.text, catches: resolved.catches, chips, note: "" });
+      setDraft({
+        spot,
+        text: resolved.text,
+        catches: resolved.catches,
+        chips,
+        note: "",
+        anchor: anchorNow(),
+      });
     },
-    [scenario, locale],
+    [scenario, locale, anchorNow],
   );
 
-  const open = useCallback((flagId: string) => {
-    const flag = useRunStore.getState().flags[flagId];
-    if (flag === undefined) return;
-    setDraft({
-      flagId,
-      spot: { targetId: flag.targetId, start: flag.start, end: flag.end },
-      text: flag.text,
-      catches: flag.catches,
-      chips: flag.chips,
-      tactic: flag.tactic,
-      note: flag.note ?? "",
-    });
-  }, []);
+  const open = useCallback(
+    (flagId: string) => {
+      const flag = useRunStore.getState().flags[flagId];
+      if (flag === undefined) return;
+      setDraft({
+        flagId,
+        spot: { targetId: flag.targetId, start: flag.start, end: flag.end },
+        text: flag.text,
+        catches: flag.catches,
+        chips: flag.chips,
+        tactic: flag.tactic,
+        note: flag.note ?? "",
+        anchor: anchorNow(),
+      });
+    },
+    [anchorNow],
+  );
 
   const marksFor = useCallback(
     (targetId: string): HighlightMark[] =>
@@ -220,6 +269,7 @@ export function Flagging({
       </HighlightProvider>
       {draft !== null && (
         <FlagPopover
+          anchor={draft.anchor}
           quote={draft.text}
           chips={draft.chips.map((chip) => ({
             value: chip.tactic,

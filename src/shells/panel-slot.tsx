@@ -21,3 +21,6 @@ export function DojoPanel({ children }: { children: ReactNode }) {
   if (slot === null) return <>{children}</>;
   return createPortal(children, slot);
 }
+
+/** Width of the docked Dojo panel in px (`w-[340px]` in `PlayerFrame`). Overlays leave it uncovered. */
+export const PANEL_WIDTH = 340;
