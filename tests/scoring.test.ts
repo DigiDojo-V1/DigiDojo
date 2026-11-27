@@ -47,7 +47,7 @@ describe("computeDebrief", () => {
     expect(result.caught).toEqual([]);
     expect(result.spotted.map((f) => f.redFlagId)).toEqual(["pay-first"]);
     expect(result.spotted[0]?.player).toMatchObject({
-      text: "Send ₹500 to earn",
+      text: "Send ₹500 to earn ₹5,000",
       tactic: "urgency",
     });
   });
@@ -135,14 +135,14 @@ describe("computeDebrief with evidence", () => {
     expect(result.caught[0]?.evidenceText).toEqual({ en: "Pay ₹999 to register." });
   });
 
-  it("treats a highlighted harmless phrase as a false alarm", () => {
+  it("treats a flagged harmless sentence as a false alarm", () => {
     const s = richScenario();
     const flag = makeFlag(s, "dm-1", { phrase: "in Bengaluru", tactic: "authority" });
     const result = computeDebrief(
       s,
       run({ seen: ["dm-1"], flags: flagsById(flag), visited: ["dm"] }),
     );
-    expect(result.falseAlarms.map((a) => a.text)).toEqual(["in Bengaluru"]);
+    expect(result.falseAlarms.map((a) => a.text)).toEqual(["The role is in Bengaluru."]);
   });
 
   it("catches a phrase inside an email paragraph", () => {

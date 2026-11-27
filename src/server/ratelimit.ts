@@ -10,7 +10,6 @@ export interface Limiter {
 }
 
 export const LIMITS = {
-  chips: { requests: 30, window: "1 m" },
   judge: { requests: 10, window: "1 m" },
 } as const;
 

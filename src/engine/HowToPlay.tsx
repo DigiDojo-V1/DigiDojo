@@ -23,7 +23,7 @@ import {
   type HighlightMark,
 } from "@/shells/HighlightableText";
 import { SimulationBadge } from "@/shells/SimulationBadge";
-import { highlightCatches, MAX_HIGHLIGHT_CHARS } from "./highlight";
+import { sentenceCatches } from "./highlight";
 import type { Tactic } from "./schema";
 
 const STEPS = 4;
@@ -35,7 +35,7 @@ const RIGHT_REASON: Tactic = "pay-to-earn";
 
 /**
  * "How to play": a quick hands-on walkthrough before the first scenario. The player flags a
- * practice message with the real highlighting and reason sheet, sorts a genuine message from a
+ * practice message with the real sentence flagging and reason sheet, sorts a genuine message from a
  * scam, then sees how a run is scored. Unlike the game, every step gives instant feedback.
  */
 export function HowToPlay({ onDone }: { onDone: () => void }) {
@@ -172,9 +172,7 @@ function Feedback({ good, children }: { good: boolean; children: ReactNode }) {
 
 /* ------------------------------------------------------------------ */
 
-type Miss = "miss" | "tooBig";
-
-/** Steps 1 and 2: highlight the fee, then say why. They share the practice message. */
+/** Steps 1 and 2: flag the fee sentence, then say why. They share the practice message. */
 function FlagSteps({
   step,
   onFlagged,
@@ -187,7 +185,7 @@ function FlagSteps({
   const t = useT();
   const message = t("howto.scamMessage");
   const [mark, setMark] = useState<HighlightMark | null>(null);
-  const [miss, setMiss] = useState<Miss | null>(null);
+  const [miss, setMiss] = useState(0);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [chosen, setChosen] = useState<Tactic | undefined>(undefined);
   const [saved, setSaved] = useState<Tactic | undefined>(undefined);
@@ -198,12 +196,12 @@ function FlagSteps({
   const marksFor = useCallback(() => (mark === null ? [] : [mark]), [mark]);
   const onFlagRange = useCallback(
     (_targetId: string, start: number, end: number) => {
-      if (end - start > MAX_HIGHLIGHT_CHARS || !highlightCatches(answer, start, end)) {
-        const overlaps = start < answer.end && end > answer.start;
-        setMiss(overlaps ? "tooBig" : "miss");
+      if (!sentenceCatches(answer, start, end)) {
+        // A new key each time, so the hint shakes again on every wrong tap.
+        setMiss((n) => n + 1);
         return;
       }
-      setMiss(null);
+      setMiss(0);
       setMark({ flagId: FLAG_ID, start, end });
       // A beat to see the highlight land, then on to the reason.
       setTimeout(() => {
@@ -247,7 +245,7 @@ function FlagSteps({
       </div>
 
       <div className="mt-4 mb-6 flex flex-col gap-3">
-        {step === 0 && mark === null && miss === null && (
+        {step === 0 && mark === null && miss === 0 && (
           <motion.p
             className="flex items-center gap-2 text-sm text-muted-foreground"
             animate={{ opacity: [0.55, 1, 0.55] }}
@@ -256,9 +254,9 @@ function FlagSteps({
             <MousePointerClick className="size-4" aria-hidden /> {t("howto.highlight.tryIt")}
           </motion.p>
         )}
-        {step === 0 && miss !== null && (
+        {step === 0 && mark === null && miss > 0 && (
           <Feedback key={miss} good={false}>
-            {t(miss === "tooBig" ? "howto.highlight.tooBig" : "howto.highlight.miss")}
+            {t("howto.highlight.miss")}
           </Feedback>
         )}
         {step === 0 && mark !== null && <Feedback good>{t("highlight.flagged")}</Feedback>}
@@ -300,7 +298,6 @@ function FlagSteps({
           showNote={false}
           canExplainOnly={false}
           canSave={chosen !== undefined}
-          minNote={0}
           editing={false}
           onChoose={(value) => setChosen(PRACTICE_CHIPS.find((c) => c === value))}
           onNote={() => undefined}

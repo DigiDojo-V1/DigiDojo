@@ -64,12 +64,10 @@ const en = {
   "howto.sender": "Lucky Draw Desk",
   "howto.scamMessage":
     "Congrats!! 🎉 Your number won ₹50,000 in our lucky draw. To claim it, pay a ₹499 processing fee today.",
-  "howto.highlight.title": "Spot it. Highlight it.",
-  "howto.highlight.body":
-    "Something in this message is off. Select those words: drag across them, or tap one word and then another. Then tap Flag this.",
+  "howto.highlight.title": "Spot it. Tap it.",
+  "howto.highlight.body": "Something in this message is off. Tap the sentence that gives it away.",
   "howto.highlight.tryIt": "Your turn: find the giveaway.",
   "howto.highlight.miss": "Close! Look at what they want from you before you get the prize.",
-  "howto.highlight.tooBig": "Too much. Pick just the few words that give it away.",
   "howto.why.title": "Say why",
   "howto.why.body":
     "Every flag asks why it's suspicious. Pick the reason that fits best. You can also write it in your own words for bonus points.",
@@ -153,7 +151,8 @@ const en = {
   "mail.to": "To",
   "mail.toMe": "to me",
   "mail.tapSender": "Tap the sender to see the full details",
-  "mail.inspectLinkHint": "Hover over or tap a link to see where it really goes (nothing will open)",
+  "mail.inspectLinkHint":
+    "Hover over or tap a link to see where it really goes (nothing will open)",
   "mail.fileName": "File",
   "mail.fileType": "Actual type:",
   "mail.openDocument": "Open preview",
@@ -171,16 +170,11 @@ const en = {
   "mail.showDetails": "Show sender details",
   "mail.hideDetails": "Hide sender details",
 
-  // Highlighting and flagging
-  "highlight.toolbar": "Selected words",
-  "highlight.extendHint": "Drag to change the selection, or tap another word to add more.",
-  "highlight.cancel": "Cancel selection",
-  "highlight.flagThis": "Flag this",
+  // Flagging sentences
   "highlight.flagged": "Flagged",
-  "highlight.textAria":
-    "Message text. Use the arrow keys to pick a word, Shift and arrows to select more, Enter to flag.",
+  "highlight.flagSentence": "Flag this sentence",
+  "highlight.openFlag": "Flagged sentence. Open to change or remove the flag.",
   "flag.why": "Why is this suspicious?",
-  "flag.loadingChips": "Finding possible reasons…",
   "flag.noteLabel": "In your own words",
   "flag.noteLabelOr": "Or say it in your own words",
   "flag.noteOptional": "(bonus points)",
@@ -188,10 +182,6 @@ const en = {
   "flag.notePrivacy": "Don't type personal details.",
   "flag.pickReason": "Pick a reason to save this flag.",
   "flag.pickOrExplain": "Pick a reason, or explain it yourself.",
-  "flag.explainTitle": "What’s off about this?",
-  "flag.explainBody": "No hints for this one. Say what the trick is, in your own words.",
-  "flag.explainPlaceholder": "What did you notice, and why would it trick someone?",
-  "flag.explainHint": (min: number) => `Write at least ${min} characters to save this flag.`,
   "flag.save": "Flag it",
   "flag.update": "Save",
   "flag.remove": "Remove",
