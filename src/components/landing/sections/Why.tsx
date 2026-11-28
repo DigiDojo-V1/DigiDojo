@@ -4,7 +4,7 @@ import { useRef } from "react";
 import { useT } from "@/i18n/hooks";
 import { clamp, easeOutCubic } from "../camera";
 import { WorldNode, type NodeFrame } from "../engine";
-import { PhoneCutout } from "../figures/Props";
+import { LinkedInPhone } from "../figures/LinkedInPhone";
 import { DISPLAY, MONO } from "../styles";
 import { Z } from "../world";
 
@@ -16,7 +16,7 @@ const WARPS = [
   { ry: -20, rx: 12, skew: 5, x: 30 },
 ];
 
-/** 02 Why: a phone cut-out beside "ONE TAP FROM A SCAM". */
+/** 02 Why: an iPhone with a LinkedIn DM beside "ONE TAP FROM A SCAM". */
 export function Why() {
   const t = useT();
   const lineRefs = useRef<(HTMLElement | null)[]>([]);
@@ -41,7 +41,7 @@ export function Why() {
         anchor="why"
         staticClassName="pb-0"
       >
-        <PhoneCutout className="w-[min(17vh,175px)] group-data-[layout=wide]/land:w-[min(280px,36vh)]" />
+        <LinkedInPhone className="w-[min(17vh,175px)] group-data-[layout=wide]/land:w-[min(280px,36vh)]" />
       </WorldNode>
 
       <WorldNode spec={{ z: Z.why, x: 190, y: -6, mx: 0, my: (vp) => vp.h * 0.2 }} onFrame={warp}>
