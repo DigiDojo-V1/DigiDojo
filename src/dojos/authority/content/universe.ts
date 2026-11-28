@@ -32,5 +32,8 @@ export const AARAV = {
   ],
 };
 
-export const REAL_WORLD_ACTION =
-  "Got a call like this? Hang up and call the number on the back of your card or the bank's official website. Lost money or shared an OTP? Call 1930 right away and report at cybercrime.gov.in: the first hour matters most. Report fraud calls and texts on the government's Sanchar Saathi portal, then block the number.";
+export const REAL_WORLD_ACTION = {
+  en: "Got a call like this? Hang up and call the number on the back of your card or the bank's official website. Lost money or shared an OTP? Call 1930 right away and report at cybercrime.gov.in: the first hour matters most. Report fraud calls and texts on the government's Sanchar Saathi portal, then block the number.",
+  hinglish:
+    "Aisa call aaya? Call kaato aur apne card ke peeche wale number pe ya bank ki official website pe diye number pe call karo. Paise gaye ya OTP share kar diya? Turant 1930 pe call karo aur cybercrime.gov.in pe report karo: pehla ghanta sabse zaroori hai. Fraud calls aur texts sarkar ke Sanchar Saathi portal pe report karo, phir number block kar do.",
+};
