@@ -21,9 +21,10 @@ function allStrings(value: unknown, out: string[] = []): string[] {
 }
 
 describe("Trust Me Bro dojo", () => {
-  it("has the two planned scams and one legit scenario, and no placeholder", () => {
+  it("has the three scams and one legit scenario, and no placeholder", () => {
     expect(trustMeBro.scenarios.map((s) => [s.id, s.legit])).toEqual([
       ["bhai-urgent", false],
+      ["bohot-urgent", false],
       ["free-gems", false],
       ["real-friend", true],
     ]);
@@ -146,5 +147,24 @@ describe("recorded voice files", () => {
         }
       }
     }
+  });
+});
+
+describe("Bhai, bohot urgent", () => {
+  it("starts on Instagram with the real reel and moves to WhatsApp for the clone", () => {
+    const s = scenario("bohot-urgent");
+    const reel = s.nodes["the-reel"];
+    const ask = s.nodes["new-number"];
+    if (reel?.kind !== "thread" || ask?.kind !== "thread") throw new Error("wrong node kinds");
+    expect(reel.app).toBe("instagram");
+    expect(ask.app).toBe("whatsapp");
+    expect(reel.messages.some((m) => m.id === "reel-audio" && m.voiceNote)).toBe(true);
+    expect(ask.messages.some((m) => m.id === "clone-voice" && m.voiceNote)).toBe(true);
+  });
+
+  it("plays the same real clip in the reel and in the reveal", async () => {
+    const { readFileSync } = await import("node:fs");
+    const dir = "public/voices/trust-me-bro/bohot-urgent";
+    expect(readFileSync(`${dir}/rk-reel.mp3`)).toEqual(readFileSync(`${dir}/reel-audio.mp3`));
   });
 });
