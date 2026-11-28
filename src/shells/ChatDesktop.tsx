@@ -10,13 +10,11 @@ import {
   Flag,
   House,
   Image as ImageIcon,
-  Menu,
   MessageSquareText,
   Mic,
   MoreHorizontal,
   Paperclip,
   Pencil,
-  Phone,
   Plus,
   Search,
   Send,
@@ -43,10 +41,11 @@ import {
   type ThemeStyle,
 } from "./chat-parts";
 import { InstagramDesktop } from "./instagram/InstagramDesktop";
+import { TelegramDesktop } from "./telegram/TelegramDesktop";
 import type { ShellProps } from "./types";
 
 /** How each app looks on a desktop browser. Layout and colours only: no logos or wordmarks.
- * Instagram has its own full replica in `./instagram/`. */
+ * Instagram and Telegram have their own full replicas in `./instagram/` and `./telegram/`. */
 interface DesktopLook {
   /** Narrow icon column on the far left. */
   rail?: "messenger";
@@ -70,7 +69,9 @@ interface DesktopLook {
 /** Apps with a desktop web version. SMS is phone-only: it shows in a phone mockup instead. */
 export type DesktopChatTheme = Exclude<ChatTheme, "sms">;
 
-const LOOKS: Record<Exclude<DesktopChatTheme, "instagram">, DesktopLook> = {
+type GenericDesktopTheme = Exclude<DesktopChatTheme, "instagram" | "telegram">;
+
+const LOOKS: Record<GenericDesktopTheme, DesktopLook> = {
   whatsapp: {
     rail: "messenger",
     page: "bg-[#f0f2f5]",
@@ -93,28 +94,6 @@ const LOOKS: Record<Exclude<DesktopChatTheme, "instagram">, DesktopLook> = {
       bubbleMax: "max-w-[65%]",
     },
     headerIcons: [Video, Search, EllipsisVertical],
-  },
-  telegram: {
-    page: "bg-white",
-    sidebar: "bg-white border-r border-[#dadce0]",
-    sidebarTitle: "sr-only",
-    search: "bg-[#f4f4f5] rounded-full",
-    activeRow: "bg-[#3390ec] text-white",
-    activeMuted: "text-white/80",
-    threadHeader: "bg-white text-black border-b border-[#dadce0]",
-    wallpaper: "bg-[linear-gradient(135deg,#dbe8b6,#9fcb97_50%,#d6e5ae)]",
-    composer: "bg-transparent",
-    composerInput: "bg-white rounded-xl shadow-sm",
-    bubbles: {
-      them: "bg-white text-black",
-      me: "bg-[#eeffde] text-black",
-      system: "bg-black/25 text-white",
-      sender: "text-[#3390ec]",
-      headerMuted: "text-[#707579]",
-      avatar: "bg-[#5fbcf0] text-white",
-      bubbleMax: "max-w-[65%]",
-    },
-    headerIcons: [Search, Phone, EllipsisVertical],
   },
   linkedin: {
     topNav: true,
@@ -144,6 +123,7 @@ const LOOKS: Record<Exclude<DesktopChatTheme, "instagram">, DesktopLook> = {
 /** The desktop web layout of ChatShell. Same props, same messages, same flagging. */
 export function ChatDesktop({ theme, ...props }: ShellProps & { theme: DesktopChatTheme }) {
   if (theme === "instagram") return <InstagramDesktop {...props} />;
+  if (theme === "telegram") return <TelegramDesktop {...props} />;
   return <GenericChatDesktop theme={theme} {...props} />;
 }
 
@@ -159,7 +139,7 @@ function GenericChatDesktop({
   onContactClick,
   aside,
   transition,
-}: ShellProps & { theme: Exclude<DesktopChatTheme, "instagram"> }) {
+}: ShellProps & { theme: GenericDesktopTheme }) {
   const tr = useT();
   const look = LOOKS[theme];
   const style: ThemeStyle = { ...THEMES[theme], ...look.bubbles };
@@ -336,20 +316,15 @@ function ChatList({
   return (
     <aside className={cn("flex w-[340px] shrink-0 flex-col", look.sidebar)}>
       <div className="flex h-16 shrink-0 items-center gap-3 px-4">
-        {look.sidebarTitle === "sr-only" && (
-          <Menu aria-hidden className="size-5 shrink-0 text-[#707579]" />
-        )}
         <h2 className={cn("flex-1", look.sidebarTitle)}>{title}</h2>
-        {look.sidebarTitle !== "sr-only" && (
-          <span aria-hidden className="flex items-center gap-4 text-black/60">
-            {look.topNav === true ? (
-              <MoreHorizontal className="size-5" />
-            ) : (
-              <Plus className="size-5" />
-            )}
-            <Pencil className="size-5" />
-          </span>
-        )}
+        <span aria-hidden className="flex items-center gap-4 text-black/60">
+          {look.topNav === true ? (
+            <MoreHorizontal className="size-5" />
+          ) : (
+            <Plus className="size-5" />
+          )}
+          <Pencil className="size-5" />
+        </span>
       </div>
       <div aria-hidden className="px-3 pb-2">
         <div className={cn("flex h-9 items-center gap-3 px-3 text-sm text-black/50", look.search)}>

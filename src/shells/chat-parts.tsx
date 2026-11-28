@@ -19,6 +19,7 @@ import type { ThreadApp } from "@/engine/schema";
 import { useT } from "@/i18n/hooks";
 import { cn } from "@/lib/utils";
 import { HighlightableText } from "./HighlightableText";
+import { TelegramLogo } from "./telegram/brand";
 import type { ChannelTransitionView, ChatBubble, ShellContact } from "./types";
 import { VoiceNote, type VoiceNoteTone } from "./VoiceNote";
 
@@ -57,7 +58,7 @@ const NEUTRAL_VOICE: VoiceNoteTone = {
   muted: "text-neutral-500",
 };
 
-/** Our own simple palettes. Not copies of the real apps' branding. */
+/** Palettes per app. Instagram and Telegram use their real colours (with permission); the rest are our own. */
 export const THEMES: Record<ChatTheme, ThemeStyle> = {
   whatsapp: {
     layout: "bubbles",
@@ -85,30 +86,31 @@ export const THEMES: Record<ChatTheme, ThemeStyle> = {
       muted: "text-emerald-800/70",
     },
   },
+  // Telegram's real colours. Its screens are drawn by `./telegram/`; this entry gives the voice tones.
   telegram: {
     layout: "bubbles",
-    header: "bg-sky-600 text-white",
-    headerMuted: "text-sky-100",
-    avatar: "bg-sky-200 text-sky-900",
-    wallpaper: "bg-sky-50",
-    them: "bg-white text-neutral-900",
-    me: "bg-sky-100 text-neutral-900",
-    system: "bg-sky-900/10 text-sky-950",
-    sender: "text-sky-700",
+    header: "bg-white text-black",
+    headerMuted: "text-[#707579]",
+    avatar: "bg-[#5fbcf0] text-white",
+    wallpaper: "bg-[#a8c78d]",
+    them: "bg-white text-black",
+    me: "bg-[#effdde] text-black",
+    system: "bg-[#5a7f5b]/55 text-white",
+    sender: "text-[#3390ec]",
     bubble: "tail",
-    themAvatar: false,
+    themAvatar: true,
     headerIcons: "call-more",
     voiceThem: {
-      button: "bg-sky-600 text-white",
-      played: "bg-sky-600",
-      idle: "bg-sky-200",
-      muted: "text-neutral-500",
+      button: "bg-[#3390ec] text-white",
+      played: "bg-[#3390ec]",
+      idle: "bg-[#c4d9ee]",
+      muted: "text-[#686c72]",
     },
     voiceMe: {
-      button: "bg-sky-700 text-white",
-      played: "bg-sky-700",
-      idle: "bg-sky-300",
-      muted: "text-sky-800/70",
+      button: "bg-[#4fae4e] text-white",
+      played: "bg-[#4fae4e]",
+      idle: "bg-[#b6dfb0]",
+      muted: "text-[#4fae4e]",
     },
   },
   instagram: {
@@ -224,13 +226,21 @@ export function TransitionCard({ transition }: { transition: ChannelTransitionVi
       className="mx-auto mb-2 w-[88%] rounded-xl bg-white/95 p-3 text-center shadow-sm ring-1 ring-black/5"
     >
       <div className="flex items-center justify-center gap-2 text-neutral-600" aria-hidden>
-        <span className="flex size-8 items-center justify-center rounded-full bg-indigo-100 text-indigo-800">
-          <From className="size-4" />
-        </span>
+        {transition.fromApp === "telegram" ? (
+          <TelegramLogo className="size-8" />
+        ) : (
+          <span className="flex size-8 items-center justify-center rounded-full bg-indigo-100 text-indigo-800">
+            <From className="size-4" />
+          </span>
+        )}
         <ArrowRight className="size-4" />
-        <span className="flex size-8 items-center justify-center rounded-full bg-emerald-100 text-emerald-800">
-          <To className="size-4" />
-        </span>
+        {transition.toApp === "telegram" ? (
+          <TelegramLogo className="size-8" />
+        ) : (
+          <span className="flex size-8 items-center justify-center rounded-full bg-emerald-100 text-emerald-800">
+            <To className="size-4" />
+          </span>
+        )}
       </div>
       <p className="mt-2 text-sm font-semibold text-neutral-900">{t("transition.title")}</p>
       <p className="mt-0.5 text-xs leading-snug text-neutral-600">
