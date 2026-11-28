@@ -20,6 +20,7 @@ export const freeGems = defineScenario({
     hinglish:
       "Ek rewards account free Gems aur ek rare skin de raha hai. Claim karoge ya pehle check?",
   },
+  image: "/dojos/trust-me-bro/free-gems.png",
   legit: false,
   primer: {
     title: { en: "The free-reward login trap", hinglish: "Free reward wala login trap" },
