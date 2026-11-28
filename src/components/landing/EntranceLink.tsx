@@ -16,9 +16,9 @@ interface Burst {
 }
 
 /**
- * A link to the app home. The first time ever, clicking it floods the screen orange from the
- * click point, then navigates; the home page picks up under the same orange (`Entrance`).
- * Every other time, and with reduced motion, it's a plain link.
+ * A link to the app home. Clicking it floods the screen orange from the click point, then
+ * navigates; the home page picks up under the same orange (`Entrance`). With reduced motion, or
+ * opened in a new tab, it's a plain link.
  */
 export function EntranceLink({ onClick, ...props }: Omit<ComponentProps<typeof Link>, "href">) {
   const router = useRouter();

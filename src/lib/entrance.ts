@@ -1,68 +1,34 @@
 /**
- * The once-ever grand entrance into the app home (`/digidojo`). The landing page's CTAs start it
- * (an orange circle grows from the button, see `EntranceLink`); the home page finishes it (giant
- * wordmark, flies into the header, the card builds in, see `Entrance`).
+ * The grand entrance into the app home (`/digidojo`), played whenever a landing CTA takes the
+ * player there. The landing starts it (an orange circle grows from the button, see
+ * `EntranceLink`); the home page finishes it (giant wordmark that flies into the header, then the
+ * card builds in, see `Entrance`).
  *
- * Two storage flags: `ENTERED_KEY` (localStorage) means it has played in this browser, so it never
- * plays again; `HANDOFF_KEY` (sessionStorage) means the landing already covered the screen orange,
- * so the home page starts covered instead of growing its own circle.
+ * The handoff is a module-level flag: client navigation keeps it, so the home page knows it was
+ * reached from a CTA. A reload or a direct visit starts with it unset, so those get no entrance.
  */
-
-const ENTERED_KEY = "digidojo-entered";
-const HANDOFF_KEY = "digidojo-entrance-handoff";
 
 /** The landing's orange, shared by the handoff circle and the home page's cover. */
 export const ENTRANCE_ORANGE = "#ec7230";
 
-/** Set on `<html>` while the entrance is covering the page, so the parts it reveals start hidden. */
-export const PENDING_ATTR = "data-entrance";
-
-/** How the home page should open: no entrance, already covered by the landing, or grow a cover. */
-export type EntrancePlan = "none" | "covered" | "grow";
-
-function prefersReducedMotion(): boolean {
-  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-}
-
-function hasEntered(): boolean {
-  try {
-    return localStorage.getItem(ENTERED_KEY) !== null;
-  } catch {
-    // Storage blocked: we can't remember it played, so don't play it at all.
-    return true;
-  }
-}
+let handoff = false;
 
 /** Whether a click on a landing CTA should start the entrance. */
 export function shouldStartEntrance(): boolean {
-  return !prefersReducedMotion() && !hasEntered();
+  return !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
-/** The landing covered the screen; tell the home page to start covered. */
+/** The landing covered the screen orange; the home page should pick it up. */
 export function markHandoff(): void {
-  try {
-    sessionStorage.setItem(HANDOFF_KEY, "1");
-  } catch {
-    // The home page will grow its own cover instead.
-  }
+  handoff = true;
 }
 
-/** What the home page should do. Stable until `finishEntrance()`, so it's safe as a snapshot. */
-export function readEntrancePlan(): EntrancePlan {
-  if (prefersReducedMotion() || hasEntered()) return "none";
-  try {
-    return sessionStorage.getItem(HANDOFF_KEY) === "1" ? "covered" : "grow";
-  } catch {
-    return "grow";
-  }
+/** Whether the home page should play the entrance. Stable until `finishEntrance()`. */
+export function isEntrancePending(): boolean {
+  return handoff;
 }
 
-/** The entrance played (or was skipped): never again in this browser. */
+/** The entrance played (or was skipped). */
 export function finishEntrance(): void {
-  try {
-    localStorage.setItem(ENTERED_KEY, "1");
-    sessionStorage.removeItem(HANDOFF_KEY);
-  } catch {
-    // Nothing to remember it in; `hasEntered()` already treats that as played.
-  }
+  handoff = false;
 }

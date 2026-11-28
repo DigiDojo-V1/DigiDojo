@@ -11,39 +11,69 @@ import {
 } from "react";
 import { DISPLAY, MONO } from "@/components/landing/styles";
 import { useT } from "@/i18n/hooks";
-import {
-  ENTRANCE_ORANGE,
-  PENDING_ATTR,
-  finishEntrance,
-  readEntrancePlan,
-  type EntrancePlan,
-} from "@/lib/entrance";
+import { ENTRANCE_ORANGE, finishEntrance, isEntrancePending } from "@/lib/entrance";
 
 const OUT = [0.22, 1, 0.36, 1] as const;
 const IN_OUT = [0.76, 0, 0.24, 1] as const;
 
 const noSubscribe = () => () => {};
-const serverPlan = (): EntrancePlan => "none";
+const notOnServer = () => false;
 
 /**
- * The first-ever arrival on the app home. Orange covers the screen (picked up from the landing's
- * CTA, or grown here on a direct visit), the giant DIGIDOJO wordmark rises letter by letter, then
- * the orange lifts away while the wordmark flies into the header and the card builds in.
+ * The arrival on the app home from a landing CTA. The page opens under the landing's orange, the
+ * giant DIGIDOJO wordmark rises letter by letter, then the orange lifts away while the wordmark
+ * flies into the header and the card builds in.
  *
  * It finds what it reveals by data attributes, so the home page stays plain markup:
  * `data-entrance-wordmark` (the header wordmark it lands on), `data-entrance-card` (the big card),
  * `data-enter` (card contents, revealed in DOM order) and `data-enter-late` (header and footer
- * bits, revealed last). While the entrance runs, `<html data-entrance="pending">` hides them.
+ * bits, revealed last).
  */
 export function Entrance() {
-  const plan = useSyncExternalStore(noSubscribe, readEntrancePlan, serverPlan);
+  const pending = useSyncExternalStore(noSubscribe, isEntrancePending, notOnServer);
   const [done, setDone] = useState(false);
   const onDone = useCallback(() => setDone(true), []);
-  if (plan === "none" || done) return null;
-  return <EntranceOverlay plan={plan} onDone={onDone} />;
+  if (!pending || done) return null;
+  return <EntranceOverlay onDone={onDone} />;
 }
 
-function EntranceOverlay({ plan, onDone }: { plan: "covered" | "grow"; onDone: () => void }) {
+/** What the entrance reveals, found on the home page by data attribute. */
+interface Targets {
+  wordmark: HTMLElement | null;
+  card: HTMLElement | null;
+  /** The card's contents, in the slide on show (the others are inert and off to the side). */
+  items: HTMLElement[];
+  late: HTMLElement[];
+}
+
+function findTargets(): Targets {
+  const card = document.querySelector<HTMLElement>("[data-entrance-card]");
+  const items = card
+    ? Array.from(card.querySelectorAll<HTMLElement>("[data-enter]")).filter(
+        (el) => el.closest("[inert]") === null,
+      )
+    : [];
+  return {
+    wordmark: document.querySelector<HTMLElement>("[data-entrance-wordmark]"),
+    card,
+    items,
+    late: Array.from(document.querySelectorAll<HTMLElement>("[data-enter-late]")),
+  };
+}
+
+function allOf({ wordmark, card, items, late }: Targets): HTMLElement[] {
+  return [wordmark, card, ...items, ...late].filter((el): el is HTMLElement => el !== null);
+}
+
+/** Hand the elements back to their own styles. */
+function release(els: HTMLElement[]) {
+  for (const el of els) {
+    el.style.opacity = "";
+    el.style.transform = "";
+  }
+}
+
+function EntranceOverlay({ onDone }: { onDone: () => void }) {
   const t = useT();
   const title = t("home.title");
   const rootRef = useRef<HTMLDivElement>(null);
@@ -51,24 +81,26 @@ function EntranceOverlay({ plan, onDone }: { plan: "covered" | "grow"; onDone: (
   const wordRef = useRef<HTMLSpanElement>(null);
   const welcomeRef = useRef<HTMLParagraphElement>(null);
   const skipButtonRef = useRef<HTMLButtonElement>(null);
+  const targetsRef = useRef<Targets | null>(null);
   const skipRef = useRef<() => void>(() => {});
 
-  // Coming from the landing, the page is already under orange: hide what we'll reveal before the
-  // first paint.
+  // The page arrives under the orange: hide everything we'll reveal before the first paint.
   useLayoutEffect(() => {
-    if (plan !== "covered") return;
-    document.documentElement.setAttribute(PENDING_ATTR, "pending");
-    return () => document.documentElement.removeAttribute(PENDING_ATTR);
-  }, [plan]);
+    const targets = findTargets();
+    targetsRef.current = targets;
+    const els = allOf(targets);
+    for (const el of els) el.style.opacity = "0";
+    return () => release(els);
+  }, []);
 
   useEffect(() => {
-    const html = document.documentElement;
     const root = rootRef.current;
     const cover = coverRef.current;
     const word = wordRef.current;
     const welcome = welcomeRef.current;
     const skip = skipButtonRef.current;
-    if (!root || !cover || !word || !welcome || !skip) return;
+    const targets = targetsRef.current;
+    if (!root || !cover || !word || !welcome || !skip || !targets) return;
 
     let cancelled = false;
     const running: AnimationPlaybackControlsWithThen[] = [];
@@ -80,7 +112,7 @@ function EntranceOverlay({ plan, onDone }: { plan: "covered" | "grow"; onDone: (
     const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
     const finish = () => {
-      html.removeAttribute(PENDING_ATTR);
+      release(allOf(targets));
       finishEntrance();
       onDone();
     };
@@ -93,24 +125,9 @@ function EntranceOverlay({ plan, onDone }: { plan: "covered" | "grow"; onDone: (
     };
 
     async function run() {
-      if (!root || !cover || !word || !welcome || !skip) return;
+      if (!root || !cover || !word || !welcome || !skip || !targets) return;
 
-      // 1. Direct visit: grow the orange from the centre, like the landing's disc.
-      if (plan === "grow") {
-        const r = Math.hypot(window.innerWidth / 2, window.innerHeight / 2) + 4;
-        await track(
-          animate(
-            cover,
-            { clipPath: ["circle(0px at 50% 50%)", `circle(${r}px at 50% 50%)`] },
-            { duration: 0.6, ease: [0.7, 0, 0.84, 0] },
-          ),
-        );
-        if (cancelled) return;
-        html.setAttribute(PENDING_ATTR, "pending");
-        track(animate(skip, { opacity: 1 }, { duration: 0.3 }));
-      }
-
-      // 2. The wordmark rises letter by letter, then the welcome line.
+      // 1. The wordmark rises letter by letter, then the welcome line.
       track(
         animate(
           word.querySelectorAll("[data-letter]"),
@@ -124,32 +141,35 @@ function EntranceOverlay({ plan, onDone }: { plan: "covered" | "grow"; onDone: (
       await wait(250);
       if (cancelled) return;
 
-      // 3. The orange lifts, the wordmark flies into the header, the card builds in.
+      // 2. The orange lifts, the wordmark flies into the header, the card builds in.
       root.style.pointerEvents = "none";
       const flights: Promise<unknown>[] = [];
-      const target = document.querySelector("[data-entrance-wordmark]");
-      if (target) {
+      const { wordmark } = targets;
+      if (wordmark) {
         const from = word.getBoundingClientRect();
-        const to = target.getBoundingClientRect();
-        flights.push(
-          track(
-            animate(
-              word,
-              {
-                x: to.left + to.width / 2 - (from.left + from.width / 2),
-                y: to.top + to.height / 2 - (from.top + from.height / 2),
-                scale: to.width / from.width,
-              },
-              { duration: 0.9, ease: IN_OUT },
-            ),
+        const to = wordmark.getBoundingClientRect();
+        const flight = track(
+          animate(
+            word,
+            {
+              x: to.left + to.width / 2 - (from.left + from.width / 2),
+              y: to.top + to.height / 2 - (from.top + from.height / 2),
+              scale: to.width / from.width,
+            },
+            { duration: 0.9, ease: IN_OUT },
           ),
-        );
+        ).then(() => {
+          // Landed: swap to the real one, so there's only ever one wordmark on screen.
+          wordmark.style.opacity = "";
+          word.style.visibility = "hidden";
+        });
+        flights.push(flight);
       } else {
         flights.push(track(animate(word, { opacity: 0 }, { duration: 0.4 })));
       }
       track(animate([welcome, skip], { opacity: 0 }, { duration: 0.2 }));
       flights.push(track(animate(cover, { y: "-100%" }, { duration: 0.85, ease: IN_OUT })));
-      flights.push(...buildPage(track, 0.3));
+      flights.push(...buildPage(targets, track, 0.3));
 
       await Promise.all(flights);
       if (cancelled) return;
@@ -162,9 +182,8 @@ function EntranceOverlay({ plan, onDone }: { plan: "covered" | "grow"; onDone: (
     return () => {
       cancelled = true;
       running.forEach((c) => c.stop());
-      html.removeAttribute(PENDING_ATTR);
     };
-  }, [plan, onDone]);
+  }, [onDone]);
 
   // Any key or tap skips to the end.
   useEffect(() => {
@@ -183,10 +202,7 @@ function EntranceOverlay({ plan, onDone }: { plan: "covered" | "grow"; onDone: (
         ref={coverRef}
         aria-hidden
         className="absolute inset-0"
-        style={{
-          backgroundColor: ENTRANCE_ORANGE,
-          clipPath: plan === "grow" ? "circle(0px at 50% 50%)" : undefined,
-        }}
+        style={{ backgroundColor: ENTRANCE_ORANGE }}
       />
 
       <div
@@ -216,7 +232,6 @@ function EntranceOverlay({ plan, onDone }: { plan: "covered" | "grow"; onDone: (
       <button
         ref={skipButtonRef}
         type="button"
-        style={{ opacity: plan === "grow" ? 0 : undefined }}
         onClick={() => skipRef.current()}
         className={`${MONO} absolute right-5 bottom-5 rounded-full px-4 py-2 text-black/60 ring-1 ring-black/20 transition hover:text-black`}
       >
@@ -228,11 +243,11 @@ function EntranceOverlay({ plan, onDone }: { plan: "covered" | "grow"; onDone: (
 
 /** Starts the card build-in after `delay` seconds; returns each animation's finish. */
 function buildPage(
+  { card, items, late }: Targets,
   track: (c: AnimationPlaybackControlsWithThen) => Promise<unknown>,
   delay: number,
 ): Promise<unknown>[] {
   const out: Promise<unknown>[] = [];
-  const card = document.querySelector("[data-entrance-card]");
   if (card) {
     out.push(
       track(
@@ -243,23 +258,18 @@ function buildPage(
         ),
       ),
     );
-    // Only the slide on show; the others are inert and off to the side.
-    const items = Array.from(card.querySelectorAll("[data-enter]")).filter(
-      (el) => el.closest("[inert]") === null,
-    );
-    if (items.length > 0) {
-      out.push(
-        track(
-          animate(
-            items,
-            { opacity: [0, 1], y: [18, 0] },
-            { duration: 0.6, ease: OUT, delay: stagger(0.06, { startDelay: delay + 0.25 }) },
-          ),
-        ),
-      );
-    }
   }
-  const late = document.querySelectorAll("[data-enter-late]");
+  if (items.length > 0) {
+    out.push(
+      track(
+        animate(
+          items,
+          { opacity: [0, 1], y: [18, 0] },
+          { duration: 0.6, ease: OUT, delay: stagger(0.06, { startDelay: delay + 0.25 }) },
+        ),
+      ),
+    );
+  }
   if (late.length > 0) {
     out.push(
       track(

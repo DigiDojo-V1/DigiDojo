@@ -132,9 +132,3 @@
     @apply font-sans;
   }
 }
-
-/* The first-ever entrance (src/components/home/Entrance.tsx) reveals these itself. */
-[data-entrance="pending"]
-  :is([data-entrance-wordmark], [data-entrance-card], [data-enter], [data-enter-late]) {
-  opacity: 0;
-}
