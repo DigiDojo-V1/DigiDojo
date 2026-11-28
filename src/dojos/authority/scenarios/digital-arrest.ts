@@ -243,7 +243,7 @@ export const digitalArrest = defineScenario({
               text: {
                 en: "A package containing 2 kg of banned narcotics was intercepted at the border. It was found in your car. An FIR has been registered in your name.",
                 hinglish:
-                  "Border pe 2 kg banned narcotics wala ek package pakda gaya hai. Woh aapki car mein mila. Aapke naam pe FIR register ho chuki hai.",
+                  "Border pe 2 kg banned narcotics wala ek package pakda gaya hai, aur woh aapki car mein mila. Aapke naam pe FIR register ho chuki hai.",
               },
               redFlagId: "arrest-fir-shock",
             },

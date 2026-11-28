@@ -16,8 +16,8 @@ describe("translate", () => {
   });
 
   it("falls back to English when Hinglish is missing", () => {
-    expect(UI_STRINGS.hinglish["primer.start"]).toBeUndefined();
-    expect(translate("hinglish", "primer.start")).toBe("Start simulation");
+    expect(UI_STRINGS.hinglish["mail.compose"]).toBeUndefined();
+    expect(translate("hinglish", "mail.compose")).toBe("Compose");
   });
 
   it("returns English for en", () => {
