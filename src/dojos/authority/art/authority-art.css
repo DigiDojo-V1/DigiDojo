@@ -1,0 +1,305 @@
+/*
+ * Authority loops. Pivots are in the scene's own coordinates (the 2752 x 1536 source image).
+ * Top half fast and aggressive: a 2.4 s cycle in which the officer prods his finger twice, then
+ * shakes the evidence at her. Bottom half slow and relaxed: his front leg swings on a 3.6 s
+ * pendulum, the chappal dangling a beat behind, and the chai steams. The viewfinder hunts for
+ * focus and its rec dot blinks. She trembles, sweats, and her eyes dart between her phone, the
+ * floor and him.
+ * Plain global CSS (next.config runs every .css file as global), so every name carries `au-`.
+ */
+
+/* The pointing arm: two small prods toward her, each a 1.2% push along the arm (it points at
+   -24.6deg) and half a degree of tilt about the shoulder, then still while the evidence shakes. */
+.au-scene .au-arm {
+  transform-box: view-box;
+  transform-origin: 1689px 708px;
+  animation: au-jab 2.4s ease-in-out infinite;
+}
+
+@keyframes au-jab {
+  0%,
+  18%,
+  40%,
+  100% {
+    transform: rotate(-24.6deg) scaleX(1) rotate(24.6deg);
+  }
+  9%,
+  27% {
+    transform: rotate(-24.1deg) scaleX(1.012) rotate(24.6deg);
+  }
+}
+
+/* The evidence: the car photo and the bag shaken at her about the shoulder, between the prods. */
+.au-scene .au-evidence {
+  transform-box: view-box;
+  transform-origin: 1494px 700px;
+  animation: au-shake 2.4s ease-in-out infinite;
+}
+
+@keyframes au-shake {
+  0%,
+  44%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(2.6deg) translateY(-3px);
+  }
+  56% {
+    transform: rotate(-2deg) translateY(2px);
+  }
+  62% {
+    transform: rotate(2.4deg) translateY(-3px);
+  }
+  68% {
+    transform: rotate(-1.8deg) translateY(2px);
+  }
+  74% {
+    transform: rotate(1.6deg) translateY(-2px);
+  }
+  82% {
+    transform: rotate(-0.4deg);
+  }
+}
+
+/* Below the frame: the leg swings slowly from the knee, the chappal hangs off the toe post. */
+.au-scene .au-shin {
+  transform-box: view-box;
+  transform-origin: 1818px 1012px;
+  animation: au-swing 3.6s ease-in-out infinite alternate;
+}
+
+@keyframes au-swing {
+  from {
+    transform: rotate(-4deg);
+  }
+  to {
+    transform: rotate(5deg);
+  }
+}
+
+.au-scene .au-chappal {
+  transform-box: view-box;
+  transform-origin: 1894px 1215px;
+  animation: au-dangle 3.6s ease-in-out -0.9s infinite alternate;
+}
+
+@keyframes au-dangle {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(-9deg);
+  }
+}
+
+/* Three wisps of steam off the chai, rising and fading in turn. */
+.au-scene .au-steam {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  opacity: 0;
+  animation: au-steam 3.3s ease-out infinite;
+}
+
+.au-scene .au-steam-2 {
+  animation-delay: -1.1s;
+}
+
+.au-scene .au-steam-3 {
+  animation-delay: -2.2s;
+}
+
+@keyframes au-steam {
+  0% {
+    transform: translateY(8px) scale(0.8, 0.6);
+    opacity: 0;
+  }
+  25% {
+    opacity: 0.75;
+  }
+  100% {
+    transform: translateY(-34px) scale(1.25, 1.1);
+    opacity: 0;
+  }
+}
+
+/* The viewfinder hunts for focus about its centre, then holds; the rec dot blinks. */
+.au-scene .au-frame {
+  transform-box: view-box;
+  transform-origin: 1558px 645px;
+  animation: au-focus 4.8s ease-in-out infinite;
+}
+
+@keyframes au-focus {
+  0%,
+  40%,
+  100% {
+    transform: scale(1);
+  }
+  8% {
+    transform: scale(1.016);
+  }
+  16% {
+    transform: scale(0.992);
+  }
+  23% {
+    transform: scale(1.008);
+  }
+  30% {
+    transform: scale(0.998);
+  }
+}
+
+.au-scene .au-rec {
+  animation: au-blink 1.2s steps(1) infinite;
+}
+
+@keyframes au-blink {
+  0% {
+    opacity: 1;
+  }
+  55% {
+    opacity: 0.12;
+  }
+}
+
+/* Her: a small, fast tremble of everything above the waist. */
+.au-scene .au-her {
+  transform-box: view-box;
+  transform-origin: 2330px 1012px;
+  animation: au-tremble 0.42s linear infinite;
+}
+
+@keyframes au-tremble {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  20% {
+    transform: translate(1.4px, -0.6px) rotate(0.35deg);
+  }
+  40% {
+    transform: translate(-1.2px, 0.4px) rotate(-0.3deg);
+  }
+  60% {
+    transform: translate(1px, 0.6px) rotate(0.25deg);
+  }
+  80% {
+    transform: translate(-1.4px, -0.4px) rotate(-0.35deg);
+  }
+}
+
+/* Her eyes, moved from where the pupils rest (down at her phone, offset -8.6, 5.2 from each eye's
+   centre): on the phone they shrink with fright; then down at the floor (-1, 10), back to the
+   phone, up at him (-11.5, -1), and round again. */
+.au-scene .au-pupil {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: au-dart 6.2s ease-in-out infinite;
+}
+
+@keyframes au-dart {
+  0%,
+  15%,
+  35%,
+  45%,
+  67%,
+  73%,
+  82%,
+  100% {
+    transform: translate(0, 0) scale(0.82);
+  }
+  18%,
+  28%,
+  32% {
+    transform: translate(7.6px, 4.8px) scale(1);
+  }
+  30% {
+    transform: translate(10.6px, 4.8px) scale(1);
+  }
+  48%,
+  57%,
+  75%,
+  79% {
+    transform: translate(-2.9px, -6.2px) scale(1);
+  }
+  60%,
+  64% {
+    transform: translate(6.6px, 4.8px) scale(1);
+  }
+}
+
+/* Sweat: each drop swells at its spot, slides down, fades, and a new one forms. */
+.au-scene .au-drop {
+  transform-box: fill-box;
+  transform-origin: 50% 0;
+  animation: au-sweat 2.9s cubic-bezier(0.55, 0, 0.85, 0.6) infinite;
+}
+
+.au-scene .au-drop-2 {
+  animation-duration: 3.5s;
+  animation-delay: -1.4s;
+}
+
+/* The tear sits near the edge of her face: a shorter run, so it fades before reaching her hair. */
+.au-scene .au-drop-3 {
+  animation-name: au-tear;
+  animation-duration: 4.3s;
+  animation-delay: -2.6s;
+}
+
+@keyframes au-sweat {
+  0% {
+    transform: translateY(-3px) scale(0.3);
+    opacity: 0;
+  }
+  14% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  30% {
+    transform: translateY(1px) scale(1);
+    opacity: 1;
+  }
+  78% {
+    transform: translateY(20px) scale(0.95, 1.08);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(30px) scale(0.8, 1.1);
+    opacity: 0;
+  }
+}
+
+@keyframes au-tear {
+  0% {
+    transform: translateY(-2px) scale(0.3);
+    opacity: 0;
+  }
+  16% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  34% {
+    transform: translateY(1px) scale(1);
+    opacity: 1;
+  }
+  80% {
+    transform: translateY(11px) scale(0.95, 1.08);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(16px) scale(0.8, 1.1);
+    opacity: 0;
+  }
+}
+
+.au-paused * {
+  animation-play-state: paused !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .au-scene * {
+    animation: none !important;
+  }
+}
