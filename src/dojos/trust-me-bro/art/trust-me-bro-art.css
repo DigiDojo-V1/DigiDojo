@@ -1,0 +1,266 @@
+/*
+ * Trust Me Bro loops. Pivots are in the scene's own coordinates (the 2752 x 1536 source image).
+ * A 4 s "call": the scammer talks in a burst (the cut-out bobs on its stick, the string twitches)
+ * and three blips run down the string from his can to the user's; as each lands, the user laughs.
+ * The scammer's eyes dart on their own 6 s loop; the user's thumb hovers over pay and taps it
+ * every 8 s, at the end of every second call.
+ * Plain global CSS (next.config runs every .css file as global), so every name carries `tmb-`.
+ */
+
+/* The cut-out bobs and tilts about the fist while he talks, then rests. */
+.tmb-scene .tmb-puppet {
+  transform-box: view-box;
+  transform-origin: 1607px 866px;
+  animation: tmb-talk 4s ease-in-out infinite;
+}
+
+@keyframes tmb-talk {
+  0%,
+  52%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  8% {
+    transform: translateY(-5px) rotate(-2deg);
+  }
+  16% {
+    transform: translateY(4px) rotate(1.2deg);
+  }
+  25% {
+    transform: translateY(-6px) rotate(-2.4deg);
+  }
+  34% {
+    transform: translateY(3px) rotate(1deg);
+  }
+  43% {
+    transform: translateY(-4px) rotate(-1.6deg);
+  }
+}
+
+/* The string: slack at rest, twitching taut while the voice runs down it. Browsers without CSS
+   path animation (Safari) keep the string still; the blips still run. */
+.tmb-scene .tmb-line {
+  d: path("M1827 643Q1875 632 1923 610Q1968 599 2013 580");
+  animation: tmb-twitch 4s linear infinite;
+}
+
+@keyframes tmb-twitch {
+  0%,
+  70%,
+  100% {
+    d: path("M1827 643Q1875 632 1923 610Q1968 599 2013 580");
+  }
+  10% {
+    d: path("M1827 643Q1875 622 1923 610Q1968 591 2013 580");
+  }
+  20% {
+    d: path("M1827 643Q1875 638 1923 610Q1968 604 2013 580");
+  }
+  30% {
+    d: path("M1827 643Q1875 624 1923 610Q1968 590 2013 580");
+  }
+  40% {
+    d: path("M1827 643Q1875 636 1923 610Q1968 603 2013 580");
+  }
+  50% {
+    d: path("M1827 643Q1875 625 1923 610Q1968 592 2013 580");
+  }
+  60% {
+    d: path("M1827 643Q1875 634 1923 610Q1968 601 2013 580");
+  }
+}
+
+/* Each blip is a dash on a copy of the string, run from his can to the user's. */
+.tmb-scene .tmb-blip {
+  stroke-dasharray: 0.01 200;
+  stroke-dashoffset: 0;
+  opacity: 0;
+  animation:
+    tmb-twitch 4s linear infinite,
+    tmb-blip 4s linear infinite;
+}
+
+/* Three blips per call, 0.55 s apart. The twitch stays in step with the string. */
+.tmb-scene .tmb-blip-2 .tmb-blip {
+  animation-delay: 0s, 0.55s;
+}
+
+.tmb-scene .tmb-blip-3 .tmb-blip {
+  animation-delay: 0s, 1.1s;
+}
+
+@keyframes tmb-blip {
+  0% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+  2% {
+    opacity: 1;
+  }
+  20% {
+    opacity: 1;
+  }
+  22%,
+  100% {
+    stroke-dashoffset: -100;
+    opacity: 0;
+  }
+}
+
+/* The user laughs as each blip lands: his head nods and tips about his neck. */
+.tmb-scene .tmb-head {
+  transform-box: view-box;
+  transform-origin: 2205px 672px;
+  animation: tmb-laugh 4s ease-in-out infinite;
+}
+
+@keyframes tmb-laugh {
+  0%,
+  16%,
+  74%,
+  100% {
+    transform: rotate(0deg) translateY(0);
+  }
+  23% {
+    transform: rotate(-2.5deg) translateY(4px);
+  }
+  30% {
+    transform: rotate(1.2deg) translateY(-2px);
+  }
+  37% {
+    transform: rotate(-3deg) translateY(5px);
+  }
+  44% {
+    transform: rotate(1.5deg) translateY(-2px);
+  }
+  51% {
+    transform: rotate(-2.5deg) translateY(4px);
+  }
+  60% {
+    transform: rotate(1deg) translateY(-1px);
+  }
+}
+
+/* The scammer's eyes dart: at you, back to his mark, at you again. */
+.tmb-pupil {
+  animation: tmb-dart 6s ease-in-out infinite;
+}
+
+@keyframes tmb-dart {
+  0%,
+  26%,
+  48%,
+  60%,
+  86%,
+  100% {
+    transform: translateX(0);
+  }
+  30%,
+  44% {
+    transform: translateX(-15px);
+  }
+  64%,
+  68% {
+    transform: translateX(-9px);
+  }
+  71%,
+  82% {
+    transform: translateX(-16px);
+  }
+}
+
+/* The thumb hovers over pay, hesitates, then taps it at the end of every second call. */
+.tmb-scene .tmb-thumb {
+  transform-box: view-box;
+  transform-origin: 2310px 862px;
+  animation: tmb-hover 8s ease-in-out infinite;
+}
+
+@keyframes tmb-hover {
+  0%,
+  6%,
+  100% {
+    transform: rotate(0deg);
+  }
+  16% {
+    transform: rotate(-5deg);
+  }
+  28% {
+    transform: rotate(4deg);
+  }
+  38% {
+    transform: rotate(-3deg);
+  }
+  50% {
+    transform: rotate(5deg);
+  }
+  62% {
+    transform: rotate(-4deg);
+  }
+  72% {
+    transform: rotate(-2deg);
+  }
+  78%,
+  84% {
+    transform: rotate(13deg);
+  }
+  92% {
+    transform: rotate(-1deg);
+  }
+}
+
+/* The button dips under the tap and sends out a ring. */
+.tmb-scene .tmb-pay {
+  transform-box: view-box;
+  transform-origin: 2257px 843px;
+  animation: tmb-press 8s ease-in-out infinite;
+}
+
+@keyframes tmb-press {
+  0%,
+  76%,
+  88%,
+  100% {
+    transform: scale(1);
+    filter: none;
+  }
+  79%,
+  84% {
+    transform: scale(0.9);
+    filter: brightness(0.85);
+  }
+}
+
+.tmb-scene .tmb-ring {
+  transform-box: view-box;
+  transform-origin: 2257px 843px;
+  opacity: 0;
+  animation: tmb-ring 8s ease-out infinite;
+}
+
+@keyframes tmb-ring {
+  0%,
+  78% {
+    transform: scale(1);
+    opacity: 0;
+  }
+  79% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  92%,
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+
+.tmb-paused * {
+  animation-play-state: paused !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tmb-scene * {
+    animation: none !important;
+  }
+}
