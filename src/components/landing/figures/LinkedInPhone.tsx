@@ -328,7 +328,10 @@ function Composer({ placeholder }: { placeholder: string }) {
   );
 }
 
-/** A fictional profile photo; with `hiring`, LinkedIn's purple #HIRING frame. */
+/**
+ * Priya's profile photo, an AI-generated face of nobody real (credit in public/landing/CREDITS.md).
+ * With `hiring`, LinkedIn's purple #HIRING frame.
+ */
 function Portrait({ className, hiring }: { className?: string; hiring?: string }) {
   const id = useId();
   return (
@@ -339,28 +342,13 @@ function Portrait({ className, hiring }: { className?: string; hiring?: string }
         </clipPath>
         <path id={`${id}-arc`} d="M 5.83 66.07 A 47 47 0 0 0 80.21 86" />
       </defs>
-      <g clipPath={`url(#${id}-clip)`}>
-        <rect width="100" height="100" fill="#d7e3ea" />
-        <path
-          d="M24 50c-2-24 12-34 26-34s28 10 26 34c-1 14 2 24 6 32H18c4-8 7-18 6-32Z"
-          fill="#2b1d18"
-        />
-        <path d="M42 62h16v14H42z" fill="#b97d57" />
-        <path d="M12 100c2-16 16-26 38-26s36 10 38 26Z" fill="#33536b" />
-        <path d="M40 74l10 12 10-12" fill="#f1ece4" />
-        <ellipse cx="50" cy="46" rx="15" ry="18" fill="#c98e66" />
-        <path
-          d="M34 44c0-14 8-22 18-22 9 0 15 6 15 16-6-6-14-8-20-8-5 4-9 9-13 14Z"
-          fill="#2b1d18"
-        />
-        <path
-          d="M44 55q6 4 12 0"
-          stroke="#7a3f2c"
-          strokeWidth="1.6"
-          fill="none"
-          strokeLinecap="round"
-        />
-      </g>
+      <image
+        href="/landing/priya.jpg"
+        width="100"
+        height="100"
+        preserveAspectRatio="xMidYMid slice"
+        clipPath={`url(#${id}-clip)`}
+      />
       {hiring && (
         <>
           <path
