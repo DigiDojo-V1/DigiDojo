@@ -43,6 +43,7 @@ next-env.d.ts
 
 # claude code local settings
 .claude/settings.local.json
+.claude/worktrees/
 
 # Design reference video (local only)
 /homePageInspiration.mov
