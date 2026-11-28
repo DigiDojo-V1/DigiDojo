@@ -98,9 +98,8 @@ const en = {
   "landing.dojos.soon": "Coming soon",
   "landing.app.pill": "The app",
   "landing.app.wordmark": "DigiDojo",
-  "landing.app.headlineA": "The",
-  "landing.app.headlineEm": "scam",
-  "landing.app.headlineB": "simulator for India's 15–25s.",
+  "landing.app.headlineEm": "Scam",
+  "landing.app.headlineB": "simulator for a scam-free future.",
   "landing.app.body":
     "Live through the scams that target you, inside fake chat, SMS, UPI, call and email screens. Make the calls, flag the red flags, rewind when you slip, and get a debrief on every trick.",
   "landing.app.meta": "Free · no sign-up · about 3 min a scenario",

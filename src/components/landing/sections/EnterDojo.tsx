@@ -107,8 +107,7 @@ function Content({ userPausedRef }: { userPausedRef: PausedRef }) {
           </span>
         </div>
         <h2 className={`${SERIF} mt-5 text-[clamp(36px,4.4vw,60px)] leading-[0.98]`}>
-          {t("landing.app.headlineA")} <em className="italic">{t("landing.app.headlineEm")}</em>{" "}
-          {t("landing.app.headlineB")}
+          <em className="italic">{t("landing.app.headlineEm")}</em> {t("landing.app.headlineB")}
         </h2>
         <p className="mt-5 max-w-[400px] text-[13.5px] leading-[1.55]">{t("landing.app.body")}</p>
         <p className={`${MONO} mt-4 text-[8px] opacity-70`}>{t("landing.app.meta")}</p>
