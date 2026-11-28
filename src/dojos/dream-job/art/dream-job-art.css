@@ -1,0 +1,125 @@
+/*
+ * Dream Job loops. Pivots are in the scene's own coordinates (the 2752 x 1536 source image).
+ * The hug rocks and she laughs on short loops; every 9 s the envelope's hidden arm lifts the card
+ * out of her bag while the envelope glances at you and raises its brows.
+ * Plain global CSS (next.config runs every .css file as global), so every name carries `dj-`.
+ */
+
+/* Envelope, her upper body and the bag rock together about the hips; the legs stay planted. */
+.dj-scene .dj-hug {
+  transform-box: view-box;
+  transform-origin: 1965px 1005px;
+  animation: dj-rock 4.5s ease-in-out infinite alternate;
+}
+
+@keyframes dj-rock {
+  from {
+    transform: rotate(-1.2deg);
+  }
+  to {
+    transform: rotate(1.2deg);
+  }
+}
+
+/* Her head tilts into the envelope as she laughs, about her neck. */
+.dj-scene .dj-head {
+  transform-box: view-box;
+  transform-origin: 2105px 462px;
+  animation: dj-laugh 2.25s ease-in-out infinite alternate;
+}
+
+@keyframes dj-laugh {
+  from {
+    transform: rotate(1deg);
+  }
+  to {
+    transform: rotate(-3.5deg);
+  }
+}
+
+/* The arm round her back pivots at the shoulder hidden behind her: card up, hold, back down. */
+.dj-scene .dj-arm {
+  transform-box: view-box;
+  transform-origin: 2250px 480px;
+  animation: dj-lift 9s ease-in-out infinite;
+}
+
+@keyframes dj-lift {
+  0%,
+  22%,
+  92%,
+  100% {
+    transform: rotate(1.5deg);
+  }
+  42%,
+  68% {
+    transform: rotate(-7deg);
+  }
+}
+
+/* While the card comes out, the envelope glances at you and raises its brows. */
+.dj-pupil {
+  animation: dj-glance 9s ease-in-out infinite;
+}
+
+@keyframes dj-glance {
+  0%,
+  30%,
+  76%,
+  100% {
+    transform: translateX(0);
+  }
+  36%,
+  68% {
+    transform: translateX(-11px);
+  }
+}
+
+.dj-brows {
+  animation: dj-brow 9s ease-in-out infinite;
+}
+
+@keyframes dj-brow {
+  0%,
+  32%,
+  74%,
+  100% {
+    transform: translateY(0);
+  }
+  40%,
+  66% {
+    transform: translateY(-9px);
+  }
+}
+
+/* Two quick blinks per loop, each eye about its own centre. */
+.dj-eye {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: dj-blink 9s linear infinite;
+}
+
+@keyframes dj-blink {
+  0%,
+  10%,
+  13.4%,
+  84%,
+  87.4%,
+  100% {
+    transform: scaleY(1);
+  }
+  11.7%,
+  85.7% {
+    transform: scaleY(0.08);
+  }
+}
+
+.dj-paused * {
+  animation-play-state: paused !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dj-scene * {
+    animation: none !important;
+  }
+}

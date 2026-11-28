@@ -1,6 +1,7 @@
 import type { ComponentType } from "react";
 import type { DojoArtProps } from "@/components/home/art";
 import type { DojoId } from "@/engine/schema";
+import { DREAM_JOB_BACKGROUND, DreamJobArt } from "./dream-job/art/DreamJobArt";
 import { EASY_MONEY_BACKGROUND, EasyMoneyArt } from "./easy-money/art/EasyMoneyArt";
 
 export interface DojoArt {
@@ -16,6 +17,7 @@ export interface DojoArt {
  */
 export const DOJO_ART: Readonly<Partial<Record<DojoId, DojoArt>>> = {
   "easy-money": { Scene: EasyMoneyArt, background: EASY_MONEY_BACKGROUND },
+  "dream-job": { Scene: DreamJobArt, background: DREAM_JOB_BACKGROUND },
 };
 
 /** The art for a dojo id, if it has any. */
