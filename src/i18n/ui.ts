@@ -191,7 +191,7 @@ const en = {
   "ig.inbox1.name": "Aditi Sharma",
   "ig.inbox1.preview": "sent a reel by college.memes",
   "ig.inbox1.time": "1h",
-  "ig.inbox2.name": "B.Com 2nd Year 🎓",
+  "ig.inbox2.name": "Sem 4 Squad 📚",
   "ig.inbox2.preview": "Karan: who has the accounts notes?",
   "ig.inbox2.time": "3h",
   "ig.inbox3.name": "Mom",
