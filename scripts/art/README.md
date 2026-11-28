@@ -1,7 +1,7 @@
 # Dojo art
 
 Each dojo's slide on the home carousel can have an animated illustration: a flat, grainy 2D scene
-whose parts move in slow loops. Easy Money, Dream Job and Trust Me Bro have one. This folder turns
+whose parts move in slow loops. Easy Money, Dream Job, Trust Me Bro and Authority have one. This folder turns
 a generated image into the vector layers the app animates.
 
 ## How a scene is made
@@ -88,6 +88,49 @@ a generated image into the vector layers the app animates.
 - **Gemini's mistakes**: two stray V-shaped strokes on the user's forearm are painted out. The
   background brightens towards the wall and the figures have a 1-3 px pale pink rim where they
   meet it; both count as background, or they trace as salmon outlines.
+
+## How Authority is split
+
+- **Drawn in code, not traced** (painted out of every layer first, then filled by nearest colour):
+  the phone-shaped cage (rounded outline, five bars, notch, camera), the viewfinder corners and
+  rec dot, her pupils and sweat drops, the chai steam, and the cage's floor shadow. Gemini's
+  sparkle sat on the cage's corner and its shadow, so redrawing them removes it too. `scene.ts`
+  exports the measurements (`CAGE`, `EYES`, `PUPIL`, the sweat and gingham colours) beside the
+  layers.
+- **Back** (static): the board on its easel, the stool, the officer's head, torso, shorts and back
+  leg, the tripod and phone, the chai, the keys, her legs and the chair. Filled in under every
+  moving part by nearest colour; on the board each row uses the board's own colour there (it is a
+  vertical gradient), and the background counts as a source, or a gap beside a part (the cable,
+  her trousers) fills in solid. Removing the bottom-left viewfinder corner took the top of the
+  easel leg with it; the leg is copied back up from below.
+- **Shorts**: Gemini's gingham traced as a jumble of bricks. The shorts are a flat base (folds
+  kept), and the component multiplies an exact 20 px check over them, clipped to the `SHORTS`
+  outline.
+- **Evidence**: the fist holding up the car photo and the bag, the sleeve behind the bag and the
+  bag's shadow on the board. Shakes about the shoulder. **Torso** is the torso's edge, drawn again
+  over the sleeve.
+- **Arm**: the pointing arm and hand, cut 5 px inside the torso so no sliver opens at the shoulder.
+  Prods by stretching along its own direction (`rotate(A) scaleX(s) rotate(-A)`, A = -24.6deg).
+  The khaki (torso and both sleeves) is snapped to four shared colours first, or the arm traced a
+  darker khaki with a seam at the shoulder.
+- **Shin, chappal and thigh**: the front leg is found as one shape and snapped to three shared
+  colours, then cut at the knee; traced separately, the two halves came out different browns. The
+  shin and foot swing about the knee (the toes beyond the strap are joined through the chappal, so
+  they swing too); the chappal dangles about the toe post; the thigh is drawn again over the top
+  of the shin. Only the part joined to the foot counts as shin: the stool leg's shaded edge also
+  passes the skin test.
+- **Her**: everything above the waist, minus slivers of hair beside the bars. Trembles about the
+  waist. **Cable**: the charging cable and plugs are near the background's colour, so they are
+  found as neutral (not pink) pixels and drawn again over her; in her trace the loops broke up.
+  Where Gemini drew a strand in front of a bar, the bar now covers it.
+- **Eyes and brows**: the whites as a flat layer with the wet lower rim as a flat band. A bar cut
+  her right eye, so it is the left one copied 66 px across (Gemini drew them as twins). The pupils
+  are circles clipped to ellipses round the whites; they shrink when she looks at her phone. The
+  brows are their own layer: the left one merged into her hair in her trace.
+- Everything traces at the default clustering: Gemini's "flat" image still has soft gradients
+  (faces, legs, the board), and finer settings traced them as blotches.
+- **Fictional**: the cap carries a plain star, the badge is a blank shield, the name bar is blank
+  and the car photo has no plate. There is no text anywhere in the scene.
 
 ## Checking a scene
 
