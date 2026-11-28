@@ -45,18 +45,27 @@ export function LandingHeader() {
         >
           {t("landing.brand")}
         </button>
-        <button
-          type="button"
-          onClick={() => setOpen(true)}
-          aria-expanded={open}
-          className={`${MONO} pointer-events-auto flex items-center gap-2.5`}
-        >
-          {t("landing.menu")}
-          <span aria-hidden className="flex w-5 flex-col gap-[5px]">
-            <span className="h-px w-full bg-current" />
-            <span className="h-px w-full bg-current" />
-          </span>
-        </button>
+        <div className="pointer-events-auto flex items-center gap-4 sm:gap-6">
+          <Link
+            href={APP_HOME}
+            className={`${MONO} group inline-flex h-8 items-center gap-2 rounded-full bg-[var(--land-fg)] px-3.5 text-[var(--land-bg)] transition hover:opacity-85`}
+          >
+            {t("landing.header.cta")}
+            <ArrowRight aria-hidden className="size-3.5 transition group-hover:translate-x-0.5" />
+          </Link>
+          <button
+            type="button"
+            onClick={() => setOpen(true)}
+            aria-expanded={open}
+            className={`${MONO} flex items-center gap-2.5`}
+          >
+            {t("landing.menu")}
+            <span aria-hidden className="flex w-5 flex-col gap-[5px]">
+              <span className="h-px w-full bg-current" />
+              <span className="h-px w-full bg-current" />
+            </span>
+          </button>
+        </div>
       </header>
 
       <AnimatePresence>
