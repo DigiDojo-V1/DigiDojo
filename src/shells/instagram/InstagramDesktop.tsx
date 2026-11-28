@@ -220,7 +220,8 @@ function SideNav({ variant, className }: { variant: "rail" | "wide"; className: 
   );
 }
 
-/** Fictional other conversations: plain everyday chats, so no extra story is invented. */
+/** Fictional other conversations: plain everyday chats, so no extra story is invented.
+ * Photos: Unsplash License stock images in /public/shells/instagram (see docs/IMAGE_CREDITS.md). */
 const OTHER_CHATS = [
   { n: 1, tone: "bg-[#fde2e4] text-[#9d174d]", unread: true },
   { n: 2, tone: "bg-[#dbeafe] text-[#1e40af]", unread: false },
@@ -283,7 +284,14 @@ function Inbox({
             <InboxRow
               key={n}
               name={name}
-              avatar={<Avatar name={name} className={tone} size="size-14" />}
+              avatar={
+                <Avatar
+                  name={name}
+                  src={`/shells/instagram/inbox-${n}.jpg`}
+                  className={tone}
+                  size="size-14"
+                />
+              }
               preview={t(`ig.inbox${n}.preview`)}
               time={t(`ig.inbox${n}.time`)}
               unread={unread}

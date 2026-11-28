@@ -6,7 +6,11 @@ import { pickRedFlags } from "../content/red-flags";
  * Task scam: ₹50 a like → Telegram "VIP prepaid tasks" → frozen withdrawal.
  * Source: docs/scenarios/easy-money/task-scam.md.
  */
-const riya = { name: "Riya | Digital Promotions", subtitle: "Active now" };
+const riya = {
+  name: "Riya | Digital Promotions",
+  subtitle: "Active now",
+  avatar: "/dojos/easy-money/riya.jpg",
+};
 const group = { name: "TaskEarn VIP", subtitle: "1,284 members" };
 const mentor = "Anjali (Mentor)";
 

@@ -6,8 +6,16 @@ import { pickRedFlags } from "../content/red-flags";
  * Money mule: an Instagram "payments gig" that rents your bank account.
  * Source: docs/scenarios/easy-money/mule-recruitment.md.
  */
-const vikramInsta = { name: "Vikram | EasyEarn Hub", subtitle: "Active now" };
-const vikramWa = { name: "Vikram EasyEarn", subtitle: "online" };
+const vikramInsta = {
+  name: "Vikram | EasyEarn Hub",
+  subtitle: "Active now",
+  avatar: "/dojos/easy-money/vikram.jpg",
+};
+const vikramWa = {
+  name: "Vikram EasyEarn",
+  subtitle: "online",
+  avatar: "/dojos/easy-money/vikram.jpg",
+};
 
 export const muleRecruitment = defineScenario({
   id: "mule-recruitment",
