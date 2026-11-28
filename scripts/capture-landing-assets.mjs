@@ -2,6 +2,7 @@
 //
 //   npm run dev                      # in one terminal
 //   npm run capture:landing          # in another (optionally: -- http://localhost:3001)
+//   npm run capture:landing -- http://localhost:3000 authority   # only these dojo cards, no clip
 //
 // Writes public/landing/dojo-<id>.jpg, demo.webm and demo-poster.jpg. Everything captured is
 // the app's own fictional content. Needs Playwright's Chromium: `npx playwright install chromium`.
@@ -11,6 +12,8 @@ import path from "node:path";
 import { chromium } from "playwright";
 
 const BASE = process.argv[2] ?? "http://localhost:3000";
+/** Dojo ids to capture; when given, only those cards are captured and the demo clip is kept. */
+const ONLY = process.argv.slice(3);
 const OUT = path.resolve("public/landing");
 const VIEWPORT = { width: 1280, height: 800 };
 
@@ -19,6 +22,7 @@ const CARDS = [
   { dojo: "easy-money", scenario: "task-scam", settleMs: 9000 },
   { dojo: "dream-job", scenario: "easy-too-good", settleMs: 6000 },
   { dojo: "authority", scenario: "kyc-call", settleMs: 4000 },
+  { dojo: "trust-me-bro", scenario: "bhai-urgent", settleMs: 7000 },
 ];
 const DEMO = { dojo: "easy-money", scenario: "task-scam", lengthMs: 13000 };
 
@@ -47,7 +51,7 @@ async function openScenario(page, dojo, scenario) {
 await mkdir(OUT, { recursive: true });
 const browser = await chromium.launch();
 
-for (const card of CARDS) {
+for (const card of CARDS.filter((c) => ONLY.length === 0 || ONLY.includes(c.dojo))) {
   const context = await newContext(browser);
   const page = await context.newPage();
   await openScenario(page, card.dojo, card.scenario);
@@ -61,7 +65,7 @@ for (const card of CARDS) {
   console.log(`dojo-${card.dojo}.jpg`);
 }
 
-{
+if (ONLY.length === 0) {
   const tmp = path.join(OUT, ".video-tmp");
   const context = await newContext(browser, { recordVideo: { dir: tmp, size: VIEWPORT } });
   const page = await context.newPage();
