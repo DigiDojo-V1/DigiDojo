@@ -175,6 +175,7 @@ export function HomeCarousel() {
       <section
         aria-roledescription="carousel"
         aria-label={t("home.carousel")}
+        data-entrance-card
         className={cn(BIG_CARD, "relative flex min-h-[560px] flex-1 flex-col overflow-hidden")}
       >
         <div
@@ -248,7 +249,7 @@ function DojoSlide({
     >
       <div className={cn(PAD, "relative flex flex-1 flex-col pt-6 md:pt-8 lg:pt-10")}>
         {/* Counter, top left. The carousel controls sit top right on phones. */}
-        <p className={`${MONO} flex h-10 items-center text-black/55`}>
+        <p data-enter className={`${MONO} flex h-10 items-center text-black/55`}>
           {t("home.counter")(index + 1, total)}
           <span className="hidden sm:inline">&nbsp;· {t("dojo.eyebrow")(dojo.order)}</span>
         </p>
@@ -261,6 +262,7 @@ function DojoSlide({
         {art && (
           <div
             aria-hidden
+            data-enter
             className="relative -mx-5 max-h-[330px] min-h-[150px] flex-1 overflow-hidden md:-mx-8 md:max-h-[480px] lg:absolute lg:top-0 lg:right-0 lg:bottom-[88px] lg:mx-0 lg:max-h-none lg:w-[54%]"
           >
             <art.Scene paused={!active} className="absolute inset-0 size-full" />
@@ -269,19 +271,24 @@ function DojoSlide({
 
         <div className={cn("relative grid gap-10 lg:flex-1 lg:grid-cols-2", !art && "flex-1")}>
           <div className="flex flex-col justify-center py-4">
-            <h2 className={`${DISPLAY} text-[clamp(56px,min(11vw,16dvh),160px)] leading-[0.85]`}>
+            <h2
+              data-enter
+              className={`${DISPLAY} text-[clamp(56px,min(11vw,16dvh),160px)] leading-[0.85]`}
+            >
               {text(dojo.name)}
             </h2>
-            <p className="mt-4 max-w-md text-base text-black/70 md:text-lg">{text(dojo.tagline)}</p>
+            <p data-enter className="mt-4 max-w-md text-base text-black/70 md:text-lg">
+              {text(dojo.tagline)}
+            </p>
             {!soon && (
-              <p className={`${MONO} mt-3 text-black/50`}>
+              <p data-enter className={`${MONO} mt-3 text-black/50`}>
                 {t("home.scenarioCount")(dojo.scenarioKeys.length)}
               </p>
             )}
 
             <ol className="mt-6 max-w-sm space-y-2.5 md:mt-8">
               {steps.map((step, i) => (
-                <li key={i} className="flex gap-3 text-sm leading-snug text-black/70">
+                <li key={i} data-enter className="flex gap-3 text-sm leading-snug text-black/70">
                   <span className={`${MONO} w-4 shrink-0 leading-5 text-black/45`}>{i + 1}</span>
                   {step}
                 </li>
@@ -293,7 +300,7 @@ function DojoSlide({
           <div aria-hidden className="hidden lg:block" />
         </div>
 
-        <div className="flex items-center pt-2 pb-6 md:pb-8">
+        <div data-enter className="flex items-center pt-2 pb-6 md:pb-8">
           {soon ? (
             <span
               className={`${MONO} inline-flex h-12 w-full items-center justify-center rounded-full ring-1 ring-black/20 md:w-auto md:px-7`}
@@ -313,7 +320,7 @@ function DojoSlide({
       </div>
 
       {/* Status bar: this dojo's scenarios done. */}
-      <div className={cn(PAD, "flex h-14 items-center border-t border-black/10")}>
+      <div data-enter className={cn(PAD, "flex h-14 items-center border-t border-black/10")}>
         {!soon && (
           <div className="flex-1">
             <DojoProgress
@@ -359,6 +366,7 @@ function CarouselControls({
 
   return (
     <div
+      data-enter
       className={cn(
         "absolute top-6 right-5 flex h-10 items-center gap-2",
         // 56px status bar + 32px bottom padding = Start's bottom edge; h-12 row matches Start.

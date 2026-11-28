@@ -29,7 +29,10 @@ export function HomeShell({ children }: { children: ReactNode }) {
         {children}
       </main>
 
-      <footer className="flex items-center justify-center gap-2 px-4 py-4 text-center text-xs text-black/60">
+      <footer
+        data-enter-late
+        className="flex items-center justify-center gap-2 px-4 py-4 text-center text-xs text-black/60"
+      >
         <PhoneCall aria-hidden className="size-3.5 shrink-0 text-red-600" />
         <span>{t("chrome.helpBody")}</span>
       </footer>
@@ -50,11 +53,17 @@ function HomeHeader() {
     <header className="mx-auto flex w-full max-w-[1280px] items-center justify-between gap-4 px-4 py-4 md:px-6 lg:px-8">
       <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:gap-5">
         <h1 className={`${DISPLAY} text-xl leading-none tracking-[0.06em]`}>
-          <Link href="/">{t("home.title")}</Link>
+          <Link href="/" data-entrance-wordmark>
+            {t("home.title")}
+          </Link>
         </h1>
-        <p className={`${MONO} text-black/55`}>{t("chrome.progressBody")(done, keys.length)}</p>
+        <p data-enter-late className={`${MONO} text-black/55`}>
+          {t("chrome.progressBody")(done, keys.length)}
+        </p>
       </div>
-      <LanguageToggle />
+      <div data-enter-late>
+        <LanguageToggle />
+      </div>
     </header>
   );
 }
