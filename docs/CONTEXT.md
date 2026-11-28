@@ -67,6 +67,7 @@ src/
   shells/
     ChatShell.tsx                      # generic chat: header, bubbles, typing indicator, flag-on-tap; theme: whatsapp | telegram | instagram | linkedin
     ChatDesktop.tsx                    # ChatShell's desktop web layout (chat list, thread, evidence column)
+    instagram/                         # Instagram replica (real logo and UI, by request): web inbox on desktop, DM thread on phones
     MailShell.tsx                      # mail app; webmail layout on desktop (folders, list, reading pane, compose window)
     PhoneFrame.tsx                     # phone mockup for phone-only apps on desktop
     panel-slot.tsx                     # <DojoPanel> / useInDojoPanel(): render game controls into the docked panel
@@ -333,7 +334,7 @@ Not in the scaffold (later phases): database and auth, the belt test, the before
 
 - All people, companies, agencies and apps in scenarios are fictional. No real logos or brand names.
   - Exception agreed by the lead: Dream Job's player-facing text keeps the blueprint's platform names (LinkedIn, Gmail, WhatsApp, `@gmail.com` addresses, an `@okaxis` UPI handle), because spotting a free-mail sender is the lesson. All companies, people and domains stay fictional (`*.example`).
-  - Desktop layouts may closely copy the real apps' desktop structure and colours (webmail, professional network, messengers), so the practice transfers. Never their logos, wordmarks or brand icons: app names in the chrome are generic ("Mail", "Messaging") and marks are plain shapes.
+  - Desktop layouts may closely copy the real apps' desktop structure and colours (webmail, professional network, messengers), so the practice transfers. Never their logos, wordmarks or brand icons: app names in the chrome are generic ("Mail", "Messaging") and marks are plain shapes. Exception: the Instagram shell uses Instagram's real UI and logo, as the product owner asked.
 - Never ask players for real OTPs, PINs, card numbers or passwords.
 - No "play the scammer" mode. Sextortion appears only as a text guidance card, never a simulation.
 - No political content.
