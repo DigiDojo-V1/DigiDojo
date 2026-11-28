@@ -1,5 +1,6 @@
 import { defineDojo } from "@/engine/define";
 import { bhaiUrgent } from "./scenarios/bhai-urgent";
+import { bohotUrgent } from "./scenarios/bohot-urgent";
 import { freeGems } from "./scenarios/free-gems";
 import { realFriend } from "./scenarios/real-friend";
 
@@ -11,9 +12,10 @@ export const trustMeBro = defineDojo({
     en: "A friend's voice, a scammer's plan.",
     hinglish: "Dost ki awaaz, scammer ka plan.",
   },
-  scenarios: [bhaiUrgent, freeGems, realFriend],
+  scenarios: [bhaiUrgent, bohotUrgent, freeGems, realFriend],
   takeaways: [
     "A familiar voice proves nothing. Just 3 seconds of audio from a reel can be enough to copy it.",
+    "Your public reels are free recordings of your voice. Keep them private or close-friends only.",
     "Before you send a friend money, call them on the number you already have.",
     'A "new number", a stranger\'s UPI name, "don\'t tell anyone" and "can\'t talk right now" together mean stop.',
     "Free coins, skins and passes show up inside the game, never through a link in a DM.",

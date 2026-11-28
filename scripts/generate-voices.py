@@ -19,6 +19,10 @@ import edge_tts
 
 ROOT = Path(__file__).resolve().parent.parent
 
+# Real recordings and AI clones of real, consenting people, made by hand (see
+# scripts/voice-clone/README.md). Never replace these with stock voices, even with --force.
+HAND_MADE = ("public/voices/trust-me-bro/bohot-urgent/",)
+
 # Indian English for English transcripts, Hindi voices for Hinglish (they read Latin-script
 # Hinglish well enough and keep the accent).
 VOICES = {
@@ -82,6 +86,7 @@ async def main():
         path = ROOT / note["path"]
         return path.exists() and path.stat().st_size > 0
 
+    notes = [n for n in notes if not n["path"].startswith(HAND_MADE)]
     todo = [n for n in notes if force or not recorded(n)]
     for note in todo:
         await record(note)
