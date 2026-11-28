@@ -82,7 +82,7 @@ export const bohotUrgent = defineScenario({
         {
           id: "clone-voice",
           from: "them",
-          voiceNote: { durationSec: 10, voice: "male", mood: "urgent" },
+          voiceNote: { durationSec: 9, voice: "male", mood: "urgent" },
           segments: [
             { text: "Bhai, it's Kabir. I lost my phone, this is my roommate's number. " },
             {
