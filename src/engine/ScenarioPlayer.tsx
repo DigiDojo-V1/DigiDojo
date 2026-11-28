@@ -3,9 +3,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "motion/react";
 import { RotateCcw } from "lucide-react";
-import { AppChrome } from "@/components/layout/AppChrome";
-import { TopBar } from "@/components/TopBar";
-import { Button } from "@/components/ui/button";
+import { HomeShell } from "@/components/home/HomeShell";
+import { BIG_BUTTON, CardBack, OUTLINE_BUTTON, ScreenCard } from "@/components/home/ScreenCard";
+import { DISPLAY, MONO } from "@/components/landing/styles";
 import { useLocale, useT, useText } from "@/i18n/hooks";
 import type { Locale } from "@/i18n/locale";
 import { formatRupees } from "@/lib/format";
@@ -85,33 +85,34 @@ export function ScenarioPlayer({ scenario, backHref, notesGraded }: ScenarioPlay
 
   if (phase === "tutorial") {
     return (
-      <AppChrome>
+      <HomeShell>
         <HowToPlay
           onDone={() => {
             markTutorialSeen();
             finishTutorial();
           }}
         />
-      </AppChrome>
+      </HomeShell>
     );
   }
 
   if (phase === "primer" && scenario.primer !== undefined) {
     return (
-      <AppChrome>
+      <HomeShell>
         <ScenarioIntro
+          title={scenario.title}
           primer={scenario.primer}
           backHref={backHref}
           onStart={beginSimulation}
           onHowToPlay={openTutorial}
         />
-      </AppChrome>
+      </HomeShell>
     );
   }
 
   if (phase === "debrief") {
     return (
-      <AppChrome>
+      <HomeShell>
         <Debrief
           scenario={scenario}
           outcome={node?.kind === "outcome" ? node : undefined}
@@ -119,7 +120,7 @@ export function ScenarioPlayer({ scenario, backHref, notesGraded }: ScenarioPlay
           backHref={backHref}
           onReplay={() => start(key, scenario)}
         />
-      </AppChrome>
+      </HomeShell>
     );
   }
 
@@ -128,14 +129,14 @@ export function ScenarioPlayer({ scenario, backHref, notesGraded }: ScenarioPlay
   if (node.kind === "outcome") {
     const rewindTarget = node.rewindToNodeId;
     return (
-      <AppChrome>
+      <HomeShell>
         <OutcomeView
           outcome={node}
           backHref={backHref}
           onRewind={rewindTarget !== undefined ? () => rewind(rewindTarget) : undefined}
           onDebrief={openDebrief}
         />
-      </AppChrome>
+      </HomeShell>
     );
   }
 
@@ -332,41 +333,45 @@ function OutcomeView({
   const style = OUTCOME_STYLE[outcome.result];
   const Icon = style.icon;
   return (
-    <main className="flex flex-1 flex-col gap-4 p-4 md:rounded-lg md:bg-white md:p-6 md:ring-1 md:ring-black/10">
-      <TopBar back={{ href: backHref, label: "nav.backToDojo" }} />
-      <div className="flex flex-1 flex-col justify-center gap-4">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.96 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className={cn("rounded-2xl p-6 text-center ring-1", style.soft)}
+    <ScreenCard>
+      <CardBack href={backHref} label={t("nav.back")} />
+      <motion.div
+        initial={{ opacity: 0, scale: 0.97 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="mt-6 flex flex-col items-center text-center md:mt-8"
+      >
+        <span
+          className={cn("flex size-16 items-center justify-center rounded-full ring-1", style.soft)}
         >
-          <Icon className={cn("mx-auto size-12", style.tone)} aria-hidden />
-          <p className={cn("mt-3 text-xs font-semibold tracking-wide uppercase", style.tone)}>
-            {t(`outcome.${outcome.result}`)}
+          <Icon className={cn("size-8", style.tone)} aria-hidden />
+        </span>
+        <p className={cn(MONO, "mt-4", style.tone)}>{t(`outcome.${outcome.result}`)}</p>
+        <h1 className={`${DISPLAY} mt-3 text-[clamp(40px,10vw,64px)] leading-[0.9]`}>
+          {text(outcome.title)}
+        </h1>
+        {outcome.moneyDelta !== undefined && outcome.moneyDelta !== 0 && (
+          <p
+            className={cn(
+              "mt-4 text-3xl font-bold tabular-nums",
+              outcome.moneyDelta < 0 ? "text-red-700" : "text-emerald-700",
+            )}
+          >
+            {formatRupees(outcome.moneyDelta, { signed: true })}
           </p>
-          <h1 className="mt-1 text-2xl font-bold">{text(outcome.title)}</h1>
-          {outcome.moneyDelta !== undefined && outcome.moneyDelta !== 0 && (
-            <p
-              className={cn(
-                "mt-3 text-3xl font-bold tabular-nums",
-                outcome.moneyDelta < 0 ? "text-red-700" : "text-emerald-700",
-              )}
-            >
-              {formatRupees(outcome.moneyDelta, { signed: true })}
-            </p>
-          )}
-          <p className="mt-3 leading-relaxed text-neutral-700">{text(outcome.body)}</p>
-        </motion.div>
-
-        {onRewind !== undefined && (
-          <Button variant="outline" size="lg" className="h-11" onClick={onRewind}>
-            <RotateCcw /> {t("outcome.rewind")}
-          </Button>
         )}
-        <Button size="lg" className="h-11" onClick={onDebrief}>
+        <p className="mt-4 text-lg leading-relaxed text-black/70">{text(outcome.body)}</p>
+      </motion.div>
+
+      <div className="mt-8 flex flex-col gap-3">
+        <button type="button" onClick={onDebrief} className={BIG_BUTTON}>
           {t("outcome.seeDebrief")}
-        </Button>
+        </button>
+        {onRewind !== undefined && (
+          <button type="button" onClick={onRewind} className={OUTLINE_BUTTON}>
+            <RotateCcw aria-hidden className="size-4" /> {t("outcome.rewind")}
+          </button>
+        )}
       </div>
-    </main>
+    </ScreenCard>
   );
 }

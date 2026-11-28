@@ -22,7 +22,7 @@ Every dojo also contains at least one **legit** scenario (a real internship, a r
 ## 3. How a scenario works (the learning loop)
 
 0. **How to play (first scenario only, ~40 s).** A hands-on walkthrough in `src/engine/HowToPlay.tsx`: flag a practice message with the real sentence flagging and reason sheet, judge one genuine message and one scam ("not everything is a scam"), then see how a run is scored. Unlike the game it gives instant feedback. It shows once (`tutorialSeen` in persisted progress, cold runs included, since it teaches controls, not the scam) and can be replayed from the intro's "How to play" button.
-1. **Primer (optional, ~45 s).** The intro screen (`src/engine/ScenarioIntro.tsx`): **your situation** (`setup`, who you are and what just happened), the trick's name and a short body, **ask yourself** (`watchFor`, 1 to 4 questions, easy scenarios only, never pointing at a specific red flag), and the goals: spot the red flags, avoid false alarms, make the right call. A **cold run** scenario skips the primer and any hints, to show players they are vulnerable.
+1. **Primer (optional, ~20 s).** The intro screen (`src/engine/ScenarioIntro.tsx`): one card with the scenario's title, **your situation** (`setup`; falls back to the primer `body`), three fixed instructions (play it out, flag what's suspicious knowing some messages are genuine, make your call) and a big Start button. The trick's `title`/`body` and `watchFor` stay in the data but are not shown. A **cold run** scenario skips the primer and any hints, to show players they are vulnerable.
 2. **Simulation (2 to 3 min).** Messages arrive in real time (typing indicator, delays) inside a fake app shell. The player **taps any sentence** that looks suspicious (nothing marks where the red flags are), or taps the flag next to a detail such as a Reply-To line, then picks **why** from 4 reason chips and, when AI marking is on, can explain in their own words for bonus points. At 3 to 4 **decision points** the player picks a reply.
 3. **Consequence.** Each path ends in an outcome: safe, a money loss, a partial loss, or a missed opportunity (for legit scenarios the player wrongly rejected). Losses show exact rupee amounts.
 4. **Rewind.** Loss outcomes offer "Rewind" back to the decision node where the player could have stopped.
@@ -82,7 +82,7 @@ src/
     LanguageToggle.tsx                 # "EN | Hinglish" segmented toggle
     coverage.ts                        # counts text fields missing Hinglish (npm run i18n:report)
   components/ui/                       # shadcn
-  components/layout/                   # AppChrome (top nav + 3 columns from md/lg), ProgressCard, RightRail
+  components/layout/                   # chrome-data (dojo summaries for the home and dojo pages)
   lib/                                 # useIsDesktop(), placePopover()
 tests/
   scenarios.test.ts                    # validates every registered scenario

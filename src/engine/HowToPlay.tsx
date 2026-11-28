@@ -12,9 +12,9 @@ import {
   ShieldAlert,
   ThumbsUp,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { BIG_BUTTON, ScreenCard } from "@/components/home/ScreenCard";
+import { MONO } from "@/components/landing/styles";
 import { useT } from "@/i18n/hooks";
-import { LanguageToggle } from "@/i18n/LanguageToggle";
 import { cn } from "@/lib/utils";
 import { FlagPopover } from "@/shells/FlagPopover";
 import {
@@ -44,22 +44,9 @@ export function HowToPlay({ onDone }: { onDone: () => void }) {
   const next = () => (step + 1 < STEPS ? setStep(step + 1) : onDone());
 
   return (
-    <main className="flex flex-1 flex-col p-4 md:rounded-lg md:bg-white md:p-6 md:ring-1 md:ring-black/10">
-      <div className="flex h-9 items-center justify-between gap-2">
-        <button
-          type="button"
-          onClick={onDone}
-          className="-ml-1 rounded-full px-2 py-1 text-sm font-medium text-muted-foreground hover:bg-muted"
-        >
-          {t("howto.skip")}
-        </button>
-        <LanguageToggle />
-      </div>
-
-      <div className="mt-3 flex items-center gap-3">
-        <p className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-          {t("howto.title")}
-        </p>
+    <ScreenCard className="min-h-[min(680px,calc(100dvh-140px))]">
+      <div className="flex items-center gap-3">
+        <p className={`${MONO} text-black/55`}>{t("howto.title")}</p>
         <div
           className="flex flex-1 gap-1.5"
           role="progressbar"
@@ -79,6 +66,13 @@ export function HowToPlay({ onDone }: { onDone: () => void }) {
             </span>
           ))}
         </div>
+        <button
+          type="button"
+          onClick={onDone}
+          className={`${MONO} -mr-2 h-8 rounded-full px-3 text-black/55 transition hover:bg-black/5 hover:text-black/80`}
+        >
+          {t("howto.skip")}
+        </button>
       </div>
 
       <AnimatePresence mode="wait">
@@ -96,7 +90,7 @@ export function HowToPlay({ onDone }: { onDone: () => void }) {
           {step === 3 && <RecapStep onDone={onDone} />}
         </motion.div>
       </AnimatePresence>
-    </main>
+    </ScreenCard>
   );
 }
 
@@ -280,9 +274,9 @@ function FlagSteps({
       </div>
 
       {step === 1 && saved !== undefined && (
-        <Button size="lg" className="mt-auto h-11 w-full shrink-0" onClick={onNext}>
+        <button type="button" className={cn(BIG_BUTTON, "mt-auto shrink-0")} onClick={onNext}>
           {t("howto.next")}
-        </Button>
+        </button>
       )}
 
       {sheetOpen && (
@@ -434,9 +428,9 @@ function MixedStep({ onNext }: { onNext: () => void }) {
       </div>
 
       {picked !== null && (
-        <Button
-          size="lg"
-          className="mt-auto h-11 w-full shrink-0"
+        <button
+          type="button"
+          className={cn(BIG_BUTTON, "mt-auto shrink-0")}
           onClick={() => {
             if (done) return onNext();
             setIndex(index + 1);
@@ -444,7 +438,7 @@ function MixedStep({ onNext }: { onNext: () => void }) {
           }}
         >
           {t("howto.next")}
-        </Button>
+        </button>
       )}
     </>
   );
@@ -542,9 +536,9 @@ function RecapStep({ onDone }: { onDone: () => void }) {
         </p>
       </motion.div>
 
-      <Button size="lg" className="mt-auto h-11 w-full shrink-0" onClick={onDone}>
+      <button type="button" className={cn(BIG_BUTTON, "mt-auto shrink-0")} onClick={onDone}>
         {t("howto.ready")}
-      </Button>
+      </button>
     </>
   );
 }

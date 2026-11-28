@@ -17,9 +17,9 @@ import {
   Trophy,
   X,
 } from "lucide-react";
-import { TopBar } from "@/components/TopBar";
+import { BIG_BUTTON, CardBack, OUTLINE_BUTTON, ScreenCard } from "@/components/home/ScreenCard";
+import { DISPLAY, MONO } from "@/components/landing/styles";
 import { Badge } from "@/components/ui/badge";
-import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { useT, useText } from "@/i18n/hooks";
@@ -61,20 +61,20 @@ export function Debrief({ scenario, outcome, run, backHref, onReplay }: DebriefP
   const style = outcome !== undefined ? OUTCOME_STYLE[outcome.result] : undefined;
 
   return (
-    <main className="flex flex-1 flex-col gap-4 p-4 pb-8 md:rounded-lg md:bg-white md:p-6 md:ring-1 md:ring-black/10">
-      <TopBar back={{ href: backHref, label: "nav.backToDojo" }} className="-mb-2" />
-      <header className="flex items-center gap-2">
-        <div className="min-w-0">
-          <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-            {t("debrief.eyebrow")}
-          </p>
-          <h1 className="truncate text-lg font-semibold">{text(scenario.title)}</h1>
+    <ScreenCard width="wide" className="gap-4">
+      <CardBack href={backHref} label={t("nav.backToDojo")} />
+      <header className="mt-2 mb-2">
+        <div className="flex items-center gap-2">
+          <p className={`${MONO} text-black/55`}>{t("debrief.eyebrow")}</p>
+          {outcome !== undefined && style !== undefined && (
+            <Badge variant="outline" className={cn("ml-auto", style.tone)}>
+              {t(`outcome.${outcome.result}`)}
+            </Badge>
+          )}
         </div>
-        {outcome !== undefined && style !== undefined && (
-          <Badge variant="outline" className={cn("ml-auto", style.tone)}>
-            {t(`outcome.${outcome.result}`)}
-          </Badge>
-        )}
+        <h1 className={`${DISPLAY} mt-3 text-[clamp(40px,9vw,64px)] leading-[0.9]`}>
+          {text(scenario.title)}
+        </h1>
       </header>
 
       {Object.values(run.liveCalls ?? {}).map((record) => (
@@ -160,15 +160,15 @@ export function Debrief({ scenario, outcome, run, backHref, onReplay }: DebriefP
 
       {result.notReached.length > 0 && <OtherPathsSection flags={result.notReached} />}
 
-      <div className="mt-2 grid grid-cols-2 gap-2">
-        <Button variant="outline" size="lg" onClick={onReplay}>
-          <RotateCcw /> {t("debrief.playAgain")}
-        </Button>
-        <Link href={backHref} className={buttonVariants({ size: "lg" })}>
+      <div className="mt-4 grid gap-3 sm:grid-cols-2">
+        <button type="button" onClick={onReplay} className={cn(OUTLINE_BUTTON, "h-14 text-base")}>
+          <RotateCcw aria-hidden className="size-4" /> {t("debrief.playAgain")}
+        </button>
+        <Link href={backHref} className={BIG_BUTTON}>
           {t("nav.backToDojo")}
         </Link>
       </div>
-    </main>
+    </ScreenCard>
   );
 }
 
