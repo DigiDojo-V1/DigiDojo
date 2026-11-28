@@ -116,8 +116,16 @@ const en = {
 
   // Home
   "home.title": "DigiDojo",
-  "home.tagline": "Real scams, fake apps. Practise here, lose nothing.",
   "home.scenarioCount": (n: number) => `${n} scenario${n === 1 ? "" : "s"}`,
+  "home.start": "Start",
+  "home.comingSoon": "Coming soon",
+  "home.carousel": "Dojos",
+  "home.prev": "Previous dojo",
+  "home.next": "Next dojo",
+  "home.slide": (i: number, n: number) => `Dojo ${i} of ${n}`,
+  "home.counter": (i: number, n: number) =>
+    `${String(i).padStart(2, "0")} / ${String(n).padStart(2, "0")}`,
+  "home.goTo": (name: string) => `Show ${name}`,
 
   // Progress
   "progress.completed": "Completed",
@@ -594,7 +602,6 @@ export type UiDict = typeof en;
 export type UiKey = keyof UiDict;
 
 const hinglish: Partial<UiDict> = {
-  "home.tagline": "Asli scams, nakli apps. Practice yahin karo, nuksaan kahin nahi.",
   "notFound.body": "Yeh page nahi mila.",
   "voice.play": "Voice note chalao",
   "voice.stop": "Voice note roko",

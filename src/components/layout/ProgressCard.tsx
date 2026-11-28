@@ -5,7 +5,7 @@ import { UserRound } from "lucide-react";
 import { DojoProgress } from "@/components/progress/DojoProgress";
 import { useHydrated, useProgressStore } from "@/engine/store";
 import { useT, useText } from "@/i18n/hooks";
-import { useDojoSummaries } from "./chrome-data";
+import { playableScenarioKeys, useDojoSummaries } from "./chrome-data";
 import { dojoHref } from "@/lib/routes";
 
 /** Left column on desktop: the player's card, like a profile card, with progress per dojo. */
@@ -15,7 +15,7 @@ export function ProgressCard() {
   const dojos = useDojoSummaries();
   const hydrated = useHydrated();
   const completed = useProgressStore((s) => s.completed);
-  const keys = dojos.flatMap((d) => d.scenarioKeys);
+  const keys = playableScenarioKeys(dojos);
   const done = hydrated ? keys.filter((k) => completed[k]).length : 0;
 
   return (

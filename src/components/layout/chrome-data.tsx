@@ -28,3 +28,11 @@ export function ChromeDataProvider({
 export function useDojoSummaries(): readonly DojoSummary[] {
   return useContext(ChromeDataContext);
 }
+
+/** A dojo whose only scenario is the scaffold placeholder has nothing to play yet. */
+export const isComingSoon = (scenarioKeys: readonly string[]) =>
+  scenarioKeys.length === 0 || scenarioKeys.every((key) => key.endsWith("/coming-soon"));
+
+/** Every scenario a player can actually finish: coming-soon placeholders left out. */
+export const playableScenarioKeys = (dojos: readonly DojoSummary[]): string[] =>
+  dojos.filter((d) => !isComingSoon(d.scenarioKeys)).flatMap((d) => d.scenarioKeys);

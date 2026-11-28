@@ -9,10 +9,13 @@ import { cn } from "cn";
 export function DojoProgress({
   scenarioKeys,
   inverted = false,
+  className,
 }: {
   scenarioKeys: readonly string[];
   /** Light bar for a dark background. */
   inverted?: boolean;
+  /** Extra classes for the bar, e.g. a track colour for an unusual background. */
+  className?: string;
 }) {
   const t = useT();
   const hydrated = useHydrated();
@@ -28,6 +31,7 @@ export function DojoProgress({
           "flex-1",
           inverted &&
             "[&_[data-slot=progress-indicator]]:bg-primary-foreground [&_[data-slot=progress-track]]:bg-primary-foreground/20",
+          className,
         )}
         aria-label={t("progress.dojoAria")}
       />

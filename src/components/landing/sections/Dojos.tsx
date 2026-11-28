@@ -4,17 +4,13 @@ import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRef } from "react";
-import { useDojoSummaries } from "@/components/layout/chrome-data";
+import { isComingSoon, useDojoSummaries } from "@/components/layout/chrome-data";
 import { useT, useText } from "@/i18n/hooks";
 import { dojoHref } from "@/lib/routes";
 import { clamp, easeOutCubic } from "../camera";
 import { WorldNode, type NodeFrame } from "../engine";
 import { DISPLAY, MONO, NUMERALS } from "../styles";
 import { Z } from "../world";
-
-/** Dojos whose only scenario is the scaffold placeholder have nothing to show yet. */
-const isComingSoon = (scenarioKeys: readonly string[]) =>
-  scenarioKeys.length === 0 || scenarioKeys.every((key) => key.endsWith("/coming-soon"));
 
 /** Card positions along the looping thread, alternating sides like the reference. */
 const CARD_PLACES = [
