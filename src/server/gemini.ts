@@ -56,17 +56,23 @@ export function getVoice(): Voice | null {
       async generateJson({ system, prompt, schema, timeoutMs }) {
         const controller = new AbortController();
         const timer = setTimeout(() => controller.abort(), timeoutMs);
-        try {
-          const response = await ai.models.generateContent({
+        const ask = (thinking: boolean) =>
+          ai.models.generateContent({
             model: models.judge,
             contents: prompt,
             config: {
               systemInstruction: system,
               responseMimeType: "application/json",
               responseJsonSchema: schema,
-              thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
+              ...(thinking ? { thinkingConfig: { thinkingLevel: ThinkingLevel.LOW } } : {}),
               abortSignal: controller.signal,
             },
+          });
+        try {
+          // Some judge models reject a thinking level: ask once more without one.
+          const response = await ask(true).catch((error: unknown) => {
+            if (error instanceof Error && /thinking/i.test(error.message)) return ask(false);
+            throw error;
           });
           const text = response.text;
           if (!text) throw new Error("empty response");

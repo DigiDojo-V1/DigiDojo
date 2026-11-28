@@ -142,7 +142,7 @@ function judge(answer: unknown): JsonJudge & { prompts: string[] } {
 
 const goodAnswer = {
   outcome_id: "kept-safe",
-  rating: 9.3,
+  scores: { secrets: 4, questions: 2, pressure: 1.8, exit: 1.7 },
   summary: "You questioned it and hung up.",
   good_moves: [{ quote: "I didn't get any notice", why: "You questioned the claim first." }],
   mistakes: [],

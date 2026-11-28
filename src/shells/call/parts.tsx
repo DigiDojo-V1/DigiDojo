@@ -14,13 +14,26 @@ import { SimulationBar } from "../SimulationBar";
  * A dark screen, the caller in the middle, captions as light cards, round buttons at the bottom.
  */
 
-export function CallFrame({ children, className }: { children: ReactNode; className?: string }) {
+export function CallFrame({
+  children,
+  className,
+  fit = false,
+}: {
+  children: ReactNode;
+  className?: string;
+  /**
+   * Exactly one screen tall, never scrolling as a whole: for the live call, where the captions
+   * scroll inside and the buttons stay put.
+   */
+  fit?: boolean;
+}) {
   // Calls are phone-only: on desktop they sit in the phone mockup next to the Dojo panel.
   return (
     <PhoneFrame>
       <div
         className={cn(
-          "relative flex min-h-dvh flex-col bg-gradient-to-b from-slate-800 via-slate-900 to-slate-950 text-white lg:min-h-full",
+          "relative flex flex-col bg-gradient-to-b from-slate-800 via-slate-900 to-slate-950 text-white",
+          fit ? "h-dvh overflow-hidden lg:h-auto lg:min-h-0 lg:flex-1" : "min-h-dvh lg:min-h-full",
           className,
         )}
       >

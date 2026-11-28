@@ -435,8 +435,62 @@ const en = {
   "report.you": "You",
   "report.pending": "Reviewing your call…",
   "report.notAnalysed":
-    "We couldn't review the call in detail this time, so this is a rough rating.",
+    "We couldn't review the call in detail this time, so this score comes from what was said and done on the call.",
   "report.duration": (time: string) => `Call length ${time}`,
+  "report.parts": "How you scored",
+  "report.reported": "You blocked and reported the number.",
+
+  // Reporting a caller
+  "call.report": "Report",
+  "call.report.title": "Report this caller?",
+  "call.report.body": (number: string) =>
+    `This hangs up, blocks ${number} and reports it as a fraud call.`,
+  "call.report.confirm": "Block & report",
+  "call.report.cancel": "Back to the call",
+  "call.report.after": "Block & report this number",
+  "call.report.done": "Number blocked and reported",
+  "call.report.sim": "Simulated. Nothing is sent anywhere.",
+
+  // Loading screens
+  "call.connect.title": "Connecting your call",
+  "call.connect.mic": "Checking your microphone",
+  "call.connect.setup": "Setting up the practice caller",
+  "call.connect.line": (name: string) => `Connecting to ${name}`,
+  "call.connect.cancel": "Cancel",
+  "call.connect.tip":
+    "Tip: tap “My details” during the call to see the made-up details you can use.",
+  "call.review.title": "Reviewing your call",
+  "call.review.read": "Reading what was said",
+  "call.review.check": "Checking what you shared",
+  "call.review.score": "Scoring your call",
+
+  // Call score parts and the moments the scorer finds by itself
+  "callScore.part.secrets": "Kept your details safe",
+  "callScore.part.questions": "Questioned the caller",
+  "callScore.part.pressure": "Didn't give in to pressure",
+  "callScore.part.exit": "Ended it safely",
+  "callScore.part.pressure.legit": "Stayed calm",
+  "callScore.part.exit.legit": "Verified the right way",
+  "callScore.points": (got: string, max: number) => `${got}/${max}`,
+  "callScore.move.keptSecrets": "You didn't hand over any code, money or personal details.",
+  "callScore.move.askedQuestion": "You questioned the caller instead of just going along.",
+  "callScore.move.refused": "You said no when they pushed.",
+  "callScore.move.verify": "You said you'd check through a channel you trust.",
+  "callScore.move.hungUp": "You hung up on your own terms.",
+  "callScore.move.reported": "You blocked and reported the number, so it can't try again.",
+  "callScore.move.lifeline": "You quietly told someone you trust during the call.",
+  "callScore.move.stayedCalm": "You stayed calm and dealt with the call.",
+  "callScore.move.sharedCode":
+    "You read out the one-time code. That code is the key to your account.",
+  "callScore.move.paid":
+    "You paid the caller. Real officials and banks never collect money on a call.",
+  "callScore.move.sharedDetail": "You said a personal or account detail out loud.",
+  "callScore.move.openedFile": "You opened a file the caller sent.",
+  "callScore.move.stayedOn": "You stayed on the line until the caller was done with you.",
+  "callScore.move.reportedGenuine":
+    "This was a genuine call. Check the number on your card before reporting a caller.",
+  "callScore.move.dismissedGenuine":
+    "You hung up on a genuine alert without checking it. Call the number on your card instead.",
 
   // Mail
   "mail.inbox": "Inbox",

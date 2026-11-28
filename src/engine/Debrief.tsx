@@ -81,7 +81,12 @@ export function Debrief({ scenario, outcome, run, backHref, onReplay }: DebriefP
         <CallReportCard key={record.nodeId} scenario={scenario} record={record} />
       ))}
 
-      <ScoreCard result={result} found={found} reached={reachedCount} />
+      {/* A call-only run with nothing flagged has no flag score: the call's own score says it all. */}
+      {(Object.keys(run.liveCalls ?? {}).length === 0 ||
+        result.score.max > 0 ||
+        result.falseAlarms.length > 0) && (
+        <ScoreCard result={result} found={found} reached={reachedCount} />
+      )}
 
       <FlagSection
         title={t("debrief.caught")}

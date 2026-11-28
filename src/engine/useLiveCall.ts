@@ -12,12 +12,12 @@ import {
   CallReportSchema,
   DEFAULT_MAX_MINUTES,
   END_CALL_TOOL,
-  fallbackReport,
   fillCode,
   makeCode,
   MAX_QUOTE_CHARS,
   MAX_TURN_CHARS,
   MAX_TURNS,
+  REPORTED_SIGNAL,
   resolveOutcome,
   saidCode,
   TRIGGER_EVENT_TOOL,
@@ -26,11 +26,15 @@ import {
   type LiveCallRecord,
   type LiveFlag,
 } from "./live-call";
+import { fallbackReport } from "./call-score";
 import type { LiveCallNode, Scenario, Tactic } from "./schema";
 import { useRunStore } from "./store";
 
-export type LiveCallPhase = "idle" | "connecting" | "active" | "ended";
+/** ended: the call is over and the player can report the number; reviewing: the judge is at work. */
+export type LiveCallPhase = "idle" | "connecting" | "active" | "ended" | "reviewing";
 export type LiveCallFailure = "mic" | "voice-off" | "connect";
+/** Where connecting is up to, for the loading screen. */
+export type ConnectStep = "mic" | "setup" | "line";
 
 export interface CallNotice {
   id: string;
@@ -86,6 +90,9 @@ export function useLiveCall({
   const [signals, setSignals] = useState<string[]>([]);
   const [muted, setMutedState] = useState(false);
   const [endedBy, setEndedBy] = useState<CallEnding | null>(null);
+  const [step, setStep] = useState<ConnectStep>("mic");
+  const [reported, setReported] = useState(false);
+  const [durationMs, setDurationMs] = useState(0);
 
   const session = useRef<LiveSession | null>(null);
   const mic = useRef<Mic | null>(null);
@@ -101,6 +108,9 @@ export function useLiveCall({
   const otp = useRef<{ eventId: string; code: string; fromTurn: number } | null>(null);
   const pendingPayment = useRef<ToolCall | null>(null);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
+  /** Bumped by every answer and cancel, so a cancelled attempt stops at its next step. */
+  const attempt = useRef(0);
+  const finished = useRef<LiveCallRecord | null>(null);
 
   const later = useCallback((fn: () => void, ms: number) => {
     timers.current.push(setTimeout(fn, ms));
@@ -127,7 +137,7 @@ export function useLiveCall({
     }
   }, []);
 
-  /** The call is over: save it, then ask the judge for a review. */
+  /** The call is over. It's saved and reviewed once the player leaves the "call ended" screen. */
   const end = useCallback(
     (reason: CallEnding) => {
       if (ended.current) return;
@@ -138,25 +148,46 @@ export function useLiveCall({
         .map((t) => ({ ...t, text: t.text.trim().slice(0, MAX_TURN_CHARS) }))
         .filter((t) => t.text.length > 0)
         .slice(-MAX_TURNS);
-      const record: LiveCallRecord = {
+      finished.current = {
         nodeId,
         transcript,
         flags: flagsRef.current,
-        signals: signalsRef.current,
+        signals: [],
         endedBy: reason,
         durationMs,
-        outcomeId: resolveOutcome(node, signalsRef.current).id,
+        outcomeId: "",
         report: "pending",
       };
-      saveLiveCall(record);
       setEndedBy(reason);
+      setDurationMs(durationMs);
       setPhase("ended");
-      void fetchReport(scenario, nodeId, locale, record).then((report) =>
-        setCallReport(nodeId, report ?? fallbackReport(node, record)),
-      );
     },
-    [node, nodeId, scenario, locale, saveLiveCall, setCallReport, shutdown],
+    [nodeId, shutdown],
   );
+
+  /** Saves the finished call with everything that happened, then asks the judge for a review. */
+  const finish = useCallback(() => {
+    const done = finished.current;
+    if (done === null) return;
+    finished.current = null;
+    const record: LiveCallRecord = {
+      ...done,
+      signals: signalsRef.current,
+      outcomeId: resolveOutcome(node, signalsRef.current).id,
+    };
+    saveLiveCall(record);
+    setPhase("reviewing");
+    void fetchReport(scenario, nodeId, locale, record).then((report) =>
+      setCallReport(nodeId, report ?? fallbackReport(node, record, scenario.legit === true)),
+    );
+  }, [node, nodeId, scenario, locale, saveLiveCall, setCallReport]);
+
+  /** Blocks and reports the caller's number: hangs up if the call is still going. */
+  const report = useCallback(() => {
+    addSignal(REPORTED_SIGNAL);
+    setReported(true);
+    end("player");
+  }, [addSignal, end]);
 
   const addText = useCallback(
     (who: CallTurn["who"], chunk: string) => {
@@ -265,7 +296,10 @@ export function useLiveCall({
 
   const answer = useCallback(async () => {
     if (phase === "connecting" || phase === "active") return;
+    const mine = ++attempt.current;
+    const cancelled = () => attempt.current !== mine;
     setFailure(null);
+    setStep("mic");
     setPhase("connecting");
     // Made inside the tap, so the browser lets it play sound.
     const p = new PcmPlayer();
@@ -273,6 +307,7 @@ export function useLiveCall({
     void p.resume();
 
     const fail = (why: LiveCallFailure) => {
+      if (cancelled()) return;
       shutdown(true);
       setFailure(why);
       setPhase("idle");
@@ -286,7 +321,13 @@ export function useLiveCall({
       fail(error instanceof MicError ? "mic" : "connect");
       return;
     }
+    if (cancelled()) {
+      mic.current?.stop();
+      mic.current = null;
+      return;
+    }
 
+    setStep("setup");
     let token: TokenResponse;
     try {
       const res = await fetch("/api/call/token", {
@@ -300,12 +341,13 @@ export function useLiveCall({
     } catch {
       return fail("connect");
     }
+    if (cancelled()) return;
 
     ended.current = false;
     ready.current = false;
     const live = new LiveSession({
       onReady: () => {
-        if (ready.current) return;
+        if (ready.current || cancelled()) return;
         ready.current = true;
         startedAt.current = Date.now();
         setConnectedAt(startedAt.current);
@@ -328,15 +370,27 @@ export function useLiveCall({
       },
     });
     session.current = live;
+    setStep("line");
     try {
       await live.connect(token);
     } catch {
       return fail("connect");
     }
+    if (cancelled()) {
+      live.close();
+      return;
+    }
     later(() => {
       if (!ready.current && !ended.current) fail("connect");
     }, READY_TIMEOUT_MS);
   }, [addText, end, later, locale, node.maxMinutes, nodeId, onToolCall, phase, scenario, shutdown]);
+
+  /** Stops connecting and goes back to the ringing screen. */
+  const cancel = useCallback(() => {
+    attempt.current++;
+    shutdown(true);
+    setPhase("idle");
+  }, [shutdown]);
 
   // Leaving the screen mid-call hangs up without saving anything.
   useEffect(
@@ -402,6 +456,12 @@ export function useLiveCall({
     muted,
     setMuted,
     endedBy,
+    durationMs,
+    step,
+    cancel,
+    reported,
+    report,
+    finish,
     lastCallerLine: lastCallerLine === "" ? undefined : lastCallerLine,
     answer,
     hangUp: () => end("player"),

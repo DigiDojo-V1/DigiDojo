@@ -4,13 +4,17 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, MotionConfig } from "motion/react";
 import {
   Captions,
+  FileSearch,
   Flag,
+  Gauge,
   IdCard,
-  Loader2,
   MessageCircleHeart,
   Mic,
   MicOff,
+  Phone,
   PhoneOff,
+  ShieldAlert,
+  ShieldCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLocale, useT, useText } from "@/i18n/hooks";
@@ -25,8 +29,15 @@ import {
   SpeakingBars,
 } from "@/shells/call/parts";
 import { IncomingCall } from "@/shells/call/IncomingCall";
+import { CallLoadingScreen, useTimedStep } from "@/shells/call/LoadingScreens";
 import { PhoneNotifications } from "@/shells/call/PhoneNotifications";
-import { LifelineSheet, LiveFlagSheet, PaymentSheet, PersonaSheet } from "@/shells/call/sheets";
+import {
+  LifelineSheet,
+  LiveFlagSheet,
+  PaymentSheet,
+  PersonaSheet,
+  ReportSheet,
+} from "@/shells/call/sheets";
 import { VideoFeed } from "@/shells/call/VideoFeed";
 import { liveFlagTactics, resolveOutcome } from "./live-call";
 import { useEvidence } from "./PlayViews";
@@ -34,11 +45,14 @@ import type { LiveCallNode, Scenario, Tactic } from "./schema";
 import { useRunStore } from "./store";
 import { useLiveCall } from "./useLiveCall";
 
-type Sheet = "persona" | "flag" | { lifeline: string } | null;
+type Sheet = "persona" | "flag" | "report" | { lifeline: string } | null;
+
+const CONNECT_STEPS = ["mic", "setup", "line"] as const;
 
 /**
- * A live voice call: ringing → talking to the AI caller → call ended → on to the node the call
- * leads to. Without a mic, or with voice off, the player takes the scripted version instead.
+ * A live voice call: ringing → connecting → talking to the AI caller → call ended (the player
+ * can report the number) → reviewing → on to the node the call leads to. Without a mic, or with
+ * voice off, the player takes the scripted version instead.
  */
 export function LiveCallView({
   scenario,
@@ -75,6 +89,20 @@ export function LiveCallView({
     };
   }, []);
 
+  // Once the review is in, go on to wherever the call led.
+  const reviewed =
+    call.phase === "reviewing" && record !== undefined && record.report !== "pending"
+      ? record
+      : undefined;
+  useEffect(() => {
+    if (reviewed === undefined) return;
+    const timer = setTimeout(
+      () => advanceTo(resolveOutcome(node, reviewed.signals, reviewed.outcomeId).nextNodeId),
+      500,
+    );
+    return () => clearTimeout(timer);
+  }, [reviewed, node, advanceTo]);
+
   const caller = {
     name: text(node.caller.name),
     number: node.caller.number,
@@ -91,7 +119,38 @@ export function LiveCallView({
     [scenario, node, t],
   );
 
-  if (call.phase === "idle" || call.phase === "connecting") {
+  if (call.phase === "connecting") {
+    return (
+      <CallLoadingScreen
+        name={caller.name}
+        title={t("call.connect.title")}
+        subtitle={caller.name}
+        steps={[
+          { icon: Mic, label: t("call.connect.mic") },
+          { icon: ShieldCheck, label: t("call.connect.setup") },
+          { icon: Phone, label: t("call.connect.line")(caller.name) },
+        ]}
+        current={CONNECT_STEPS.indexOf(call.step)}
+        footer={
+          <div className="space-y-3 text-center">
+            <p className="text-xs text-white/55">{t("call.connect.tip")}</p>
+            <Button
+              size="lg"
+              variant="ghost"
+              className="h-12 w-full text-white hover:bg-white/10 hover:text-white"
+              onClick={call.cancel}
+            >
+              {t("call.connect.cancel")}
+            </Button>
+          </div>
+        }
+      />
+    );
+  }
+
+  if (call.phase === "reviewing") return <ReviewingScreen name={caller.name} />;
+
+  if (call.phase === "idle") {
     const problem =
       call.failure === "mic"
         ? t("call.micDenied")
@@ -107,7 +166,7 @@ export function LiveCallView({
         video={video}
         backHref={backHref}
         voiceAvailable={voiceAvailable === null ? null : canVoice}
-        busy={call.phase === "connecting"}
+        busy={false}
         problem={problem}
         onAnswer={() => (canVoice ? void call.answer() : advanceTo(node.scriptedNodeId))}
         onAnswerText={() => advanceTo(node.scriptedNodeId)}
@@ -119,8 +178,6 @@ export function LiveCallView({
   }
 
   if (call.phase === "ended") {
-    const report = record?.report;
-    const ready = report !== undefined && report !== "pending";
     const endedKey =
       call.endedBy === "player"
         ? "call.endedByYou"
@@ -138,26 +195,35 @@ export function LiveCallView({
           <div>
             <p className="text-2xl font-semibold">{t("call.ended")}</p>
             <p className="mt-1 text-white/70">{caller.name}</p>
+            <p className="text-sm text-white/55">{caller.number}</p>
             <p className="mt-1 text-sm text-white/60 tabular-nums">
-              {t("call.timer")(Math.round((record?.durationMs ?? 0) / 1000))} · {t(endedKey)}
+              {t("call.timer")(Math.round(call.durationMs / 1000))} · {t(endedKey)}
             </p>
           </div>
-          {!ready && (
-            <p className="flex items-center gap-2 text-sm text-white/70">
-              <Loader2 className="size-4 animate-spin" aria-hidden /> {t("call.analysing")}
-            </p>
-          )}
         </div>
-        <div className="p-4 pb-8">
+        <div className="space-y-3 p-4 pb-8">
+          {call.reported ? (
+            <p
+              role="status"
+              className="flex h-12 items-center justify-center gap-2 rounded-xl bg-white/10 text-sm font-medium text-white/85"
+            >
+              <ShieldCheck className="size-4 text-emerald-400" aria-hidden />
+              {t("call.report.done")}
+            </p>
+          ) : (
+            <Button
+              size="lg"
+              variant="outline"
+              className="h-12 w-full border-red-400/60 bg-transparent text-red-200 hover:bg-red-500/15 hover:text-red-100"
+              onClick={call.report}
+            >
+              <ShieldAlert className="size-4" aria-hidden /> {t("call.report.after")}
+            </Button>
+          )}
           <Button
             size="lg"
             className="h-12 w-full bg-white text-slate-900 hover:bg-white/90"
-            disabled={!ready || record === undefined}
-            onClick={() => {
-              if (record === undefined) return;
-              const outcome = resolveOutcome(node, record.signals, record.outcomeId);
-              advanceTo(outcome.nextNodeId);
-            }}
+            onClick={call.finish}
           >
             {t("call.continue")}
           </Button>
@@ -166,7 +232,7 @@ export function LiveCallView({
     );
   }
 
-  // Active call.
+  // Active call: one screen tall, captions scrolling between the caller and the buttons.
   const lifelines = node.lifelines ?? [];
   const openNotice = (id: string) => {
     const notice = call.notices.find((n) => n.id === id);
@@ -182,7 +248,7 @@ export function LiveCallView({
 
   return (
     <MotionConfig reducedMotion="user">
-      <CallFrame>
+      <CallFrame fit>
         <PhoneNotifications
           notices={call.notices.map((n) => ({
             id: n.id,
@@ -196,7 +262,7 @@ export function LiveCallView({
         />
 
         {video ? (
-          <div className="pt-3">
+          <div className="shrink-0 pt-3">
             <VideoFeed
               name={caller.name}
               label={caller.label}
@@ -205,11 +271,13 @@ export function LiveCallView({
             />
           </div>
         ) : (
-          <CallerHeader
-            {...caller}
-            level={call.callerLevel}
-            status={<CallTimer since={call.connectedAt} />}
-          />
+          <div className="shrink-0">
+            <CallerHeader
+              {...caller}
+              level={call.callerLevel}
+              status={<CallTimer since={call.connectedAt} />}
+            />
+          </div>
         )}
 
         <LiveCaptions
@@ -220,13 +288,13 @@ export function LiveCallView({
           emptyLabel={t("call.captionsEmpty")}
         />
 
-        <div className="sticky bottom-0 z-30 space-y-5 bg-gradient-to-t from-slate-950 via-slate-950/95 to-transparent px-4 pt-6 pb-8">
+        <div className="z-30 shrink-0 space-y-4 border-t border-white/10 bg-slate-950/90 px-4 pt-4 pb-6">
           {flagNote && (
             <p role="status" className="text-center text-xs text-white/70">
               {t("call.flag.saved")}
             </p>
           )}
-          <div className="flex flex-wrap justify-center gap-x-5 gap-y-4">
+          <div className="flex flex-wrap justify-center gap-x-4 gap-y-3">
             <RoundButton
               icon={call.muted ? MicOff : Mic}
               label={t(call.muted ? "call.unmute" : "call.mute")}
@@ -250,6 +318,11 @@ export function LiveCallView({
               badge={call.flags.length}
               onClick={() => setSheet("flag")}
             />
+            <RoundButton
+              icon={ShieldAlert}
+              label={t("call.report")}
+              onClick={() => setSheet("report")}
+            />
             {lifelines.map((lifeline) => (
               <RoundButton
                 key={lifeline.id}
@@ -267,6 +340,16 @@ export function LiveCallView({
             name={node.player.name}
             details={node.player.details.map((d) => ({ label: text(d.label), value: d.value }))}
             onClose={() => setSheet(null)}
+          />
+        )}
+        {sheet === "report" && (
+          <ReportSheet
+            number={caller.number}
+            onClose={() => setSheet(null)}
+            onReport={() => {
+              setSheet(null);
+              call.report();
+            }}
           />
         )}
         {sheet === "flag" && (
@@ -315,7 +398,10 @@ export function LiveCallView({
   );
 }
 
-/** The last few things said, newest at the bottom. */
+/**
+ * Everything said so far, newest at the bottom. It scrolls inside the space between the caller
+ * and the buttons, following new lines unless the player has scrolled up to reread.
+ */
 function LiveCaptions({
   show,
   turns,
@@ -329,35 +415,60 @@ function LiveCaptions({
   youLabel: string;
   emptyLabel: string;
 }) {
-  const endRef = useRef<HTMLDivElement>(null);
-  const visible = turns.filter((turn) => turn.text.trim() !== "").slice(-6);
+  const boxRef = useRef<HTMLDivElement>(null);
+  const follow = useRef(true);
+  const visible = turns.filter((turn) => turn.text.trim() !== "");
   const last = visible.at(-1);
   useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-  }, [turns]);
+    const box = boxRef.current;
+    if (box !== null && follow.current) box.scrollTop = box.scrollHeight;
+  }, [turns, show]);
 
   if (!show) {
     return (
-      <div className="flex flex-1 items-center justify-center text-sky-300">
+      <div className="flex min-h-0 flex-1 items-center justify-center text-sky-300">
         {last?.who === "caller" && <SpeakingBars className="h-8" />}
       </div>
     );
   }
   return (
-    <div className="flex flex-1 flex-col justify-end gap-2.5 px-3 pt-4 pb-2" aria-live="polite">
-      {visible.length === 0 && <p className="text-center text-sm text-white/50">{emptyLabel}</p>}
-      <AnimatePresence initial={false}>
-        {visible.map((turn) => (
-          <CaptionCard
-            key={`${turn.who}-${turn.atMs}`}
-            who={turn.who}
-            text={turn.text.trim()}
-            sender={callerName}
-            youLabel={youLabel}
-          />
-        ))}
-      </AnimatePresence>
-      <div ref={endRef} />
+    <div
+      ref={boxRef}
+      onScroll={(e) => {
+        const box = e.currentTarget;
+        follow.current = box.scrollHeight - box.scrollTop - box.clientHeight < 40;
+      }}
+      className="min-h-0 flex-1 [scrollbar-width:thin] [scrollbar-color:rgb(255_255_255/0.35)_transparent] overflow-y-auto overscroll-contain [mask-image:linear-gradient(to_bottom,transparent,black_24px)]"
+      aria-live="polite"
+    >
+      <div className="flex min-h-full flex-col justify-end gap-2.5 px-3 pt-6 pb-3">
+        {visible.length === 0 && <p className="text-center text-sm text-white/50">{emptyLabel}</p>}
+        <AnimatePresence initial={false}>
+          {visible.map((turn) => (
+            <CaptionCard
+              key={`${turn.who}-${turn.atMs}`}
+              who={turn.who}
+              text={turn.text.trim()}
+              sender={callerName}
+              youLabel={youLabel}
+            />
+          ))}
+        </AnimatePresence>
+      </div>
     </div>
+  );
+}
+
+/** While the judge reviews the call: a few steps ticking over, then on to the result. */
+function ReviewingScreen({ name }: { name: string }) {
+  const t = useT();
+  const steps = [
+    { icon: FileSearch, label: t("call.review.read") },
+    { icon: ShieldCheck, label: t("call.review.check") },
+    { icon: Gauge, label: t("call.review.score") },
+  ];
+  const current = useTimedStep(steps.length);
+  return (
+    <CallLoadingScreen name={name} title={t("call.review.title")} steps={steps} current={current} />
   );
 }

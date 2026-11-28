@@ -47,17 +47,63 @@ export type LiveFlag = z.infer<typeof LiveFlagSchema>;
 export const CALL_ENDINGS = ["player", "caller", "timeout", "error"] as const;
 export type CallEnding = (typeof CALL_ENDINGS)[number];
 
+/** Moments the conversation scorer can name by itself, shown with UI strings (`callScore.move.*`). */
+export const MOVE_KEYS = [
+  "keptSecrets",
+  "askedQuestion",
+  "refused",
+  "verify",
+  "hungUp",
+  "reported",
+  "lifeline",
+  "stayedCalm",
+  "sharedCode",
+  "paid",
+  "sharedDetail",
+  "openedFile",
+  "stayedOn",
+  "reportedGenuine",
+  "dismissedGenuine",
+] as const;
+export type MoveKey = (typeof MOVE_KEYS)[number];
+
 export const ReportMomentSchema = z.strictObject({
   quote: z.string().max(MAX_QUOTE_CHARS),
   why: z.string().max(400),
+  /** Set on moments the conversation scorer found: the UI words them, and `why` is empty. */
+  key: z.enum(MOVE_KEYS).optional(),
 });
 export type ReportMoment = z.infer<typeof ReportMomentSchema>;
+
+/**
+ * How a call is scored: four parts out of 10, the same for the judge and the local scorer.
+ * On a genuine call, "pressure" means staying calm and "exit" means verifying the right way.
+ */
+export const SCORE_PARTS = ["secrets", "questions", "pressure", "exit"] as const;
+export type ScorePart = (typeof SCORE_PARTS)[number];
+export const PART_MAX: Record<ScorePart, number> = {
+  secrets: 4,
+  questions: 2,
+  pressure: 2,
+  exit: 2,
+};
+
+const part = (p: ScorePart) => z.number().min(0).max(PART_MAX[p]);
+export const ScorePartsSchema = z.strictObject({
+  secrets: part("secrets"),
+  questions: part("questions"),
+  pressure: part("pressure"),
+  exit: part("exit"),
+});
+export type ScoreParts = z.infer<typeof ScorePartsSchema>;
 
 /** The judge's view of the call, shown in the debrief. Text is in the player's language. */
 export const CallReportSchema = z.strictObject({
   outcomeId: z.string(),
   /** 0 to 10 in steps of 0.5, like the source guide's ratings. */
   rating: z.number().min(0).max(10),
+  /** The rating, part by part. They add up to `rating`. */
+  parts: ScorePartsSchema,
   summary: z.string().max(600),
   goodMoves: z.array(ReportMomentSchema).max(6),
   mistakes: z.array(ReportMomentSchema).max(6),
@@ -119,6 +165,9 @@ export function cleanRating(rating: number): number {
   return Math.round(Math.min(10, Math.max(0, rating)) * 2) / 2;
 }
 
+/** The player blocked and reported the caller's number, during the call or right after. */
+export const REPORTED_SIGNAL = "call.reported";
+
 /** Every signal a call can record, from its events and lifelines. */
 export function possibleSignals(node: LiveCallNode): string[] {
   const out: string[] = [];
@@ -128,38 +177,13 @@ export function possibleSignals(node: LiveCallNode): string[] {
     if (event.kind === "document") out.push(`${id}.opened`);
   }
   for (const lifeline of node.lifelines ?? []) out.push(`${lifeline.id}.sent`);
+  out.push(REPORTED_SIGNAL);
   return out;
 }
 
 /** The signals that decide an outcome by themselves (money or a code handed over). */
-function decisiveSignals(node: LiveCallNode): Set<string> {
+export function decisiveSignals(node: LiveCallNode): Set<string> {
   return new Set(node.outcomes.flatMap((o) => o.events ?? []));
-}
-
-/**
- * A rough report for when the judge can't be reached: signals and who hung up decide it.
- * Text stays generic; the debrief says the call wasn't reviewed in detail.
- */
-export function fallbackReport(
-  node: LiveCallNode,
-  record: Pick<LiveCallRecord, "signals" | "endedBy" | "durationMs" | "flags">,
-): CallReport {
-  const decisive = decisiveSignals(node);
-  const lost = record.signals.some((s) => decisive.has(s));
-  const outcome = resolveOutcome(node, record.signals);
-  const quickHangUp = record.endedBy === "player" && record.durationMs < 90_000;
-  const rating = lost ? 1.5 : quickHangUp ? 8 : record.endedBy === "player" ? 6.5 : 5;
-  return {
-    outcomeId: outcome.id,
-    rating,
-    summary: "",
-    goodMoves: [],
-    mistakes: [],
-    doBetter: [],
-    heard: [],
-    flagMatches: record.flags.map(() => null),
-    analysed: false,
-  };
 }
 
 /* ------------------------------------------------------------------ */
@@ -296,6 +320,13 @@ const SPOKEN_LANGUAGE: Record<Locale, string> = {
     "Hinglish: a natural mix of Hindi and English, the way people in Indian cities talk on the phone. If the person answers only in English, follow them into English.",
 };
 
+/**
+ * Native-audio voices drift between accents when a call mixes languages. One fixed accent for
+ * the whole call, whatever language the words are in, keeps the caller sounding like one person.
+ */
+export const ACCENT_RULE =
+  "speak with one steady, natural Indian accent from your first word to your last, like an educated person from Delhi. Keep the same accent, pitch, pace and personality all through the call. When you switch between English and Hindi, only the words change, never the voice: English words keep the same Indian-English accent and Hindi words sound natural. Never use an American, British or any other accent, and never copy the person's accent or voice.";
+
 /** Terms the speech-to-text often mishears on these calls. */
 const BASE_VOCABULARY = [
   "OTP",
@@ -368,6 +399,7 @@ ${events === "" ? "" : `\nTHINGS YOU CAN MAKE HAPPEN ON THEIR PHONE\nCall ${TRIG
 HOW YOU SPEAK
 - Language: ${SPOKEN_LANGUAGE[locale]}
 - Only ever speak English, Hindi or a mix of the two. Never switch to any other language, even if the person uses one: answer in simple English then.
+- Accent: ${ACCENT_RULE}
 - Like a real phone call: short turns of one to three sentences, then let them talk. Never monologue.
 - React to what they actually say. If they ask a question, answer it in character.
 - Never use stage directions, sound effects, or narration. Only say what ${callerName} would say.
