@@ -29,7 +29,7 @@ export interface DojoViewProps {
 
 /**
  * One dojo's page, inside `HomeShell`: back link and progress, the dojo's name, a row of tall
- * scenario cards (stacked on phones, a sideways-scrolling row from tablets up), and the takeaways.
+ * scenario cards (one, two or three to a row by width; extra cards wrap), and the takeaways.
  */
 export function DojoView({ order, name, tagline, takeaways, scenarios }: DojoViewProps) {
   const t = useT();
@@ -79,12 +79,11 @@ export function DojoView({ order, name, tagline, takeaways, scenarios }: DojoVie
           aria-label={t("dojo.scenarios")}
           className={cn(
             CARD_PAD,
-            "flex flex-col gap-3 py-8 md:flex-1 md:snap-x md:snap-mandatory md:scroll-px-8 md:flex-row md:overflow-x-auto md:overscroll-x-contain md:py-10 lg:scroll-px-10",
-            "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+            "grid grid-cols-1 gap-3 py-8 sm:grid-cols-2 md:gap-4 md:py-10 lg:grid-cols-3",
           )}
         >
           {scenarios.map((scenario, i) => (
-            <li key={scenario.key} className="md:flex md:snap-start">
+            <li key={scenario.key} className="flex">
               <ScenarioCard scenario={scenario} index={i} />
             </li>
           ))}
@@ -118,7 +117,7 @@ function ScenarioCard({ scenario, index }: { scenario: DojoViewScenario; index: 
   return (
     <Link
       href={scenario.href}
-      className="group flex min-h-[320px] w-full flex-col rounded-[22px] bg-white/60 p-5 ring-1 ring-black/10 transition hover:bg-white/80 hover:ring-black/25 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black/40 active:scale-[0.99] md:h-[clamp(380px,55dvh,520px)] md:min-h-0 md:w-[280px]"
+      className="group flex min-h-[320px] w-full flex-col rounded-[22px] bg-white/60 p-5 ring-1 ring-black/10 transition hover:bg-white/80 hover:ring-black/25 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black/40 active:scale-[0.99] sm:min-h-[clamp(380px,55dvh,520px)]"
     >
       <div className="flex items-center justify-between">
         <span className={`${MONO} text-black/55 tabular-nums`}>
