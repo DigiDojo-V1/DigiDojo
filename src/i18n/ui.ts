@@ -740,11 +740,295 @@ const en = {
 export type UiDict = typeof en;
 export type UiKey = keyof UiDict;
 
+/**
+ * Hinglish for everything DigiDojo itself says. Left in English on purpose (so they fall back):
+ * the fake apps' own chrome (Gmail, Instagram, Telegram, the phone's call and payment screens,
+ * the PDF viewer and browser bar), which is English in the real apps too, the landing page,
+ * and the tactic labels, which the landing page also shows.
+ */
 const hinglish: Partial<UiDict> = {
+  // Shared
+  "nav.back": "Wapas",
+  "nav.backToHome": "Home pe wapas",
+  "nav.backToDojo": "Dojo pe wapas",
+  "language.label": "Bhasha",
+  "simulation.badgeAria": "Yeh ek simulation hai",
+
+  // Home
+  "home.start": "Shuru karo",
+  "home.comingSoon": "Jaldi aa raha hai",
+  "home.prev": "Pichla dojo",
+  "home.next": "Agla dojo",
+  "home.slide": (i: number, n: number) => `${n} mein se Dojo ${i}`,
+  "home.goTo": (name: string) => `${name} dikhao`,
+
+  // Progress
+  "progress.completed": "Ho gaya",
+  "progress.notCompleted": "Abhi baaki hai",
+
+  // Dojo page
+  "dojo.empty": "Abhi koi scenario nahi hai.",
+  "dojo.takeaways": "Yaad rakhna",
+
+  // 404
   "notFound.body": "Yeh page nahi mila.",
+
+  // App chrome
+  "chrome.progressBody": (done: number, total: number) =>
+    `${total} mein se ${done} scenario ho gaye`,
+  "chrome.how1": "Ek fake app ke andar asli jaisa scam face karo.",
+  "chrome.how2": "Jo bhi suspicious lage use flag karo, phir apna decision lo.",
+  "chrome.how3": "Debrief mein dekho tumne kya pakda aur kya miss kiya.",
+  "chrome.helpBody": "Turant 1930 pe call karo aur cybercrime.gov.in pe report karo.",
+
+  // Dojo panel
+  "panel.instructions":
+    "Jo bhi sentence suspicious lage, us pe click karo. Address, link aur file jaisi details ke paas wala flag use karo.",
+  "panel.waiting": "Dhyaan se padho. Decide karne ka time aayega toh options yahan dikhenge.",
+  "panel.flagged": (n: number) => `${n} flag kiye`,
+  "panel.exit": "Simulation se bahar niklo",
+
+  // Telegram and Instagram: only the fictional people's own messages
+  "ig.inbox2.preview": "Karan: accounts ke notes kiske paas hain?",
+  "ig.inbox4.preview": "haha same. sunday ko match?",
+  "ig.inbox6.preview": "You: ok 4 baje milte hain",
+  "tg.chat3.preview": "Khana khaya? Free ho toh call karna",
+  "tg.chat4.preview": "Priya: Accounts assignment Friday ko due hai",
+  "tg.chat5.preview": "ok eco notes abhi bhej raha hoon",
+
+  // Primer
+  "primer.start": "Simulation shuru karo",
+  "primer.howToPlay": "Kaise khelein",
+  "primer.step1": "Fake app mein aise khelo jaise yeh sach mein tumhare saath ho raha hai.",
+  "primer.step2": "Jo bhi suspicious lage, tap karke flag karo. Kuch messages genuine bhi hain.",
+  "primer.step3": "Apna decision lo, phir debrief mein dekho tumne kya pakda.",
+
+  // How to play
+  "howto.title": "Kaise khelein",
+  "howto.next": "Aage",
+  "howto.ready": "Main ready hoon",
+  "howto.stepOf": (n: number, total: number) => `Step ${n} / ${total}`,
+  "howto.scamMessage":
+    "Congrats!! 🎉 Aapke number ne humare lucky draw mein ₹50,000 jeete hain. Claim karne ke liye aaj hi ₹499 processing fee bharo.",
+  "howto.highlight.title": "Spot karo. Tap karo.",
+  "howto.highlight.body":
+    "Is message mein kuch gadbad hai. Woh sentence tap karo jo pol khol deta hai.",
+  "howto.highlight.tryIt": "Ab tumhari baari: woh sentence dhoondo.",
+  "howto.highlight.miss": "Kareeb tha! Dekho prize dene se pehle woh tumse kya maang rahe hain.",
+  "howto.why.title": "Kyun, yeh batao",
+  "howto.why.body":
+    "Har flag pe poocha jaata hai ki yeh suspicious kyun hai. Jo reason sabse sahi baithe, woh chuno. Bonus points ke liye apne shabdon mein bhi likh sakte ho.",
+  "howto.why.tap": "Reason chunne ke liye apne flag kiye words pe tap karo.",
+  "howto.why.right": "Ekdum sahi. Asli prize lene ke liye kabhi fee nahi bharni padti.",
+  "howto.why.wrong":
+    "Thoda galat. Asli gadbad hai paise paane ke liye paise bharna: asli prize kabhi fee nahi maangte.",
+  "howto.why.secret":
+    "Asli game mein koi nahi batata ki tum sahi ho ya galat. Sab kuch end mein score hota hai.",
+  "howto.mixed.title": "Har cheez scam nahi hoti",
+  "howto.mixed.body":
+    "Kuch messages genuine hote hain, aur unhe flag karne pe points katte hain. In dono ke baare mein kya kehte ho?",
+  "howto.mixed.fine": "Theek lag raha hai",
+  "howto.mixed.legitText":
+    "Hi! Hiring panel ke saath tumhara interview Thursday, 3 pm, Room 204 mein confirm hai. Reschedule karna ho toh yahin reply karna.",
+  "howto.mixed.scamText":
+    "Aapka account 2 ghante mein block ho jaayega. Active rakhne ke liye abhi aaya hua OTP share karo.",
+  "howto.mixed.legitRight":
+    "Sahi. Normal interview message hai: na paise, na jaldi, na koi secret.",
+  "howto.mixed.legitWrong":
+    "Yeh genuine hai. Tumse bas aane ko kaha gaya hai. Ise flag karna false alarm hota.",
+  "howto.mixed.scamRight": "Sahi. Deadline ke saath OTP maangna ek classic trap hai.",
+  "howto.mixed.scamWrong":
+    "Phir se dekho: 2 ghante ki deadline aur OTP ki maang. Koi bhi genuine insaan kabhi OTP nahi maangta.",
+  "howto.mixed.lesson":
+    "Apni judgement train karo, paranoia nahi. False alarm pe points katte hain.",
+  "howto.recap.title": "Dhoondo, decide karo, debrief",
+  "howto.recap.dig": "Clues dhoondo",
+  "howto.recap.digBody":
+    "View profile ya Check careers page jaise buttons tap karo. Kuch clues sirf wahin milte hain.",
+  "howto.recap.decide": "Apna decision lo",
+  "howto.recap.decideBody": "Har step pe ek reply chuno. Har choice ka nateeja hota hai.",
+  "howto.recap.debrief": "Rewind karo aur seekho",
+  "howto.recap.debriefBody":
+    "Galti ho gayi? Jahan gadbad hui wahan tak rewind karo. Phir har red flag dekho jo tumne pakda ya miss kiya.",
+  "howto.recap.right": "sahi reason",
+  "howto.recap.bonus": "achha explanation",
+
+  // Thread
+  "thread.prompt": "Ab kya karoge?",
+  "thread.hint":
+    "Kuch gadbad dikha? Words select karo (drag karo, ya ek-ek word tap karo), phir flag karo.",
+  "chat.flagAria": (text: string) => `Message flag karo: ${text}`,
+  "chat.unflagAria": (text: string) => `Message se flag hatao: ${text}`,
+  "shell.comingSoon": (name: string) => `Jaldi aa raha hai: ${name} shell`,
+  "thread.evidenceHint": "Decide karne se pehle check karo:",
   "voice.play": "Voice note chalao",
   "voice.stop": "Voice note roko",
+  "split.evidence": "Recruiter aur company",
+  "split.flaggedBadge": (n: number) => `${n} flag kiye`,
+  "split.hint": "Decide karne se pehle profile aur company ki apni jaankari scroll karke dekho.",
+  "transition.title": "Baat kahin aur shift ho gayi",
+  "transition.body": (name: string, from: string, to: string) =>
+    `${name} ne tumhe ${from} chhod ke ${to} pe baat karne ko kaha.`,
 
+  // Calls: DigiDojo's own words around the phone's call screen
+  "call.answerVoice": "Apni awaaz se answer karo",
+  "call.answerText": "Bina mic ke answer karo (reply options)",
+  "call.details": "Meri details",
+  "call.speaking": "bol rahe hain…",
+  "call.listening": "Sun rahe hain…",
+  "call.youSaid": "Tum",
+  "call.whatDoYouSay": "Kya bologe?",
+  "call.voiceOn": "Caller ki awaaz on",
+  "call.voiceOff": "Caller ki awaaz off",
+  "call.cameraOff": "Tumhara camera off hai",
+  "call.captionsEmpty": "Jab koi bolega, captions yahan dikhenge.",
+  "call.before.title": "Answer karne se pehle",
+  "call.before.ai":
+    "Caller ka role ek AI play karta hai aur tumse real time mein baat karta hai. Jo tum sach mein bologe, wahi bolo.",
+  "call.before.details":
+    "Kuch share karna ho toh apne card pe di gayi bani-banayi details use karo. Apni asli details kabhi mat bolna.",
+  "call.before.earphones":
+    "Earphones best rehte hain, taaki caller ko apni hi awaaz wapas na sunai de.",
+  "call.before.privacy":
+    "Call chalane ke liye tumhari awaaz Google ke Gemini ko jaati hai. DigiDojo use store nahi karta.",
+  "call.voiceUnavailable":
+    "Live voice calls abhi band hain. Yeh call tum reply options ke saath loge.",
+  "call.micDenied":
+    "Tumhara microphone use nahi ho paaya. Mic access allow karke phir try karo, ya reply options se answer karo.",
+  "call.failed": "Call connect nahi ho paayi.",
+  "call.retry": "Phir try karo",
+  "call.useScripted": "Reply options ke saath aage badho",
+  "call.ended": "Call khatam",
+  "call.endedByYou": "Tumne call kaat di.",
+  "call.endedByCaller": "Caller ne call kaat di.",
+  "call.endedTimeout": "Call ka time khatam ho gaya.",
+  "call.endedError": "Call drop ho gayi.",
+  "call.analysing": "Tumhari call review ho rahi hai…",
+  "call.continue": "Aage badho",
+  "call.persona.title": "Tumhari details (bani-banayi)",
+  "call.persona.note": "Sirf is simulation ke liye. Apni asli details kabhi mat bolna.",
+  "call.persona.name": "Naam",
+  "call.flag.title": "Unhone abhi jo bola, usmein kya gadbad hai?",
+  "call.flag.nothingYet": "Pehle caller ko kuch bolne do.",
+  "call.flag.saved": "Flag ho gaya. Tumne kaisa kiya, yeh end mein dikhega.",
+  "call.flag.count": (n: number) => `${n} flag kiye`,
+  "call.payment.sim": "Simulated payment hai. Koi asli paisa nahi jaata.",
+  "call.lifeline.button": (name: string) => `${name} ko message karo`,
+  "call.lifeline.title": (name: string) => `Chupke se ${name} ko message karo`,
+  "call.lifeline.close": "Call pe wapas",
+
+  // Call report (debrief)
+  "report.title": "Tumhari call",
+  "report.band.vulnerable": "Bahut zyada risk mein",
+  "report.band.moderate": "Kaafi had tak safe",
+  "report.good": "Kya achha kiya",
+  "report.mistakes": "Kahan gadbad hui",
+  "report.better": "Agli baar yeh karna",
+  "report.you": "Tum",
+  "report.pending": "Tumhari call review ho rahi hai…",
+  "report.notAnalysed":
+    "Is baar call ka detail mein review nahi ho paaya, toh yeh ek rough rating hai.",
+  "report.duration": (time: string) => `Call ki length ${time}`,
+
+  // Mail: DigiDojo's hints, not Gmail's own labels
+  "mail.hint":
+    "Flag karne ke liye email mein words select karo, ya kisi detail ke paas wala flag tap karo.",
+  "mail.tapSender": "Poori details dekhne ke liye sender pe tap karo",
+  "mail.inspectLinkHint":
+    "Link pe hover ya tap karke dekho ki woh asal mein kahan jaata hai (kuch nahi khulega)",
+  "mail.fileType": "Asli type:",
+  "mail.openDocument": "Preview kholo",
+  "mail.verify": "Khud alag se verify karo:",
+
+  // Flagging sentences
+  "highlight.flagged": "Flag kiya",
+  "highlight.flagSentence": "Yeh sentence flag karo",
+  "highlight.openFlag": "Flag kiya hua sentence. Flag badalne ya hatane ke liye kholo.",
+  "flag.why": "Yeh suspicious kyun hai?",
+  "flag.noteLabel": "Apne shabdon mein",
+  "flag.noteLabelOr": "Ya apne shabdon mein batao",
+  "flag.notePlaceholder": "Isme scam jaisa kya lag raha hai?",
+  "flag.notePrivacy": "Personal details mat likhna.",
+  "flag.pickReason": "Yeh flag save karne ke liye ek reason chuno.",
+  "flag.pickOrExplain": "Ek reason chuno, ya khud explain karo.",
+  "flag.save": "Flag karo",
+  "flag.update": "Save karo",
+  "flag.remove": "Hatao",
+  "flag.close": "Band karo",
+
+  // Evidence panels
+  "evidence.close": "Band karo",
+  "evidence.hint": "Jo bhi galat lage, uske paas wala flag tap karo.",
+  "evidence.open.document": "Document kholo",
+  "evidence.checked": "Check kiya",
+
+  // Inbox triage
+  "triage.hint":
+    "Har email kholo aur label karo. Chaho toh pehle senders aur attachments check kar lo.",
+  "triage.prompt": "Is email ko kya label doge?",
+  "triage.needs-checking": "Check karna padega",
+  "triage.unlabelled": "Label nahi kiya",
+  "triage.backToInbox": "Inbox pe wapas",
+  "triage.submit": "Labels submit karo",
+  "triage.progress": (done: number, total: number) => `${total} mein se ${done} label ho gaye`,
+
+  // Outcome
+  "outcome.loss": "Paise gaye",
+  "outcome.partial-loss": "Thoda nuksaan",
+  "outcome.compromised": "Compromise ho gaye",
+  "outcome.missed-opportunity": "Mauka chhoot gaya",
+  "outcome.rewind": "Wahan tak rewind karo jahan ruk sakte the",
+  "outcome.seeDebrief": "Debrief dekho",
+
+  // Debrief
+  "debrief.caughtSummary": (caught: number, seen: number) =>
+    `Tumne jo ${seen} red flags dekhe, unmein se ${caught} pakde.`,
+  "debrief.noFlags": "Tumhare raaste pe koi red flag nahi tha.",
+  "debrief.falseAlarmSummary": (n: number) =>
+    `${n} false alarm${n === 1 ? "" : "s"}: tumne aise messages flag kiye jo theek the.`,
+  "debrief.caught": "Pakde",
+  "debrief.missed": "Miss hue",
+  "debrief.missedNone": "Ek bhi nahi. Tumne har dikha hua red flag pakad liya.",
+  "debrief.falseAlarmNote":
+    "Yeh wala theek tha. Savdhaan rehna achha hai, par har cheez pe shak karoge toh asli mauke bhi haath se nikal jaayenge.",
+  "debrief.notReached": (n: number) =>
+    `Bonus: ${n} red flag${n === 1 ? "" : "s"} un raaston pe jo tumne nahi liye`,
+  "debrief.notReachedNote":
+    "Yeh un raaston pe the jo tumne nahi khele. Yeh tumhare score mein count nahi hote. Inhe try karne ke liye phir se khelo.",
+  "debrief.notReachedTag": "Tumhare raaste pe nahi",
+  "debrief.notInspected": "Tumne check nahi kiya",
+  "debrief.notInspectedNote": "Yeh bas ek tap door the. Decide karne se pehle check karo.",
+  "debrief.triageScore": (right: number, total: number) =>
+    `Tumne ${total} mein se ${right} emails sahi label kiye.`,
+  "debrief.triageYouSaid": "Tumne kaha",
+  "debrief.triageAnswer": "Sahi jawab",
+  "debrief.where.email-body": "Email ka text",
+  "debrief.where.to": "Reply yahan jaata hai",
+  "debrief.where.link": "Button ya link",
+  "debrief.where.panel-field": "Profile ya record",
+  "debrief.where.call": "Call pe",
+  "debrief.spotted": "Pakda, par reason galat",
+  "debrief.spottedNote": "Tumne dhoondh liya, par uske peeche ki trick alag thi.",
+  "debrief.youFlagged": "Tumne flag kiya",
+  "debrief.yourReason": "Tumhara reason",
+  "debrief.ownWords": "Tumhare apne shabd",
+  "debrief.rightReason": "Asli trick",
+  "debrief.yourNote": "Tumne likha",
+  "debrief.judgePending": "Tumhara explanation check ho raha hai…",
+  "debrief.judgeError": "Is baar tumhara explanation check nahi ho paaya.",
+  "debrief.judge.good": "Zabardast explanation (+1)",
+  "debrief.judge.partial": "Thoda sahi",
+  "debrief.judge.off": "Sahi nahi",
+  "score.title": "Tumhara score",
+  "score.accuracy": (caught: number, total: number, falseAlarms: number) =>
+    `${total} mein se ${caught} red flags · ${falseAlarms} false alarm${falseAlarms === 1 ? "" : "s"}`,
+  "score.pathOnly": "Score sirf usi raaste ke red flags pe hai jo tumne khela.",
+  "score.howItWorks":
+    "Sahi reason (ya ekdum sahi explanation) +3 · galat reason +1 · false alarm −1 · achha explanation +1",
+  "debrief.rule": "Yaad rakhne wala rule",
+  "debrief.playAgain": "Phir se khelo",
+
+  // Tactics: explanations only (the labels also appear on the landing page)
   "tactic.small-win-first.explanation":
     "Pehle thode paise dete hain, taaki tum unpe bada bharosa kar lo.",
   "tactic.pay-to-earn.explanation":
@@ -764,6 +1048,26 @@ const hinglish: Partial<UiDict> = {
     "Tareef aur 'aap special selected ho' sun ke guard neeche aa jaata hai.",
   "tactic.impersonation.explanation":
     "Kisi jaan-pehchaan wale ya bharosemand insaan ki nakal karte hain.",
+  "tactic.no-real-process.explanation":
+    "Na interview, na koi naam wala insaan, na saaf kaam: asli employer sach mein tumhe select karta hai.",
+  "tactic.data-harvest.explanation":
+    "Tumhara ID, bank details ya selfie maangte hain, jinka fraud ya loan ke liye galat use ho sakta hai.",
+  "tactic.malicious-file.explanation":
+    "Document jaisi dikhne wali file asal mein ek app hai jo tumhara phone control kar sakti hai.",
+  "tactic.disguised-link.explanation":
+    "Link jaana-pehchaana lagta hai par jaata kahin aur hai. Asli destination check karo.",
+  "tactic.fear.explanation":
+    "Pehle ek jhatka (FIR, frozen account, arrest) taaki sochne se pehle hi panic ho jao.",
+  "tactic.blocks-verification.explanation":
+    "Call kaatne, branch jaane ya official number pe call karne se rokte hain, kyunki check karte hi pol khul jaayegi.",
+  "tactic.fake-proof.explanation":
+    "ID number, badge, stamp wala PDF ya tumhari hi details padh ke sunana kuch prove nahi karta. Yeh sab koi bhi fake kar sakta hai.",
+  "tactic.secret-code.explanation":
+    "OTP, PIN ya CVV tumhare paise ki chaabi hai. Koi bank, police officer ya company kabhi ise padh ke sunane ko nahi kehti.",
+  "tactic.small-ask.explanation":
+    "Chhoti si request (₹10, “bas apna naam confirm karo”) harmless lagti hai, aur har haan ke baad agli, badi maang aasaan ho jaati hai.",
+  "tactic.pay-to-clear.explanation":
+    "Kisi khatre ko khatam karne ke liye “deposit”, “fine” ya “fee”. Koi court, police ya bank aise kuch settle nahi karta.",
 };
 
 export const UI_STRINGS: { en: UiDict; hinglish: Partial<UiDict> } = { en, hinglish };
