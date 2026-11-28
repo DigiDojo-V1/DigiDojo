@@ -7,15 +7,20 @@ import {
   MessageCircle,
   MessageSquareText,
   Phone,
-  Send,
   type LucideProps,
 } from "lucide-react";
+import { TelegramGlyph } from "@/shells/telegram/brand";
 import type { Channel } from "./channels";
 
-/** Generic icons only: no real app logos. */
+/** Telegram's logo, in one colour so it fits the tile like the line icons. */
+function TelegramIcon({ className }: LucideProps) {
+  return <TelegramGlyph className={className} />;
+}
+
+/** Generic icons, except Telegram's logo (used with permission). */
 const ICONS = {
   whatsapp: MessageCircle,
-  telegram: Send,
+  telegram: TelegramIcon,
   instagram: Camera,
   linkedin: BriefcaseBusiness,
   sms: MessageSquareText,

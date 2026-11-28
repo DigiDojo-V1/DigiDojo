@@ -210,6 +210,36 @@ const en = {
   "ig.inbox7.preview": "Sent you a message",
   "ig.inbox7.time": "2w",
 
+  // Telegram (decorative app chrome; the other chats are fictional people)
+  "tg.search": "Search",
+  "tg.messagePlaceholder": "Message",
+  "tg.today": "Today",
+  "tg.lastSeenRecently": "last seen recently",
+  /** A message's time from minutes after midnight, e.g. 1182 → "7:42 PM". */
+  "tg.time": (minutes: number) => {
+    const h = Math.floor(minutes / 60) % 24;
+    const m = String(minutes % 60).padStart(2, "0");
+    return `${h % 12 === 0 ? 12 : h % 12}:${m} ${h < 12 ? "AM" : "PM"}`;
+  },
+  "tg.chat1.name": "Telegram",
+  "tg.chat1.preview": "Welcome to Telegram! 👋",
+  "tg.chat1.time": "Mon",
+  "tg.chat2.name": "Saved Messages",
+  "tg.chat2.preview": "📷 Photo",
+  "tg.chat2.time": "Sun",
+  "tg.chat3.name": "Mummy",
+  "tg.chat3.preview": "Did you eat? Call me when free",
+  "tg.chat3.time": "6:58 PM",
+  "tg.chat4.name": "B.Com 2nd Year (Sec B)",
+  "tg.chat4.preview": "Priya: Accounts assignment due Friday",
+  "tg.chat4.time": "5:20 PM",
+  "tg.chat5.name": "Aditya Rao",
+  "tg.chat5.preview": "ok sending the eco notes now",
+  "tg.chat5.time": "Yesterday",
+  "tg.chat6.name": "Campus Memes",
+  "tg.chat6.preview": "🖼 Photo",
+  "tg.chat6.time": "Yesterday",
+
   // Primer
   "primer.start": "Start simulation",
   "primer.howToPlay": "How to play",

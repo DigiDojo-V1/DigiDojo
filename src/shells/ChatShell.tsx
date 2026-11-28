@@ -24,6 +24,13 @@ import {
   InstagramMobileHeader,
 } from "./instagram/parts";
 import { useInDojoPanel } from "./panel-slot";
+import { TELEGRAM_WALLPAPER } from "./telegram/brand";
+import {
+  TelegramMessages,
+  TelegramMobileComposer,
+  TelegramMobileHeader,
+  isGroupChat,
+} from "./telegram/parts";
 import { SimulationBar } from "./SimulationBar";
 import type { AsidePane, ShellProps } from "./types";
 
@@ -93,8 +100,18 @@ export function ChatShell({
 
   const cards = t.layout === "cards";
   const instagram = theme === "instagram";
+  const telegram = theme === "telegram";
   const header = instagram ? (
     <InstagramMobileHeader contact={contact} backHref={backHref} onContactClick={onContactClick} />
+  ) : telegram ? (
+    <TelegramMobileHeader
+      contact={contact}
+      group={isGroupChat(messages)}
+      typing={typing}
+      typingSender={typingSender}
+      backHref={backHref}
+      onContactClick={onContactClick}
+    />
   ) : (
     <header className={cn("flex h-14 items-center gap-2 px-2", t.header)}>
       <Link
@@ -131,7 +148,10 @@ export function ChatShell({
 
   return (
     <MotionConfig reducedMotion="user">
-      <div className={cn("flex min-h-dvh flex-col lg:min-h-full", t.wallpaper)}>
+      <div
+        className={cn("flex min-h-dvh flex-col lg:min-h-full", telegram ? "bg-fixed" : t.wallpaper)}
+        style={telegram ? TELEGRAM_WALLPAPER : undefined}
+      >
         <div className="sticky top-0 z-40">
           <SimulationBar />
           {header}
@@ -146,10 +166,17 @@ export function ChatShell({
           <div
             className={cn(
               "flex flex-1 flex-col px-3 pt-4 pb-3",
-              cards ? "gap-3" : instagram ? "gap-1" : "gap-1.5",
+              cards ? "gap-3" : instagram ? "gap-1" : telegram ? "gap-0 px-2" : "gap-1.5",
             )}
           >
-            {instagram ? (
+            {telegram ? (
+              <TelegramMessages
+                contact={contact}
+                messages={messages}
+                hint={hint}
+                transition={transition}
+              />
+            ) : instagram ? (
               <InstagramMessages
                 contact={contact}
                 messages={messages}
@@ -208,6 +235,7 @@ export function ChatShell({
         )}
 
         {instagram && footer === undefined && pane === "messages" && <InstagramMobileComposer />}
+        {telegram && footer === undefined && pane === "messages" && <TelegramMobileComposer />}
         {footer}
         <div ref={endRef} />
       </div>
