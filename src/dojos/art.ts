@@ -3,6 +3,7 @@ import type { DojoArtProps } from "@/components/home/art";
 import type { DojoId } from "@/engine/schema";
 import { DREAM_JOB_BACKGROUND, DreamJobArt } from "./dream-job/art/DreamJobArt";
 import { EASY_MONEY_BACKGROUND, EasyMoneyArt } from "./easy-money/art/EasyMoneyArt";
+import { TRUST_ME_BRO_BACKGROUND, TrustMeBroArt } from "./trust-me-bro/art/TrustMeBroArt";
 
 export interface DojoArt {
   /** The animated scene. */
@@ -18,6 +19,7 @@ export interface DojoArt {
 export const DOJO_ART: Readonly<Partial<Record<DojoId, DojoArt>>> = {
   "easy-money": { Scene: EasyMoneyArt, background: EASY_MONEY_BACKGROUND },
   "dream-job": { Scene: DreamJobArt, background: DREAM_JOB_BACKGROUND },
+  "trust-me-bro": { Scene: TrustMeBroArt, background: TRUST_ME_BRO_BACKGROUND },
 };
 
 /** The art for a dojo id, if it has any. */
