@@ -134,16 +134,18 @@ function ScenarioCard({ scenario, index }: { scenario: DojoViewScenario; index: 
         <span className="sr-only">{t(done ? "progress.completed" : "progress.notCompleted")}</span>
       </div>
 
-      {/* The scenario's illustration, filling the space between the number and the title. */}
-      <div data-slot="art" aria-hidden className="relative my-4 min-h-40 flex-1">
+      {/* The scenario's square illustration; the space below it pushes the title to the bottom. */}
+      <div data-slot="art" aria-hidden className="flex-1">
         {scenario.image !== undefined && (
-          <Image
-            src={scenario.image}
-            alt=""
-            fill
-            sizes="(min-width: 1024px) 30vw, (min-width: 640px) 45vw, 90vw"
-            className="rounded-2xl object-cover ring-1 ring-black/5"
-          />
+          <div className="relative my-4 aspect-square w-full">
+            <Image
+              src={scenario.image}
+              alt=""
+              fill
+              sizes="(min-width: 1024px) 30vw, (min-width: 640px) 45vw, 90vw"
+              className="rounded-2xl object-cover ring-1 ring-black/5"
+            />
+          </div>
         )}
       </div>
 
