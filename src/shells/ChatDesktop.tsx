@@ -6,14 +6,10 @@ import {
   Bell,
   BriefcaseBusiness,
   CircleDashed,
-  Clapperboard,
-  Compass,
   EllipsisVertical,
   Flag,
-  Heart,
   House,
   Image as ImageIcon,
-  Info,
   Menu,
   MessageSquareText,
   Mic,
@@ -26,7 +22,6 @@ import {
   Send,
   Settings,
   Smile,
-  SquarePlus,
   Star,
   UserRound,
   Users,
@@ -47,12 +42,14 @@ import {
   type ChatTheme,
   type ThemeStyle,
 } from "./chat-parts";
+import { InstagramDesktop } from "./instagram/InstagramDesktop";
 import type { ShellProps } from "./types";
 
-/** How each app looks on a desktop browser. Layout and colours only: no logos or wordmarks. */
+/** How each app looks on a desktop browser. Layout and colours only: no logos or wordmarks.
+ * Instagram has its own full replica in `./instagram/`. */
 interface DesktopLook {
   /** Narrow icon column on the far left. */
-  rail?: "messenger" | "photo";
+  rail?: "messenger";
   /** Global top nav with a centred page (the professional network). */
   topNav?: boolean;
   page: string;
@@ -73,7 +70,7 @@ interface DesktopLook {
 /** Apps with a desktop web version. SMS is phone-only: it shows in a phone mockup instead. */
 export type DesktopChatTheme = Exclude<ChatTheme, "sms">;
 
-const LOOKS: Record<DesktopChatTheme, DesktopLook> = {
+const LOOKS: Record<Exclude<DesktopChatTheme, "instagram">, DesktopLook> = {
   whatsapp: {
     rail: "messenger",
     page: "bg-[#f0f2f5]",
@@ -119,29 +116,6 @@ const LOOKS: Record<DesktopChatTheme, DesktopLook> = {
     },
     headerIcons: [Search, Phone, EllipsisVertical],
   },
-  instagram: {
-    rail: "photo",
-    page: "bg-white",
-    sidebar: "bg-white border-r border-[#dbdbdb]",
-    sidebarTitle: "text-xl font-bold text-black",
-    search: "bg-[#efefef] rounded-lg",
-    activeRow: "bg-[#efefef]",
-    activeMuted: "text-[#737373]",
-    threadHeader: "bg-white text-black border-b border-[#dbdbdb]",
-    wallpaper: "bg-white",
-    composer: "bg-white",
-    composerInput: "rounded-full border border-[#dbdbdb] bg-white",
-    bubbles: {
-      them: "bg-[#efefef] text-black",
-      me: "bg-[#3797f0] text-white",
-      system: "bg-transparent text-[#737373]",
-      sender: "text-[#737373]",
-      headerMuted: "text-[#737373]",
-      avatar: "bg-[#efefef] text-[#262626]",
-      bubbleMax: "max-w-[65%]",
-    },
-    headerIcons: [Phone, Video, Info],
-  },
   linkedin: {
     topNav: true,
     page: "bg-[#f4f2ee]",
@@ -168,7 +142,12 @@ const LOOKS: Record<DesktopChatTheme, DesktopLook> = {
 };
 
 /** The desktop web layout of ChatShell. Same props, same messages, same flagging. */
-export function ChatDesktop({
+export function ChatDesktop({ theme, ...props }: ShellProps & { theme: DesktopChatTheme }) {
+  if (theme === "instagram") return <InstagramDesktop {...props} />;
+  return <GenericChatDesktop theme={theme} {...props} />;
+}
+
+function GenericChatDesktop({
   theme,
   contact,
   messages,
@@ -180,7 +159,7 @@ export function ChatDesktop({
   onContactClick,
   aside,
   transition,
-}: ShellProps & { theme: DesktopChatTheme }) {
+}: ShellProps & { theme: Exclude<DesktopChatTheme, "instagram"> }) {
   const tr = useT();
   const look = LOOKS[theme];
   const style: ThemeStyle = { ...THEMES[theme], ...look.bubbles };
@@ -276,13 +255,7 @@ export function ChatDesktop({
   const list = (
     <ChatList
       look={look}
-      title={
-        cards
-          ? tr("desktop.navMessaging")
-          : theme === "instagram"
-            ? tr("desktop.messages")
-            : tr("desktop.chats")
-      }
+      title={cards ? tr("desktop.navMessaging") : tr("desktop.chats")}
       tabs={cards ? [tr("desktop.focused"), tr("desktop.other")] : undefined}
       active={
         <>
@@ -336,7 +309,7 @@ export function ChatDesktop({
           </div>
         ) : (
           <div className="flex min-h-0 flex-1">
-            {look.rail !== undefined && <IconRail kind={look.rail} />}
+            {look.rail !== undefined && <IconRail />}
             <div className={aside === undefined ? "hidden xl:flex" : "hidden 2xl:flex"}>{list}</div>
             {thread}
             {evidence}
@@ -444,36 +417,27 @@ function Composer({ look, placeholder }: { look: DesktopLook; placeholder: strin
   );
 }
 
-/** Far-left icon column of a messenger or photo app on desktop. Decorative. */
-function IconRail({ kind }: { kind: "messenger" | "photo" }) {
-  const top: LucideIcon[] =
-    kind === "messenger"
-      ? [MessageSquareText, CircleDashed, Users]
-      : [House, Search, Compass, Clapperboard, Send, Heart, SquarePlus];
-  const activeIndex = kind === "messenger" ? 0 : 4;
+/** Far-left icon column of a messenger app on desktop. Decorative. */
+function IconRail() {
+  const top: LucideIcon[] = [MessageSquareText, CircleDashed, Users];
   return (
     <nav
       aria-hidden
-      className={cn(
-        "flex shrink-0 flex-col items-center gap-2 py-4",
-        kind === "messenger"
-          ? "w-16 border-r border-[#d1d7db] bg-[#f0f2f5] text-[#54656f]"
-          : "w-[72px] border-r border-[#dbdbdb] bg-white pt-20 text-black",
-      )}
+      className="flex w-16 shrink-0 flex-col items-center gap-2 border-r border-[#d1d7db] bg-[#f0f2f5] py-4 text-[#54656f]"
     >
       {top.map((Icon, i) => (
         <span
           key={i}
           className={cn(
             "flex size-11 items-center justify-center rounded-full",
-            i === activeIndex && (kind === "messenger" ? "bg-[#d9dbdf]" : "font-bold"),
+            i === 0 && "bg-[#d9dbdf]",
           )}
         >
-          <Icon className="size-6" strokeWidth={i === activeIndex ? 2.5 : 2} />
+          <Icon className="size-6" strokeWidth={i === 0 ? 2.5 : 2} />
         </span>
       ))}
       <span className="mt-auto flex flex-col items-center gap-3">
-        {kind === "messenger" ? <Settings className="size-6" /> : <Menu className="size-6" />}
+        <Settings className="size-6" />
         <span className="flex size-8 items-center justify-center rounded-full bg-black/10">
           <UserRound className="size-4" />
         </span>

@@ -18,6 +18,11 @@ import {
   TypingIndicator,
   type ChatTheme,
 } from "./chat-parts";
+import {
+  InstagramMessages,
+  InstagramMobileComposer,
+  InstagramMobileHeader,
+} from "./instagram/parts";
 import { useInDojoPanel } from "./panel-slot";
 import { SimulationBar } from "./SimulationBar";
 import type { AsidePane, ShellProps } from "./types";
@@ -87,7 +92,10 @@ export function ChatShell({
   }
 
   const cards = t.layout === "cards";
-  const header = (
+  const instagram = theme === "instagram";
+  const header = instagram ? (
+    <InstagramMobileHeader contact={contact} backHref={backHref} onContactClick={onContactClick} />
+  ) : (
     <header className={cn("flex h-14 items-center gap-2 px-2", t.header)}>
       <Link
         href={backHref}
@@ -97,12 +105,7 @@ export function ChatShell({
         <ChevronLeft className="size-5" />
       </Link>
       <ContactButton onClick={onContactClick} label={tr("chat.viewProfile")(contact.name)}>
-        <Avatar
-          name={contact.name}
-          src={contact.avatar}
-          className={cn(t.avatar, t.avatarRing)}
-          size={t.avatarRing === undefined ? "size-9" : "size-8"}
-        />
+        <Avatar name={contact.name} src={contact.avatar} className={t.avatar} size="size-9" />
         <div className="min-w-0 flex-1 text-left leading-tight">
           <div className="truncate text-[15px] font-semibold">{contact.name}</div>
           <div className={cn("truncate text-xs", t.headerMuted)}>
@@ -140,42 +143,61 @@ export function ChatShell({
         </div>
 
         <div hidden={pane !== "messages"} className="flex flex-1 flex-col">
-          <div className={cn("flex flex-1 flex-col px-3 pt-4 pb-3", cards ? "gap-3" : "gap-1.5")}>
-            {transition !== undefined && <TransitionCard transition={transition} />}
-            {hint !== undefined && (
-              <p className="mx-auto mb-2 flex items-center gap-1.5 rounded-full bg-black/5 px-3 py-1 text-xs text-neutral-600">
-                <Flag className="size-3" aria-hidden /> {hint}
-              </p>
+          <div
+            className={cn(
+              "flex flex-1 flex-col px-3 pt-4 pb-3",
+              cards ? "gap-3" : instagram ? "gap-1" : "gap-1.5",
             )}
-            <AnimatePresence initial={false}>
-              {messages.map((m, i) =>
-                cards ? (
-                  <MessageCard
-                    key={m.id}
-                    message={m}
-                    previous={messages[i - 1]}
-                    contactName={contact.name}
-                    contactAvatar={contact.avatar}
-                    style={t}
-                  />
-                ) : (
-                  <Bubble
-                    key={m.id}
-                    message={m}
-                    next={messages[i + 1]}
-                    lastShown={i === messages.length - 1 && !typing}
-                    contact={contact}
-                    style={t}
-                  />
-                ),
-              )}
-              {typing &&
-                (cards ? (
-                  <CardTyping key="typing" name={typingSender ?? contact.name} style={t} />
-                ) : (
-                  <TypingIndicator key="typing" style={t} contact={contact} />
-                ))}
-            </AnimatePresence>
+          >
+            {instagram ? (
+              <InstagramMessages
+                contact={contact}
+                messages={messages}
+                typing={typing}
+                hint={hint}
+                transition={transition}
+                onContactClick={onContactClick}
+              />
+            ) : (
+              <>
+                {transition !== undefined && <TransitionCard transition={transition} />}
+                {hint !== undefined && (
+                  <p className="mx-auto mb-2 flex items-center gap-1.5 rounded-full bg-black/5 px-3 py-1 text-xs text-neutral-600">
+                    <Flag className="size-3" aria-hidden /> {hint}
+                  </p>
+                )}
+                <AnimatePresence initial={false}>
+                  {messages.map((m, i) =>
+                    cards ? (
+                      <MessageCard
+                        key={m.id}
+                        message={m}
+                        previous={messages[i - 1]}
+                        contactName={contact.name}
+                        contactAvatar={contact.avatar}
+                        style={t}
+                      />
+                    ) : (
+                      <Bubble
+                        key={m.id}
+                        message={m}
+                        previous={messages[i - 1]}
+                        next={messages[i + 1]}
+                        lastShown={i === messages.length - 1 && !typing}
+                        contact={contact}
+                        style={t}
+                      />
+                    ),
+                  )}
+                  {typing &&
+                    (cards ? (
+                      <CardTyping key="typing" name={typingSender ?? contact.name} style={t} />
+                    ) : (
+                      <TypingIndicator key="typing" style={t} contact={contact} />
+                    ))}
+                </AnimatePresence>
+              </>
+            )}
           </div>
         </div>
 
@@ -185,6 +207,7 @@ export function ChatShell({
           </div>
         )}
 
+        {instagram && footer === undefined && pane === "messages" && <InstagramMobileComposer />}
         {footer}
         <div ref={endRef} />
       </div>

@@ -43,8 +43,6 @@ export interface ThemeStyle {
   bubble: "tail" | "round";
   /** Show the contact's small avatar beside the last message of each run of theirs. */
   themAvatar: boolean;
-  /** Ring around the header avatar, like an active story. */
-  avatarRing?: string;
   /** Icons on the right of the header. */
   headerIcons: "call-more" | "call-video";
   /** Voice notes in other people's bubbles and in yours. */
@@ -115,29 +113,28 @@ export const THEMES: Record<ChatTheme, ThemeStyle> = {
   },
   instagram: {
     layout: "bubbles",
-    header: "border-b border-neutral-200 bg-white text-neutral-900",
-    headerMuted: "text-neutral-500",
-    avatar: "bg-violet-100 text-violet-800",
+    header: "border-b border-[#dbdbdb] bg-white text-black",
+    headerMuted: "text-[#737373]",
+    avatar: "bg-[#efefef] text-[#262626]",
     wallpaper: "bg-white",
-    them: "bg-neutral-100 text-neutral-900",
-    me: "bg-violet-600 text-white",
-    system: "text-neutral-500",
-    sender: "text-neutral-500",
+    them: "bg-[#efefef] text-black",
+    me: "bg-[#3797f0] text-white",
+    system: "text-[#737373]",
+    sender: "text-[#737373]",
     bubble: "round",
     themAvatar: true,
-    avatarRing: "ring-2 ring-violet-500 ring-offset-2 ring-offset-white",
     headerIcons: "call-video",
     voiceThem: {
-      button: "bg-violet-600 text-white",
-      played: "bg-violet-600",
-      idle: "bg-neutral-300",
-      muted: "text-neutral-500",
+      button: "bg-black text-white",
+      played: "bg-black",
+      idle: "bg-black/25",
+      muted: "text-[#737373]",
     },
     voiceMe: {
-      button: "bg-white text-violet-700",
+      button: "bg-white text-[#3797f0]",
       played: "bg-white",
       idle: "bg-white/40",
-      muted: "text-violet-100",
+      muted: "text-white/80",
     },
   },
   sms: {
@@ -412,12 +409,15 @@ export function CardTyping({ name, style }: { name: string; style: ThemeStyle })
 
 export function Bubble({
   message,
+  previous,
   next,
   lastShown,
   contact,
   style,
 }: {
   message: ChatBubble;
+  /** The message before it, so round bubbles in a run can join up. */
+  previous?: ChatBubble;
   next: ChatBubble | undefined;
   /** Nothing comes after it yet (no later message, no typing indicator). */
   lastShown: boolean;
@@ -427,6 +427,9 @@ export function Bubble({
   const isMe = message.from === "me";
   const isSystem = message.from === "system";
   const round = style.bubble === "round";
+  // Round bubbles in a run from the same sender join with tight corners on their side.
+  const joinedAbove = round && !isSystem && previous?.from === message.from;
+  const joinedBelow = round && !isSystem && next?.from === message.from;
 
   const body = (
     <>
@@ -450,8 +453,19 @@ export function Bubble({
           style.system,
         )
       : isMe
-        ? cn("ml-auto", round ? "rounded-[22px] px-3.5" : "rounded-2xl rounded-br-sm", style.me)
-        : cn(round ? "rounded-[22px] px-3.5" : "mr-auto rounded-2xl rounded-bl-sm", style.them),
+        ? cn(
+            "ml-auto",
+            round ? "rounded-[22px] px-3.5" : "rounded-2xl rounded-br-sm",
+            joinedAbove && "rounded-tr-[4px]",
+            joinedBelow && "rounded-br-[4px]",
+            style.me,
+          )
+        : cn(
+            round ? "rounded-[22px] px-3.5" : "mr-auto rounded-2xl rounded-bl-sm",
+            joinedAbove && "rounded-tl-[4px]",
+            joinedBelow && "rounded-bl-[4px]",
+            style.them,
+          ),
   );
 
   // Themes with a side avatar show it once, beside the last message of a run.
