@@ -6,6 +6,8 @@ import { useCallback, useLayoutEffect, useRef, useState, type KeyboardEvent } fr
 import { DISPLAY, MONO } from "@/components/landing/styles";
 import { isComingSoon, useDojoSummaries, type DojoSummary } from "@/components/layout/chrome-data";
 import { DojoProgress } from "@/components/progress/DojoProgress";
+import { dojoArt } from "@/dojos/art";
+import { GRAIN_BACKGROUND } from "./art";
 import { BIG_CARD, CARD_PAD as PAD, HomeShell } from "./HomeShell";
 import { useT, useText } from "@/i18n/hooks";
 import { dojoHref } from "@/lib/routes";
@@ -17,8 +19,8 @@ const SLIDE_KEY = "digidojo-home-slide";
 /**
  * The app's home screen: a wordmark row, one big rounded card holding a carousel of dojos (one per
  * slide), and the helpline underneath. Each slide has the dojo's name, the three how-it-works steps,
- * a Start button and a progress bar. Lg screens keep an empty `art` area on the right of each slide
- * for illustrations.
+ * a Start button and a progress bar. A dojo with art (`src/dojos/art.ts`) also gets its animated
+ * illustration, its own card colour and a grain overlay.
  */
 export function HomeCarousel() {
   const t = useT();
@@ -149,6 +151,7 @@ function DojoSlide({
   const text = useText();
   const soon = isComingSoon(dojo.scenarioKeys);
   const steps = [t("chrome.how1"), t("chrome.how2"), t("chrome.how3")];
+  const art = dojoArt(dojo.id);
 
   return (
     <div
@@ -157,16 +160,31 @@ function DojoSlide({
       aria-roledescription="slide"
       aria-label={t("home.slide")(index + 1, total)}
       inert={!active}
-      className="flex w-full shrink-0 snap-center snap-always flex-col"
+      className="relative flex w-full shrink-0 snap-center snap-always flex-col"
+      style={art && { backgroundColor: art.background }}
     >
-      <div className={cn(PAD, "flex flex-1 flex-col pt-6 md:pt-8 lg:pt-10")}>
+      <div className={cn(PAD, "relative flex flex-1 flex-col pt-6 md:pt-8 lg:pt-10")}>
         {/* Counter, top left. The carousel controls sit top right on phones. */}
         <p className={`${MONO} flex h-10 items-center text-black/55`}>
           {t("home.counter")(index + 1, total)}
           <span className="hidden sm:inline">&nbsp;· {t("dojo.eyebrow")(dojo.order)}</span>
         </p>
 
-        <div className="grid flex-1 gap-10 lg:grid-cols-2">
+        {/*
+          The dojo's illustration. Phones and tablets: full-bleed, filling the space between the
+          counter and the name. Lg: the right half of the slide, from the card's top edge down to
+          the Start row (h-12 + pt-2 + pb-8 = 88px), so the carousel controls never sit on it.
+        */}
+        {art && (
+          <div
+            aria-hidden
+            className="relative -mx-5 max-h-[330px] min-h-[150px] flex-1 overflow-hidden md:-mx-8 md:max-h-[480px] lg:absolute lg:top-0 lg:right-0 lg:bottom-[88px] lg:mx-0 lg:max-h-none lg:w-[54%]"
+          >
+            <art.Scene paused={!active} className="absolute inset-0 size-full" />
+          </div>
+        )}
+
+        <div className={cn("relative grid gap-10 lg:flex-1 lg:grid-cols-2", !art && "flex-1")}>
           <div className="flex flex-col justify-center py-4">
             <h2 className={`${DISPLAY} text-[clamp(56px,min(11vw,16dvh),160px)] leading-[0.85]`}>
               {text(dojo.name)}
@@ -188,8 +206,8 @@ function DojoSlide({
             </ol>
           </div>
 
-          {/* Reserved for the dojo's illustration. Empty for now. */}
-          <div data-slot="art" aria-hidden className="hidden lg:block" />
+          {/* Keeps the copy in the left half on lg; the illustration sits over this side. */}
+          <div aria-hidden className="hidden lg:block" />
         </div>
 
         <div className="flex items-center pt-2 pb-6 md:pb-8">
@@ -222,6 +240,15 @@ function DojoSlide({
           </div>
         )}
       </div>
+
+      {/* Grain over the whole slide, so the flat vector art reads like the printed source. */}
+      {art && (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 opacity-[0.16] mix-blend-multiply"
+          style={{ backgroundImage: GRAIN_BACKGROUND }}
+        />
+      )}
     </div>
   );
 }
