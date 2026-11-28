@@ -35,7 +35,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-dvh bg-neutral-200">
         <HtmlLang />
-        {/* Each screen picks its own frame: AppChrome for DigiDojo's pages, PlayerFrame for the fake apps. */}
+        {/* Each screen picks its own frame: HomeShell for DigiDojo's pages, PlayerFrame for the fake apps. */}
         <ChromeDataProvider dojos={dojoSummaries()}>{children}</ChromeDataProvider>
       </body>
     </html>

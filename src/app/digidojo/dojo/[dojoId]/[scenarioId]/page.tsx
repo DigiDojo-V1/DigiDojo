@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { landingFontVars } from "@/components/landing/fonts";
 import { DOJOS, getScenario } from "@/dojos/registry";
 import { ScenarioPlayer } from "@/engine/ScenarioPlayer";
 import { DEFAULT_LOCALE } from "@/i18n/locale";
@@ -33,10 +34,12 @@ export default async function ScenarioPage({
   if (scenario === undefined) notFound();
 
   return (
-    <ScenarioPlayer
-      scenario={scenario}
-      backHref={dojoHref(dojoId)}
-      notesGraded={"on" in aiStatus(process.env)}
-    />
+    <div className={landingFontVars}>
+      <ScenarioPlayer
+        scenario={scenario}
+        backHref={dojoHref(dojoId)}
+        notesGraded={"on" in aiStatus(process.env)}
+      />
+    </div>
   );
 }
