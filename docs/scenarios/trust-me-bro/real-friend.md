@@ -1,6 +1,6 @@
 # Neha needs a favour
 
-> Drafted by Claude as the dojo's legit control. Pair 3: check it reads like a real friend. The code lives in `src/dojos/trust-me-bro/scenarios/real-friend.ts`.
+> The dojo's legit control. The code lives in `src/dojos/trust-me-bro/scenarios/real-friend.ts`.
 
 **Dojo:** trust-me-bro
 **Scenario id:** `real-friend`

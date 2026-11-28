@@ -1,6 +1,6 @@
 # 2,000 free Gems
 
-> Drafted by Claude from the dojo plan in docs/CONTEXT.md. Pair 3: check it against the real cases below. The code lives in `src/dojos/trust-me-bro/scenarios/free-gems.ts`. "Skyfall Arena", its Gems and every domain are fictional.
+> The code lives in `src/dojos/trust-me-bro/scenarios/free-gems.ts`. "Skyfall Arena", its Gems and every domain are fictional.
 
 **Dojo:** trust-me-bro
 **Scenario id:** `free-gems`
