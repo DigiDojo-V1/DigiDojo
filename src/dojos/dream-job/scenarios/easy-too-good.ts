@@ -10,18 +10,38 @@ import { REAL_WORLD_ACTION } from "../content/universe";
 export const easyTooGood = defineScenario({
   id: "easy-too-good",
   dojoId: "dream-job",
-  title: "Too good to be true",
-  summary: "A recruiter says you're selected for a ₹40,000 internship. All you have to do is pay.",
+  title: { en: "Too good to be true", hinglish: "Itna achha ki sach na lage" },
+  summary: {
+    en: "A recruiter says you're selected for a ₹40,000 internship. All you have to do is pay.",
+    hinglish:
+      "Ek recruiter kehta hai ki tum ₹40,000 ki internship ke liye select ho gaye. Bas tumhe paise bharne hain.",
+  },
   legit: false,
   primer: {
-    title: "Too good to be true",
-    body: "Read the recruiter's message, flag the parts that look suspicious, then decide what to do.",
-    setup:
-      "You're Ananya, a final-year economics student. You've been sending internship applications for weeks and heard nothing back. One morning, a LinkedIn message pops up.",
+    title: { en: "Too good to be true", hinglish: "Itna achha ki sach na lage" },
+    body: {
+      en: "Read the recruiter's message, flag the parts that look suspicious, then decide what to do.",
+      hinglish:
+        "Recruiter ka message padho, jo hissa suspicious lage use flag karo, phir decide karo kya karna hai.",
+    },
+    setup: {
+      en: "You're Ananya, a final-year economics student. You've been sending internship applications for weeks and heard nothing back. One morning, a LinkedIn message pops up.",
+      hinglish:
+        "Tum Ananya ho, economics final year ki student. Hafton se internship applications bhej rahi ho, par kahin se jawab nahi aaya. Ek subah LinkedIn pe ek message aata hai.",
+    },
     watchFor: [
-      "Do I remember applying for this?",
-      "Does the pay make sense for the work?",
-      "Is anyone asking me for money, and why?",
+      {
+        en: "Do I remember applying for this?",
+        hinglish: "Kya mujhe yaad hai ki maine iske liye apply kiya tha?",
+      },
+      {
+        en: "Does the pay make sense for the work?",
+        hinglish: "Kya kaam ke hisaab se pay sahi lagta hai?",
+      },
+      {
+        en: "Is anyone asking me for money, and why?",
+        hinglish: "Kya koi mujhse paise maang raha hai, aur kyun?",
+      },
     ],
   },
   startNodeId: "li-dm",
@@ -30,7 +50,10 @@ export const easyTooGood = defineScenario({
     "li-dm": {
       kind: "thread",
       app: "linkedin",
-      contact: { name: "Karan Sethi", subtitle: "HR Associate | Nexora Technologies" },
+      contact: {
+        name: { en: "Karan Sethi", hinglish: "Karan Sethi" },
+        subtitle: "HR Associate | Nexora Technologies",
+      },
       messages: [
         { id: "li-easy-date", from: "system", text: "19 November 2026, 09:12", delayMs: 300 },
         {
@@ -93,24 +116,38 @@ export const easyTooGood = defineScenario({
       ],
       evidence: ["karan-profile", "nexora-company", "nexora-careers"],
       choices: [
-        { label: "Reply “YES” and pay the ₹1,499 fee", nextNodeId: "li-paid" },
-        { label: "Don't reply", nextNodeId: "safe" },
+        {
+          label: {
+            en: "Reply “YES” and pay the ₹1,499 fee",
+            hinglish: "“YES” reply karo aur ₹1,499 ki fee bharo",
+          },
+          nextNodeId: "li-paid",
+        },
+        { label: { en: "Don't reply", hinglish: "Reply mat karo" }, nextNodeId: "safe" },
       ],
     },
 
     "li-paid": {
       kind: "outcome",
       result: "loss",
-      title: "₹1,499 gone",
-      body: "You paid the “refundable” fee to karan.sethi@okaxis, an individual's UPI ID, not Nexora. Genuine recruitment never needs a registration fee.",
+      title: { en: "₹1,499 gone", hinglish: "₹1,499 gaye" },
+      body: {
+        en: "You paid the “refundable” fee to karan.sethi@okaxis, an individual's UPI ID, not Nexora. Genuine recruitment never needs a registration fee.",
+        hinglish:
+          "Tumne “refundable” fee karan.sethi@okaxis ko bhari, jo kisi ek insaan ki UPI ID hai, Nexora ki nahi. Genuine recruitment mein kabhi registration fee nahi lagti.",
+      },
       moneyDelta: -1499,
       rewindToNodeId: "li-dm",
     },
     safe: {
       kind: "outcome",
       result: "safe",
-      title: "You didn't pay",
-      body: "You didn't reply and kept your ₹1,499. Nexora's own careers page lists this internship at ₹18,000 a month, with no fee to apply. A real employer never asks you to pay to get hired.",
+      title: { en: "You didn't pay", hinglish: "Tumne paise nahi diye" },
+      body: {
+        en: "You didn't reply and kept your ₹1,499. Nexora's own careers page lists this internship at ₹18,000 a month, with no fee to apply. A real employer never asks you to pay to get hired.",
+        hinglish:
+          "Tumne reply nahi kiya aur tumhare ₹1,499 bach gaye. Nexora ke apne careers page pe yeh internship ₹18,000 mahine ki hai, aur apply karne ki koi fee nahi. Asli employer hire karne ke liye kabhi paise nahi maangta.",
+      },
     },
   },
 
@@ -128,9 +165,15 @@ export const easyTooGood = defineScenario({
   ]),
 
   debrief: {
-    rule: "A real employer does not charge you to get a job.",
-    summary:
-      "An unsolicited offer, instant selection, unusually high pay, vague duties and a payment deadline are not separate little inconveniences; together they are a strong scam pattern. Verify the vacancy through the company website you find independently.",
+    rule: {
+      en: "A real employer does not charge you to get a job.",
+      hinglish: "Asli employer job dene ke liye tumse paise nahi leta.",
+    },
+    summary: {
+      en: "An unsolicited offer, instant selection, unusually high pay, vague duties and a payment deadline are not separate little inconveniences; together they are a strong scam pattern. Verify the vacancy through the company website you find independently.",
+      hinglish:
+        "Bina maange offer, turant selection, bahut zyada pay, gol-mol kaam aur payment ki deadline, yeh alag-alag chhoti baatein nahi hain; saath mein yeh ek pakka scam pattern hain. Vacancy ko company ki us website se verify karo jo tumne khud dhoondhi ho.",
+    },
     realWorldAction: REAL_WORLD_ACTION,
   },
 });

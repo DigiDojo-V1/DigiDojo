@@ -12,14 +12,27 @@ import { REAL_WORLD_ACTION } from "../content/universe";
 export const hardDates = defineScenario({
   id: "hard-dates",
   dojoId: "dream-job",
-  title: "The profile looks right. The dates do not.",
-  summary: "A professional recruiter, a polished profile and no fee at all. Investigate.",
+  title: {
+    en: "The profile looks right. The dates do not.",
+    hinglish: "Profile sahi lagti hai. Dates nahi.",
+  },
+  summary: {
+    en: "A professional recruiter, a polished profile and no fee at all. Investigate.",
+    hinglish: "Ek professional recruiter, chamakti profile aur koi fee bhi nahi. Jaanch karo.",
+  },
   legit: false,
   primer: {
-    title: "Investigate before you trust",
-    body: "The message is professional and asks for no money. Inspect the recruiter's profile and the company's own information before you decide.",
-    setup:
-      "You're Ananya. Placement season is close and you'd love a research role before graduating. A senior recruiter messages you with an offer of a proper interview.",
+    title: { en: "Investigate before you trust", hinglish: "Bharosa karne se pehle jaanch karo" },
+    body: {
+      en: "The message is professional and asks for no money. Inspect the recruiter's profile and the company's own information before you decide.",
+      hinglish:
+        "Message professional hai aur koi paisa nahi maangta. Decide karne se pehle recruiter ki profile aur company ki apni jaankari check karo.",
+    },
+    setup: {
+      en: "You're Ananya. Placement season is close and you'd love a research role before graduating. A senior recruiter messages you with an offer of a proper interview.",
+      hinglish:
+        "Tum Ananya ho. Placement season aane wala hai aur graduation se pehle tumhe ek research role chahiye. Ek senior recruiter tumhe proper interview ke offer ke saath message karti hai.",
+    },
   },
   startNodeId: "li-nisha",
 
@@ -28,7 +41,7 @@ export const hardDates = defineScenario({
       kind: "thread",
       app: "linkedin",
       contact: {
-        name: "Nisha Rao",
+        name: { en: "Nisha Rao", hinglish: "Nisha Rao" },
         subtitle: "Senior Talent Acquisition Partner | Nexora Technologies Pvt. Ltd.",
       },
       messages: [
@@ -44,8 +57,20 @@ export const hardDates = defineScenario({
       evidence: ["nisha-profile", "nexora-company", "nexora-record"],
       layout: "split",
       choices: [
-        { label: "Reply and reserve the interview slot", nextNodeId: "gmail-hard" },
-        { label: "Report the profile: the dates don't add up", nextNodeId: "safe-early" },
+        {
+          label: {
+            en: "Reply and reserve the interview slot",
+            hinglish: "Reply karo aur interview slot reserve karo",
+          },
+          nextNodeId: "gmail-hard",
+        },
+        {
+          label: {
+            en: "Report the profile: the dates don't add up",
+            hinglish: "Profile report karo: dates mel nahi kha rahi",
+          },
+          nextNodeId: "safe-early",
+        },
       ],
     },
 
@@ -56,12 +81,25 @@ export const hardDates = defineScenario({
       evidence: ["nexora-company", "nexora-careers"],
       choices: [
         {
-          label: "Upload your Aadhaar, PAN, bank details and a selfie",
+          label: {
+            en: "Upload your Aadhaar, PAN, bank details and a selfie",
+            hinglish: "Apna Aadhaar, PAN, bank details aur selfie upload karo",
+          },
           nextNodeId: "identity-shared",
         },
-        { label: "Install the attached offer package", nextNodeId: "apk-installed" },
         {
-          label: "Contact Nexora HR using details from nexora.example, and report this email",
+          label: {
+            en: "Install the attached offer package",
+            hinglish: "Attached offer package install karo",
+          },
+          nextNodeId: "apk-installed",
+        },
+        {
+          label: {
+            en: "Contact Nexora HR using details from nexora.example, and report this email",
+            hinglish:
+              "nexora.example pe di gayi details se Nexora HR ko contact karo, aur yeh email report karo",
+          },
           nextNodeId: "safe",
         },
       ],
@@ -70,28 +108,44 @@ export const hardDates = defineScenario({
     "identity-shared": {
       kind: "outcome",
       result: "compromised",
-      title: "Your identity is exposed",
-      body: "Your Aadhaar, PAN, bank details and selfie went to onboard-hr.example, not Nexora. They can be misused for fraudulent accounts or loans in your name. (Nothing real was collected: this is a simulation.)",
+      title: { en: "Your identity is exposed", hinglish: "Tumhari identity leak ho gayi" },
+      body: {
+        en: "Your Aadhaar, PAN, bank details and selfie went to onboard-hr.example, not Nexora. They can be misused for fraudulent accounts or loans in your name. (Nothing real was collected: this is a simulation.)",
+        hinglish:
+          "Tumhara Aadhaar, PAN, bank details aur selfie onboard-hr.example ko gaye, Nexora ko nahi. Inka tumhare naam pe fake accounts ya loans ke liye galat use ho sakta hai. (Kuch bhi asli collect nahi hua: yeh simulation hai.)",
+      },
       rewindToNodeId: "gmail-hard",
     },
     "apk-installed": {
       kind: "outcome",
       result: "compromised",
-      title: "Your phone is compromised",
-      body: "Offer_Letter.pdf.apk was an Android application, not a PDF. Once installed, an app like this can read your messages and OTPs. (Nothing was installed: this is a simulation.)",
+      title: { en: "Your phone is compromised", hinglish: "Tumhara phone compromise ho gaya" },
+      body: {
+        en: "Offer_Letter.pdf.apk was an Android application, not a PDF. Once installed, an app like this can read your messages and OTPs. (Nothing was installed: this is a simulation.)",
+        hinglish:
+          "Offer_Letter.pdf.apk ek Android app thi, PDF nahi. Install hote hi aisi app tumhare messages aur OTPs padh sakti hai. (Kuch install nahi hua: yeh simulation hai.)",
+      },
       rewindToNodeId: "gmail-hard",
     },
     "safe-early": {
       kind: "outcome",
       result: "safe",
-      title: "You checked the dates",
-      body: "Nisha's profile says she joined Nexora Technologies Pvt. Ltd. on 1 July 2019, but the company was incorporated on 17 May 2021, almost 22 months later.",
+      title: { en: "You checked the dates", hinglish: "Tumne dates check ki" },
+      body: {
+        en: "Nisha's profile says she joined Nexora Technologies Pvt. Ltd. on 1 July 2019, but the company was incorporated on 17 May 2021, almost 22 months later.",
+        hinglish:
+          "Nisha ki profile kehti hai ki usne 1 July 2019 ko Nexora Technologies Pvt. Ltd. join kiya, par company 17 May 2021 ko incorporate hui, lagbhag 22 mahine baad.",
+      },
     },
     safe: {
       kind: "outcome",
       result: "safe",
-      title: "You verified first",
-      body: "You contacted Nexora through its official website instead of the email. Sensitive documents belong only after a genuine written offer and a verified HR process.",
+      title: { en: "You verified first", hinglish: "Tumne pehle verify kiya" },
+      body: {
+        en: "You contacted Nexora through its official website instead of the email. Sensitive documents belong only after a genuine written offer and a verified HR process.",
+        hinglish:
+          "Tumne email ki jagah Nexora ko uski official website se contact kiya. Sensitive documents sirf genuine written offer aur verified HR process ke baad hi dene chahiye.",
+      },
     },
   },
 
@@ -99,9 +153,16 @@ export const hardDates = defineScenario({
   redFlags: pickRedFlags(["li-timeline-conflict", ...redFlagIdsIn([EMAIL_HARD])]),
 
   debrief: {
-    rule: "No payment request is needed for a scam. Investigate the profile, the domain and the file.",
-    summary:
-      "A convincing message and a polished profile can still be false: compare dates across the profile and the company's own information. This scam never asks for money. It tries to obtain identity and banking information and to make you install an application. Check the full sender address, the actual link destination and the complete attachment filename, and never install an APK that arrives disguised as an offer letter.",
+    rule: {
+      en: "No payment request is needed for a scam. Investigate the profile, the domain and the file.",
+      hinglish:
+        "Scam ke liye payment maangna zaroori nahi. Profile, domain aur file ki jaanch karo.",
+    },
+    summary: {
+      en: "A convincing message and a polished profile can still be false: compare dates across the profile and the company's own information. This scam never asks for money. It tries to obtain identity and banking information and to make you install an application. Check the full sender address, the actual link destination and the complete attachment filename, and never install an APK that arrives disguised as an offer letter.",
+      hinglish:
+        "Bharosemand message aur chamakti profile bhi jhoothi ho sakti hai: profile aur company ki apni jaankari mein dates milao. Yeh scam kabhi paise nahi maangta. Yeh tumhari identity aur banking jaankari lena chahta hai aur tumse ek app install karwana chahta hai. Poora sender address, link ka asli destination aur attachment ka poora filename check karo, aur offer letter ke bhes mein aayi APK kabhi install mat karo.",
+    },
     realWorldAction: REAL_WORLD_ACTION,
   },
 });
