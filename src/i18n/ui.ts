@@ -761,6 +761,8 @@ const hinglish: Partial<UiDict> = {
   "home.next": "Agla dojo",
   "home.slide": (i: number, n: number) => `${n} mein se Dojo ${i}`,
   "home.goTo": (name: string) => `${name} dikhao`,
+  "home.entranceWelcome": "Dojo mein aapka swagat hai",
+  "home.entranceSkip": "Intro skip karo",
 
   // Progress
   "progress.completed": "Ho gaya",
@@ -927,8 +929,61 @@ const hinglish: Partial<UiDict> = {
   "report.you": "Tum",
   "report.pending": "Tumhari call review ho rahi hai…",
   "report.notAnalysed":
-    "Is baar call ka detail mein review nahi ho paaya, toh yeh ek rough rating hai.",
+    "Is baar call ka detail mein review nahi ho paaya, toh yeh score call pe jo bola aur kiya gaya, usi se bana hai.",
   "report.duration": (time: string) => `Call ki length ${time}`,
+  "report.parts": "Tumhe score kaise mila",
+  "report.reported": "Tumne number block aur report kar diya.",
+
+  // Reporting a caller
+  "call.report.title": "Is caller ko report karein?",
+  "call.report.body": (number: string) =>
+    `Isse call kat jaayegi, ${number} block ho jaayega aur fraud call ke roop mein report ho jaayega.`,
+  "call.report.confirm": "Block aur report karo",
+  "call.report.cancel": "Call pe wapas",
+  "call.report.after": "Is number ko block aur report karo",
+  "call.report.done": "Number block aur report ho gaya",
+  "call.report.sim": "Simulated hai. Kuch bhi kahin nahi bheja jaata.",
+
+  // Loading screens
+  "call.connect.title": "Tumhari call connect ho rahi hai",
+  "call.connect.mic": "Tumhara microphone check ho raha hai",
+  "call.connect.setup": "Practice caller ready ho raha hai",
+  "call.connect.line": (name: string) => `${name} se connect ho rahe hain`,
+  "call.connect.tip":
+    "Tip: call ke dauraan “Meri details” pe tap karke woh bani-banayi details dekho jo tum use kar sakte ho.",
+  "call.review.title": "Tumhari call review ho rahi hai",
+  "call.review.read": "Jo bola gaya, woh padh rahe hain",
+  "call.review.check": "Check kar rahe hain ki tumne kya share kiya",
+  "call.review.score": "Tumhari call score ho rahi hai",
+
+  // Call score parts and moments
+  "callScore.part.secrets": "Details safe rakhi",
+  "callScore.part.questions": "Caller se sawaal kiye",
+  "callScore.part.pressure": "Pressure mein nahi aaye",
+  "callScore.part.exit": "Safely call khatam ki",
+  "callScore.part.pressure.legit": "Shaant rahe",
+  "callScore.part.exit.legit": "Sahi tareeke se verify kiya",
+  "callScore.move.keptSecrets": "Tumne koi code, paisa ya personal details nahi di.",
+  "callScore.move.askedQuestion": "Bas haan mein haan milane ki jagah tumne caller se sawaal kiye.",
+  "callScore.move.refused": "Jab unhone pressure daala, tumne mana kar diya.",
+  "callScore.move.verify": "Tumne kaha ki tum kisi bharosemand channel se check karoge.",
+  "callScore.move.hungUp": "Tumne apni marzi se call kaat di.",
+  "callScore.move.reported":
+    "Tumne number block aur report kiya, taaki woh dobara try na kar sake.",
+  "callScore.move.lifeline":
+    "Call ke dauraan tumne chupke se kisi bharosemand insaan ko bata diya.",
+  "callScore.move.stayedCalm": "Tum shaant rahe aur call sambhal li.",
+  "callScore.move.sharedCode":
+    "Tumne one-time code padh ke suna diya. Woh code tumhare account ki chaabi hai.",
+  "callScore.move.paid":
+    "Tumne caller ko paise de diye. Asli officials aur bank kabhi call pe paise nahi lete.",
+  "callScore.move.sharedDetail": "Tumne koi personal ya account detail bol di.",
+  "callScore.move.openedFile": "Tumne caller ki bheji hui file khol di.",
+  "callScore.move.stayedOn": "Tum tab tak line pe rahe jab tak caller ka kaam khatam nahi hua.",
+  "callScore.move.reportedGenuine":
+    "Yeh genuine call tha. Kisi caller ko report karne se pehle apne card pe likha number check karo.",
+  "callScore.move.dismissedGenuine":
+    "Tumne ek genuine alert ko bina check kiye kaat diya. Uski jagah apne card wale number pe call karo.",
 
   // Mail: DigiDojo's hints, not Gmail's own labels
   "mail.hint":

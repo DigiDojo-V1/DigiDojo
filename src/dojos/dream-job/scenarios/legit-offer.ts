@@ -17,10 +17,17 @@ export const legitOffer = defineScenario({
   },
   legit: true,
   primer: {
-    title: "The written offer",
-    body: "Open the email, check who sent it and what it asks of you, then decide whether to accept.",
-    setup:
-      "You're Ananya. You've had two interviews with Nexora Technologies for a Business Research Intern role. Today, an email with a written offer lands in your inbox.",
+    title: { en: "The written offer", hinglish: "Likha hua offer" },
+    body: {
+      en: "Open the email, check who sent it and what it asks of you, then decide whether to accept.",
+      hinglish:
+        "Email kholo, check karo ki kisne bheja aur tumse kya maang raha hai, phir decide karo ki accept karna hai ya nahi.",
+    },
+    setup: {
+      en: "You're Ananya. You've had two interviews with Nexora Technologies for a Business Research Intern role. Today, an email with a written offer lands in your inbox.",
+      hinglish:
+        "Tum Ananya ho. Business Research Intern role ke liye Nexora Technologies ke saath tumhare do interviews ho chuke hain. Aaj tumhare inbox mein ek likhe hue offer wala email aata hai.",
+    },
   },
   startNodeId: "gmail-legit",
 
