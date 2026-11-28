@@ -223,13 +223,14 @@ function SideNav({ variant, className }: { variant: "rail" | "wide"; className: 
 /** Fictional other conversations: plain everyday chats, so no extra story is invented.
  * Photos: Unsplash License stock images in /public/shells/instagram (see docs/IMAGE_CREDITS.md). */
 const OTHER_CHATS = [
-  { n: 1, tone: "bg-[#fde2e4] text-[#9d174d]", unread: true },
-  { n: 2, tone: "bg-[#dbeafe] text-[#1e40af]", unread: false },
-  { n: 3, tone: "bg-[#fef3c7] text-[#92400e]", unread: false },
-  { n: 4, tone: "bg-[#dcfce7] text-[#166534]", unread: false },
-  { n: 5, tone: "bg-[#ede9fe] text-[#5b21b6]", unread: false },
-  { n: 6, tone: "bg-[#ffedd5] text-[#9a3412]", unread: false },
-  { n: 7, tone: "bg-[#e0f2fe] text-[#075985]", unread: false },
+  { n: 1, src: "/shells/instagram/inbox-1.jpg", unread: true },
+  // The IIMB UG group shows the IIM Bangalore logo (used with permission) on white, so it gets a hairline.
+  { n: 2, src: "/shells/instagram/inbox-2.png", unread: false, ring: true },
+  { n: 3, src: "/shells/instagram/inbox-3.jpg", unread: false },
+  { n: 4, src: "/shells/instagram/inbox-4.jpg", unread: false },
+  { n: 5, src: "/shells/instagram/inbox-5.jpg", unread: false },
+  { n: 6, src: "/shells/instagram/inbox-6.jpg", unread: false },
+  { n: 7, src: "/shells/instagram/inbox-7.jpg", unread: false },
 ] as const;
 
 /** The conversation list: account switcher, tabs, the open chat and everyday others. Decorative. */
@@ -278,7 +279,8 @@ function Inbox({
           preview={fromMe ? `${t("chat.you")}: ${preview}` : preview}
           time={t("ig.now")}
         />
-        {OTHER_CHATS.map(({ n, tone, unread }) => {
+        {OTHER_CHATS.map((chat) => {
+          const { n, src, unread } = chat;
           const name = t(`ig.inbox${n}.name`);
           return (
             <InboxRow
@@ -287,9 +289,9 @@ function Inbox({
               avatar={
                 <Avatar
                   name={name}
-                  src={`/shells/instagram/inbox-${n}.jpg`}
-                  className={tone}
-                  size="size-14"
+                  src={src}
+                  className={IG_STYLE.avatar}
+                  size={"ring" in chat ? "size-14 ring-1 ring-[#dbdbdb]" : "size-14"}
                 />
               }
               preview={t(`ig.inbox${n}.preview`)}
