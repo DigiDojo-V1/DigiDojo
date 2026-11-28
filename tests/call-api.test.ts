@@ -13,6 +13,7 @@ import { voiceStatus } from "@/server/voice-config";
 
 const ref = { dojoId: "authority", scenarioId: "kyc-call", nodeId: "kyc-call", locale: "en" };
 const allow = async () => true;
+const withinDailyCap = allow;
 
 function minter(): TokenMinter & { calls: unknown[] } {
   const calls: unknown[] = [];
@@ -40,6 +41,7 @@ describe("POST /api/call/token", () => {
       minter: m,
       model: "live-model",
       allow,
+      withinDailyCap,
       getScenario,
     });
     expect(result.status).toBe(200);
@@ -60,9 +62,10 @@ describe("POST /api/call/token", () => {
 
   it("refuses when voice is off, for unknown calls and bad input", async () => {
     expect(
-      (await handleCallToken(ref, { minter: null, model: "", allow, getScenario })).status,
+      (await handleCallToken(ref, { minter: null, model: "", allow, withinDailyCap, getScenario }))
+        .status,
     ).toBe(503);
-    const deps = { minter: minter(), model: "m", allow, getScenario };
+    const deps = { minter: minter(), model: "m", allow, withinDailyCap, getScenario };
     expect((await handleCallToken({ ...ref, nodeId: "kyc-open" }, deps)).status).toBe(404);
     expect((await handleCallToken({ ...ref, scenarioId: "nope" }, deps)).status).toBe(404);
     expect((await handleCallToken({ ...ref, extra: 1 }, deps)).status).toBe(400);
@@ -74,9 +77,36 @@ describe("POST /api/call/token", () => {
       minter: minter(),
       model: "m",
       allow: async () => false,
+      withinDailyCap,
       getScenario,
     });
     expect(result.status).toBe(429);
+  });
+
+  it("says voice is off once today's budget is spent, without minting", async () => {
+    const m = minter();
+    const result = await handleCallToken(ref, {
+      minter: m,
+      model: "m",
+      allow,
+      withinDailyCap: async () => false,
+      getScenario,
+    });
+    expect(result).toEqual({ status: 503, body: { error: "voice is off" } });
+    expect(m.calls).toHaveLength(0);
+  });
+
+  it("spends the daily budget only on calls it will mint", async () => {
+    let taken = 0;
+    const counting = async () => (taken++, true);
+    const deps = { minter: minter(), model: "m", allow, withinDailyCap: counting, getScenario };
+    await handleCallToken({ ...ref, extra: 1 }, deps);
+    await handleCallToken({ ...ref, nodeId: "kyc-open" }, deps);
+    await handleCallToken(ref, { ...deps, allow: async () => false });
+    await handleCallToken(ref, { ...deps, minter: null });
+    expect(taken).toBe(0);
+    await handleCallToken(ref, deps);
+    expect(taken).toBe(1);
   });
 });
 
@@ -131,7 +161,12 @@ const goodAnswer = {
 describe("POST /api/call/report", () => {
   it("cleans up the judge's answer", async () => {
     const j = judge(goodAnswer);
-    const result = await handleCallReport(reportBody, { judge: j, allow, getScenario });
+    const result = await handleCallReport(reportBody, {
+      judge: j,
+      allow,
+      withinDailyCap,
+      getScenario,
+    });
     expect(result.status).toBe(200);
     const { report } = result.body as { report: Record<string, unknown> };
     expect(report).toMatchObject({
@@ -153,7 +188,7 @@ describe("POST /api/call/report", () => {
   it("lets a code read out override the judge and cap the rating", async () => {
     const result = await handleCallReport(
       { ...reportBody, signals: ["otp-sms.read"] },
-      { judge: judge(goodAnswer), allow, getScenario },
+      { judge: judge(goodAnswer), allow, withinDailyCap, getScenario },
     );
     const { report } = result.body as { report: { outcomeId: string; rating: number } };
     expect(report.outcomeId).toBe("handed-over");
@@ -166,15 +201,33 @@ describe("POST /api/call/report", () => {
     };
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     for (const j of [failing, null, judge({ nonsense: true })]) {
-      const result = await handleCallReport(reportBody, { judge: j, allow, getScenario });
+      const result = await handleCallReport(reportBody, {
+        judge: j,
+        allow,
+        withinDailyCap,
+        getScenario,
+      });
       expect(result.status).toBe(200);
       expect((result.body as { report: { analysed: boolean } }).report.analysed).toBe(false);
     }
     warn.mockRestore();
   });
 
+  it("gives the rough report once today's budget is spent, without calling the judge", async () => {
+    const j = judge(goodAnswer);
+    const result = await handleCallReport(reportBody, {
+      judge: j,
+      allow,
+      withinDailyCap: async () => false,
+      getScenario,
+    });
+    expect(result.status).toBe(200);
+    expect((result.body as { report: { analysed: boolean } }).report.analysed).toBe(false);
+    expect(j.prompts).toHaveLength(0);
+  });
+
   it("rejects malformed reports", async () => {
-    const deps = { judge: null, allow, getScenario };
+    const deps = { judge: null, allow, withinDailyCap, getScenario };
     expect((await handleCallReport({ ...reportBody, endedBy: "aliens" }, deps)).status).toBe(400);
     expect(
       (

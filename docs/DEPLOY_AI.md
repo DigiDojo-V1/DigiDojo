@@ -40,10 +40,29 @@ Add `FLAG_AI=on` and `OPENAI_API_KEY` (mark it Sensitive) in Project → Setting
 
 Without Upstash the API isn't rate limited, and a warning is printed in development. Always set it up for production.
 
+The production database is `digidojo-ratelimit` (Upstash free plan, auto-upgrade off, iad1), connected for Production and Preview. It sets `KV_REST_API_URL`/`KV_REST_API_TOKEN`.
+
+## Global daily caps
+
+Per-IP limits don't stop abuse from many IPs, so each AI endpoint also has a budget shared by every player, set in `src/server/daily-cap.ts`. Once today's budget is spent, that endpoint takes its no-AI path until the next day.
+
+| Endpoint                | Env var                    | Default | Once the budget is spent                                |
+| ----------------------- | -------------------------- | ------- | ------------------------------------------------------- |
+| `POST /api/call/token`  | `AI_DAILY_CAP_CALL_TOKEN`  | 150     | 503 "voice is off": calls are played with reply options |
+| `POST /api/call/report` | `AI_DAILY_CAP_CALL_REPORT` | 200     | The rough review built without the model                |
+| `POST /api/flag/judge`  | `AI_DAILY_CAP_JUDGE`       | 1000    | The note isn't marked, as if `FLAG_AI` were off         |
+
+- **Day:** budgets reset at 00:00 UTC (05:30 in India). Each day's counter is a Redis key that deletes itself after 2 days.
+- **What counts:** only requests that would reach the model. Bad input, per-IP rejections, false alarms and unknown calls don't use the budget.
+- **Call screen:** `GET /api/call/status` reports voice as off once the token budget is spent, so players get reply options before they're asked for the mic.
+- **Changing a cap:** set the env var to a whole number and redeploy. `0` switches that endpoint's AI off. A value that isn't a whole number is ignored (the default is used and a warning is logged).
+- **If Redis fails:** calls are allowed by default, like the per-IP limiter. Set `AI_CAP_BLOCK_ON_REDIS_ERROR=true` to switch the AI off instead while Redis can't be reached (or the free plan's quota is used up).
+- **Without Redis** (local development) nothing is capped, except a cap of `0`.
+
 ## Privacy
 
 - Nothing a player types is stored or logged by our server. Failed calls log only the error message.
-- Redis holds only a hashed caller id and a counter.
+- Redis holds only hashed caller ids with their counters, and one call count per endpoint per day.
 
 # Live voice calls (Gemini) on Vercel
 

@@ -19,6 +19,7 @@ function deps(overrides: Partial<FlagApiDeps> = {}): FlagApiDeps {
   return {
     llm: null,
     allow: async () => true,
+    withinDailyCap: async () => true,
     getScenario: (d, s): Scenario | undefined =>
       d === "dream-job" && s === "rich" ? scenario : undefined,
     ...overrides,
@@ -51,6 +52,27 @@ describe("POST /api/flag/judge", () => {
 
   it("returns 429 when the caller is over the limit", async () => {
     expect((await handleJudge(judge, deps({ allow: async () => false }))).status).toBe(429);
+  });
+
+  it("leaves the note unmarked once today's budget is spent, without calling the model", async () => {
+    const llm = fakeLlm({ verdict: "good", feedback: "x" });
+    const result = await handleJudge(judge, deps({ llm, withinDailyCap: async () => false }));
+    expect(result).toEqual({ status: 200, body: { result: null } });
+    expect(llm.calls).toBe(0);
+  });
+
+  it("spends the daily budget only on notes the model will mark", async () => {
+    let taken = 0;
+    const withinDailyCap = async () => (taken++, true);
+    const llm = fakeLlm({ verdict: "good", feedback: "x" });
+    const harmless = { ...judge, ...span("The role is in Bengaluru.") };
+    await handleJudge({ ...judge, note: "" }, deps({ llm, withinDailyCap }));
+    await handleJudge(judge, deps({ llm, withinDailyCap, allow: async () => false }));
+    await handleJudge(harmless, deps({ llm, withinDailyCap }));
+    await handleJudge(judge, deps({ withinDailyCap }));
+    expect(taken).toBe(0);
+    await handleJudge(judge, deps({ llm, withinDailyCap }));
+    expect(taken).toBe(1);
   });
 
   it("skips grading without an LLM or for a false alarm, without calling the model", async () => {

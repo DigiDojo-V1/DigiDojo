@@ -46,6 +46,8 @@ export interface JsonJudge {
 
 export interface CallApiDeps {
   allow: () => Promise<boolean>;
+  /** Takes one call from today's global AI budget. False once it's spent. */
+  withinDailyCap: () => Promise<boolean>;
   getScenario: (dojoId: string, scenarioId: string) => Scenario | undefined;
 }
 
@@ -123,6 +125,8 @@ export async function handleCallToken(
   if (!(await deps.allow())) return bad(429, "too many requests");
   const call = findCall(deps, parsed.data);
   if (call === undefined) return bad(404, "unknown call");
+  // Today's voice budget is spent: the call screen falls back to reply options, as with voice off.
+  if (!(await deps.withinDailyCap())) return bad(503, "voice is off");
 
   const config = liveConfig(call.scenario, call.node, parsed.data.locale);
   try {
@@ -176,6 +180,7 @@ export async function handleCallReport(
   const fallback = () => ({ status: 200, body: { report: fallbackReport(node, record) } });
   if (deps.judge === null) return fallback();
   if (!(await deps.allow())) return fallback();
+  if (!(await deps.withinDailyCap())) return fallback();
 
   try {
     const answer = ModelReportSchema.parse(
