@@ -6,49 +6,6 @@ import { cn } from "@/lib/utils";
 import { DISPLAY, MONO } from "../styles";
 import { StickFigure } from "./StickFigure";
 
-/** A phone cut-out showing a fictional "earn from home" DM, printed in grayscale. */
-export function PhoneCutout({ className }: { className?: string }) {
-  const t = useT();
-  return (
-    <div
-      aria-hidden
-      className={cn(
-        "relative aspect-[9/18.5] w-[230px] rounded-[34px] bg-[#161616] p-[9px] shadow-[0_30px_60px_-20px_rgba(0,0,0,0.45)] [filter:grayscale(1)_contrast(1.08)]",
-        className,
-      )}
-    >
-      <div className="flex h-full flex-col overflow-hidden rounded-[26px] bg-[#efeeeb]">
-        <div className="mx-auto mt-2 h-[18px] w-[72px] rounded-full bg-[#161616]" />
-        <div className="mt-2 flex items-center gap-2 border-b border-black/10 px-3 pb-2">
-          <span className="flex size-7 items-center justify-center rounded-full bg-[#8a8a8a] text-[11px] font-semibold text-white">
-            P
-          </span>
-          <span className="leading-tight">
-            <span className="block text-[11px] font-semibold text-black">
-              {t("landing.why.phone.contact")}
-            </span>
-            <span className="block text-[9px] text-black/50">{t("landing.why.phone.status")}</span>
-          </span>
-        </div>
-        <div className="flex flex-1 flex-col gap-1.5 p-3 text-[10.5px] leading-snug text-black">
-          <p className="max-w-[85%] self-start rounded-xl rounded-tl-sm bg-white px-2.5 py-1.5 shadow-sm">
-            {t("landing.why.phone.msg1")}
-          </p>
-          <p className="max-w-[85%] self-start rounded-xl rounded-tl-sm bg-white px-2.5 py-1.5 shadow-sm">
-            {t("landing.why.phone.msg2")}
-          </p>
-          <p className="max-w-[85%] self-start rounded-xl rounded-tl-sm bg-white px-2.5 py-1.5 shadow-sm">
-            {t("landing.why.phone.msg3")}
-          </p>
-          <span className="mt-auto self-end rounded-full border border-black/30 px-3 py-1 text-[10px] font-medium">
-            {t("landing.why.phone.reply")}
-          </span>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 /** A tilted sticker of a fictional recruiter profile, white border and drop shadow. */
 export function ProfileSticker({ className }: { className?: string }) {
   const t = useT();
