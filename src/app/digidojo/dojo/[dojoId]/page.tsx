@@ -43,6 +43,7 @@ export default async function DojoPage({ params }: PageProps<"/digidojo/dojo/[do
             href: scenarioHref(dojo.id, s.id),
             title: s.title,
             summary: s.summary,
+            image: s.image,
           }))}
         />
       </HomeShell>

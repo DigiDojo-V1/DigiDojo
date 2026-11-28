@@ -1,6 +1,7 @@
 "use client";
 
 import { Check, ChevronLeft } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { BIG_CARD, CARD_PAD } from "@/components/home/HomeShell";
 import { DISPLAY, MONO } from "@/components/landing/styles";
@@ -17,6 +18,8 @@ export interface DojoViewScenario {
   href: string;
   title: LocalizedText;
   summary: LocalizedText;
+  /** Illustration path under /public. Without it the card's art area stays empty. */
+  image?: string;
 }
 
 export interface DojoViewProps {
@@ -131,8 +134,18 @@ function ScenarioCard({ scenario, index }: { scenario: DojoViewScenario; index: 
         <span className="sr-only">{t(done ? "progress.completed" : "progress.notCompleted")}</span>
       </div>
 
-      {/* Reserved for the scenario's illustration. Empty for now. */}
-      <div data-slot="art" aria-hidden className="flex-1" />
+      {/* The scenario's illustration, filling the space between the number and the title. */}
+      <div data-slot="art" aria-hidden className="relative my-4 min-h-40 flex-1">
+        {scenario.image !== undefined && (
+          <Image
+            src={scenario.image}
+            alt=""
+            fill
+            sizes="(min-width: 1024px) 30vw, (min-width: 640px) 45vw, 90vw"
+            className="rounded-2xl object-cover ring-1 ring-black/5"
+          />
+        )}
+      </div>
 
       <h3 className="text-lg leading-snug font-semibold">{text(scenario.title)}</h3>
       <p className="mt-1.5 line-clamp-3 text-sm leading-snug text-black/60">

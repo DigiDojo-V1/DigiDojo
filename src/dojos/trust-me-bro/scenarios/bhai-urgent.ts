@@ -21,6 +21,7 @@ export const bhaiUrgent = defineScenario({
     hinglish:
       "Best friend ki awaaz ek naye number se ₹5,000 maang rahi hai. Uski help karoge ya pehle check?",
   },
+  image: "/dojos/trust-me-bro/bhai-urgent.jpg",
   legit: false,
   primer: {
     title: { en: "The cloned voice", hinglish: "Clone ki hui awaaz" },

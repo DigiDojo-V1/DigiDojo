@@ -519,6 +519,8 @@ const ScenarioShape = z.strictObject({
   title: LocalizedTextSchema,
   /** One line for the dojo page. */
   summary: LocalizedTextSchema,
+  /** Illustration for the scenario's card on the dojo page: an image path under /public. */
+  image: z.string().startsWith("/").optional(),
   /** true = a real message the player should trust. */
   legit: z.boolean(),
   /** true = no primer, no hints. */

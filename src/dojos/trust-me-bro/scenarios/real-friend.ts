@@ -17,6 +17,7 @@ export const realFriend = defineScenario({
     hinglish:
       "Ek dost voice note bhej ke apna ticket book karne ko kehti hai. Scam hai ya asli favour?",
   },
+  image: "/dojos/trust-me-bro/real-friend.jpg",
   legit: true,
   primer: {
     title: { en: "Check, then trust", hinglish: "Pehle check, phir bharosa" },
