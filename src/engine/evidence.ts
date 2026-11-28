@@ -22,7 +22,9 @@ export type EvidenceWhere =
   | "attachment"
   | "link"
   | "panel-field"
-  | "fine-print";
+  | "fine-print"
+  /** Said aloud on a live voice call (from the call transcript). */
+  | "call";
 
 /** Anything the player can flag: a message, a phrase, an email header, a profile line, a PDF clause. */
 export interface Flaggable {
@@ -89,6 +91,11 @@ export function panelsForNode(node: ScenarioNode): string[] {
   const ids = new Set<string>();
   if (node.kind === "thread" || node.kind === "email") {
     for (const id of node.evidence ?? []) ids.add(id);
+  }
+  if (node.kind === "live-call") {
+    for (const event of Object.values(node.events ?? {})) {
+      if (event.kind === "document") ids.add(event.panelId);
+    }
   }
   const emails =
     node.kind === "email"
@@ -199,6 +206,8 @@ export function collectFlaggables(scenario: ScenarioData): Flaggable[] {
           hidden: false,
         });
         break;
+      case "live-call":
+      // Spoken words have no fixed text; the call judge maps them to red flags.
       case "outcome":
         break;
     }
@@ -233,6 +242,12 @@ export function nextNodeIds(node: ScenarioNode): string[] {
       return node.choices.map((c) => c.nextNodeId);
     case "triage":
       return [node.nextNodeId];
+    case "live-call":
+      return [
+        node.scriptedNodeId,
+        ...(node.declineNodeId === undefined ? [] : [node.declineNodeId]),
+        ...node.outcomes.map((o) => o.nextNodeId),
+      ];
     case "outcome":
       return [];
   }

@@ -21,6 +21,9 @@ const en = {
   "simulation.badge": "Simulation",
   "simulation.badgeAria": "This is a simulation",
 
+  // Landing (placeholder until the real landing page)
+  "landing.title": "digi dojo",
+
   // Home
   "home.title": "DigiDojo",
   "home.tagline": "Real scams, fake apps. Practise here, lose nothing.",
@@ -41,6 +44,41 @@ const en = {
 
   // 404
   "notFound.body": "We couldn't find this page.",
+
+  // App chrome (wide screens)
+  "chrome.nav": "Main",
+  "chrome.home": "Home",
+  "chrome.progressTitle": "Your training",
+  "chrome.progressBody": (done: number, total: number) =>
+    `${done} of ${total} scenario${total === 1 ? "" : "s"} done`,
+  "chrome.howTitle": "How it works",
+  "chrome.how1": "Live through a real scam inside a fake app.",
+  "chrome.how2": "Flag anything suspicious, then make your call.",
+  "chrome.how3": "See what you caught, and what you missed, in the debrief.",
+  "chrome.helpTitle": "Lost money to a scam?",
+  "chrome.helpBody": "Call 1930 right away and report it at cybercrime.gov.in.",
+
+  // Dojo panel (the side panel next to a fake app on wide screens)
+  "panel.label": "Dojo controls",
+  "panel.instructions":
+    "Click any sentence that looks suspicious. Use the flag next to details like addresses, links and files.",
+  "panel.waiting": "Read carefully. Your options appear here when it's time to decide.",
+  "panel.flagged": (n: number) => `${n} flagged`,
+  "panel.exit": "Exit simulation",
+
+  // Fake app chrome on wide screens (decorative)
+  "desktop.search": "Search",
+  "desktop.chats": "Chats",
+  "desktop.messages": "Messages",
+  "desktop.typeMessage": "Type a message",
+  "desktop.focused": "Focused",
+  "desktop.other": "Other",
+  "desktop.navHome": "Home",
+  "desktop.navNetwork": "My Network",
+  "desktop.navJobs": "Jobs",
+  "desktop.navMessaging": "Messaging",
+  "desktop.navNotifications": "Notifications",
+  "desktop.navMe": "Me",
 
   // Primer
   "primer.eyebrow": "The trick",
@@ -64,12 +102,10 @@ const en = {
   "howto.sender": "Lucky Draw Desk",
   "howto.scamMessage":
     "Congrats!! 🎉 Your number won ₹50,000 in our lucky draw. To claim it, pay a ₹499 processing fee today.",
-  "howto.highlight.title": "Spot it. Highlight it.",
-  "howto.highlight.body":
-    "Something in this message is off. Select those words: drag across them, or tap one word and then another. Then tap Flag this.",
+  "howto.highlight.title": "Spot it. Tap it.",
+  "howto.highlight.body": "Something in this message is off. Tap the sentence that gives it away.",
   "howto.highlight.tryIt": "Your turn: find the giveaway.",
   "howto.highlight.miss": "Close! Look at what they want from you before you get the prize.",
-  "howto.highlight.tooBig": "Too much. Pick just the few words that give it away.",
   "howto.why.title": "Say why",
   "howto.why.body":
     "Every flag asks why it's suspicious. Pick the reason that fits best. You can also write it in your own words for bonus points.",
@@ -150,6 +186,95 @@ const en = {
   "channel.gmail": "email",
   "channel.inbox": "inbox",
 
+  // Calls (scripted and live)
+  "call.incoming": "Incoming call",
+  "call.incomingVideo": "Incoming video call",
+  "call.answer": "Answer",
+  "call.answerVoice": "Answer with your voice",
+  "call.answerText": "Answer without mic (reply options)",
+  "call.decline": "Decline",
+  "call.hangUp": "Hang up",
+  "call.mute": "Mute",
+  "call.unmute": "Unmute",
+  "call.captions": "Captions",
+  "call.details": "My details",
+  "call.flag": "Flag",
+  "call.speaking": "speaking…",
+  "call.listening": "Listening…",
+  "call.connecting": "Connecting…",
+  "call.ringing": "Ringing…",
+  "call.youSaid": "You",
+  "call.whatDoYouSay": "What do you say?",
+  "call.voiceOn": "Caller voice on",
+  "call.voiceOff": "Caller voice off",
+  "call.cameraOff": "Your camera is off",
+  "call.rec": "REC",
+  "call.captionsEmpty": "Captions appear here when someone speaks.",
+  "call.before.title": "Before you answer",
+  "call.before.ai":
+    "An AI plays the caller and talks with you in real time. Say whatever you'd really say.",
+  "call.before.details":
+    "Use the made-up details on your card if you choose to share any. Never say your real ones.",
+  "call.before.earphones": "Earphones work best, so the caller doesn't hear itself.",
+  "call.before.privacy":
+    "Your voice goes to Google's Gemini to run the call. DigiDojo doesn't store it.",
+  "call.voiceUnavailable":
+    "Live voice calls are off right now. You'll take this call with reply options instead.",
+  "call.micDenied":
+    "We couldn't use your microphone. Allow mic access and try again, or answer with reply options.",
+  "call.failed": "The call couldn't connect.",
+  "call.retry": "Try again",
+  "call.useScripted": "Continue with reply options",
+  "call.ended": "Call ended",
+  "call.endedByYou": "You hung up.",
+  "call.endedByCaller": "The caller hung up.",
+  "call.endedTimeout": "The call timed out.",
+  "call.endedError": "The call dropped.",
+  "call.analysing": "Reviewing your call…",
+  "call.continue": "Continue",
+  "call.persona.title": "Your details (made up)",
+  "call.persona.note": "Only for this simulation. Never say your real details.",
+  "call.persona.name": "Name",
+  "call.flag.title": "What's off about what they just said?",
+  "call.flag.nothingYet": "Wait for the caller to say something first.",
+  "call.flag.saved": "Flagged. You'll see how you did at the end.",
+  "call.flag.count": (n: number) => `${n} flagged`,
+  "call.notification.now": "now",
+  "call.notification.sms": "Messages",
+  "call.notification.whatsapp": "Chat app",
+  "call.notification.open": "Open",
+  "call.payment.title": "Payment request",
+  "call.payment.to": "To",
+  "call.payment.pay": (amount: string) => `Pay ${amount}`,
+  "call.payment.decline": "Decline",
+  "call.payment.paid": "Payment sent",
+  "call.payment.declined": "Request declined",
+  "call.payment.sim": "Simulated payment. No real money moves.",
+  "call.lifeline.button": (name: string) => `Message ${name}`,
+  "call.lifeline.title": (name: string) => `Quietly message ${name}`,
+  "call.lifeline.send": "Send",
+  "call.lifeline.sent": "Sent",
+  "call.lifeline.close": "Back to the call",
+  "call.timer": (seconds: number) =>
+    `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`,
+
+  // Call report (debrief)
+  "report.title": "Your call",
+  "report.rating": (rating: string) => `${rating}/10`,
+  "report.band.vulnerable": "Highly vulnerable",
+  "report.band.moderate": "Moderately safe",
+  "report.band.savvy": "Scam-savvy",
+  "report.good": "What you did well",
+  "report.mistakes": "Where it went wrong",
+  "report.better": "Do this next time",
+  "report.transcript": "Call transcript",
+  "report.caller": "Caller",
+  "report.you": "You",
+  "report.pending": "Reviewing your call…",
+  "report.notAnalysed":
+    "We couldn't review the call in detail this time, so this is a rough rating.",
+  "report.duration": (time: string) => `Call length ${time}`,
+
   // Mail
   "mail.inbox": "Inbox",
   "mail.reply": "Reply",
@@ -169,6 +294,16 @@ const en = {
   "mail.appName": "Mail",
   "mail.search": "Search in mail",
   "mail.primary": "Primary",
+  "mail.promotions": "Promotions",
+  "mail.social": "Social",
+  "mail.starred": "Starred",
+  "mail.snoozed": "Snoozed",
+  "mail.sent": "Sent",
+  "mail.drafts": "Drafts",
+  "mail.more": "More",
+  "mail.forward": "Forward",
+  "mail.newMessage": "New message",
+  "mail.send": "Send",
   "mail.compose": "Compose",
   "mail.inboxLabel": "Inbox",
   "mail.details": "Details",
@@ -178,16 +313,11 @@ const en = {
   "mail.showDetails": "Show sender details",
   "mail.hideDetails": "Hide sender details",
 
-  // Highlighting and flagging
-  "highlight.toolbar": "Selected words",
-  "highlight.extendHint": "Drag to change the selection, or tap another word to add more.",
-  "highlight.cancel": "Cancel selection",
-  "highlight.flagThis": "Flag this",
+  // Flagging sentences
   "highlight.flagged": "Flagged",
-  "highlight.textAria":
-    "Message text. Use the arrow keys to pick a word, Shift and arrows to select more, Enter to flag.",
+  "highlight.flagSentence": "Flag this sentence",
+  "highlight.openFlag": "Flagged sentence. Open to change or remove the flag.",
   "flag.why": "Why is this suspicious?",
-  "flag.loadingChips": "Finding possible reasons…",
   "flag.noteLabel": "In your own words",
   "flag.noteLabelOr": "Or say it in your own words",
   "flag.noteOptional": "(bonus points)",
@@ -195,10 +325,6 @@ const en = {
   "flag.notePrivacy": "Don't type personal details.",
   "flag.pickReason": "Pick a reason to save this flag.",
   "flag.pickOrExplain": "Pick a reason, or explain it yourself.",
-  "flag.explainTitle": "What’s off about this?",
-  "flag.explainBody": "No hints for this one. Say what the trick is, in your own words.",
-  "flag.explainPlaceholder": "What did you notice, and why would it trick someone?",
-  "flag.explainHint": (min: number) => `Write at least ${min} characters to save this flag.`,
   "flag.save": "Flag it",
   "flag.update": "Save",
   "flag.remove": "Remove",
@@ -267,7 +393,11 @@ const en = {
   "debrief.falseAlarms": "False alarms",
   "debrief.falseAlarmNote":
     "This one was fine. Being careful is good, but suspecting everything means missing real chances.",
-  "debrief.notReached": "On paths you didn't take",
+  "debrief.notReached": (n: number) =>
+    `Bonus: ${n} red flag${n === 1 ? "" : "s"} on paths you didn't take`,
+  "debrief.notReachedNote":
+    "These were on routes you didn't play. They don't count toward your score. Play again to try them.",
+  "debrief.notReachedTag": "Not on your path",
   "debrief.notInspected": "You didn't check",
   "debrief.notInspectedNote": "These were one tap away. Inspect before you decide.",
   "debrief.triage": "Inbox labels",
@@ -284,6 +414,7 @@ const en = {
   "debrief.where.link": "Button or link",
   "debrief.where.panel-field": "Profile or record",
   "debrief.where.fine-print": "Fine print",
+  "debrief.where.call": "On the call",
   "debrief.spotted": "Spotted, wrong reason",
   "debrief.spottedNote": "You found it, but the trick behind it was different.",
   "debrief.youFlagged": "You flagged",
@@ -300,6 +431,7 @@ const en = {
   "score.points": (points: number, max: number) => `${points} / ${max} points`,
   "score.accuracy": (caught: number, total: number, falseAlarms: number) =>
     `${caught} of ${total} red flags · ${falseAlarms} false alarm${falseAlarms === 1 ? "" : "s"}`,
+  "score.pathOnly": "Scored only on the red flags on the path you played.",
   "score.howItWorks":
     "Right reason (or a spot-on explanation) +3 · wrong reason +1 · false alarm −1 · good explanation +1",
   "rank.rookie": "Rookie",
@@ -348,6 +480,24 @@ const en = {
   "tactic.disguised-link.label": "Disguised link",
   "tactic.disguised-link.explanation":
     "The link looks familiar but goes somewhere else. Check the real destination.",
+  "tactic.fear.label": "Fear",
+  "tactic.fear.explanation":
+    "A shock first (an FIR, a frozen account, arrest) so panic takes over before you think.",
+  "tactic.blocks-verification.label": "Blocks checking",
+  "tactic.blocks-verification.explanation":
+    "They talk you out of hanging up, visiting the branch or calling the official number, because checking would expose them.",
+  "tactic.fake-proof.label": "Fake proof",
+  "tactic.fake-proof.explanation":
+    "An ID number, a badge, a stamped PDF or your own details read back to you proves nothing. Anyone can fake them.",
+  "tactic.secret-code.label": "Asks for a code",
+  "tactic.secret-code.explanation":
+    "An OTP, PIN or CVV is the key to your money. No bank, police officer or company ever asks you to read one out.",
+  "tactic.small-ask.label": "Small ask first",
+  "tactic.small-ask.explanation":
+    "A tiny request (₹10, “just confirm your name”) feels harmless, and every yes makes the next, bigger one easier.",
+  "tactic.pay-to-clear.label": "Pay to make it go away",
+  "tactic.pay-to-clear.explanation":
+    "A “deposit”, “fine” or “fee” to clear a threat. No court, police force or bank settles anything this way.",
 } satisfies Record<string, UiValue> & Record<TacticKey, string>;
 
 export type UiDict = typeof en;

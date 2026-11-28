@@ -12,11 +12,14 @@ interface TopBarProps {
   className?: string;
 }
 
-/** The row at the top of every non-simulation screen: back arrow on the left, language on the right. */
+/**
+ * The row at the top of every non-simulation screen on phones: back arrow on the left, language on
+ * the right. From tablets up, `AppChrome`'s top nav takes over.
+ */
 export function TopBar({ back, className }: TopBarProps) {
   const t = useT();
   return (
-    <div className={cn("flex h-9 items-center justify-between gap-2", className)}>
+    <div className={cn("flex h-9 items-center justify-between gap-2 md:hidden", className)}>
       {back !== undefined ? (
         <Link
           href={back.href}
