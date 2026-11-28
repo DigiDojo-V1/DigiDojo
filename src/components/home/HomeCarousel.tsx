@@ -2,7 +2,14 @@
 
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
-import { useCallback, useLayoutEffect, useRef, useState, type KeyboardEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type KeyboardEvent,
+} from "react";
 import { DISPLAY, MONO } from "@/components/landing/styles";
 import { isComingSoon, useDojoSummaries, type DojoSummary } from "@/components/layout/chrome-data";
 import { DojoProgress } from "@/components/progress/DojoProgress";
@@ -28,38 +35,94 @@ export function HomeCarousel() {
   const trackRef = useRef<HTMLDivElement>(null);
   const slideRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [active, setActive] = useState(0);
-  /** Where a button or key press is heading, so a second press during the scroll goes one further. */
+  /** Where a button or key press is heading (a track position), so a second press goes one further. */
   const targetRef = useRef<number | null>(null);
+  /** A finger is on the track: never move the strip under it. */
+  const touchingRef = useRef(false);
+  const settleTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
-  const clampIndex = useCallback(
-    (index: number) => Math.max(0, Math.min(dojos.length - 1, index)),
-    [dojos.length],
+  // The carousel loops: the track is [copy of the last dojo, ...dojos, copy of the first]. Going
+  // past either end lands on a copy, which is then swapped for the real slide it shows, so the strip
+  // reads as endless. With one dojo there is nothing to loop.
+  const count = dojos.length;
+  const loop = count > 1;
+  const offset = loop ? 1 : 0;
+  const slides = loop
+    ? [
+        { dojo: dojos[count - 1], index: count - 1, copy: true },
+        ...dojos.map((dojo, index) => ({ dojo, index, copy: false })),
+        { dojo: dojos[0], index: 0, copy: true },
+      ]
+    : dojos.map((dojo, index) => ({ dojo, index, copy: false }));
+  const last = slides.length - 1;
+
+  const clampPosition = useCallback(
+    (position: number) => Math.max(0, Math.min(last, position)),
+    [last],
   );
 
-  const scrollToSlide = useCallback((index: number, behavior: ScrollBehavior) => {
-    const slide = slideRefs.current[index];
+  const scrollToSlide = useCallback((position: number, behavior: ScrollBehavior) => {
+    const slide = slideRefs.current[position];
     trackRef.current?.scrollTo({ left: slide?.offsetLeft ?? 0, behavior });
   }, []);
 
-  const goTo = useCallback(
-    (index: number) => {
-      const clamped = clampIndex(index);
+  const scrollToPosition = useCallback(
+    (position: number) => {
+      const clamped = clampPosition(position);
       targetRef.current = clamped;
       const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       scrollToSlide(clamped, reduce ? "auto" : "smooth");
     },
-    [clampIndex, scrollToSlide],
+    [clampPosition, scrollToSlide],
   );
 
-  const step = (delta: number) => goTo((targetRef.current ?? active) + delta);
+  /** Show dojo `index` (0-based). */
+  const goTo = (index: number) => scrollToPosition(index + offset);
+
+  const step = (delta: number) => {
+    const track = trackRef.current;
+    if (track === null || track.clientWidth === 0) return;
+    const width = track.clientWidth;
+    let to = (targetRef.current ?? Math.round(track.scrollLeft / width)) + delta;
+    if (loop && (to < 0 || to > last)) {
+      // Pressed again while heading onto a copy: hop one lap (the view doesn't change) and go on.
+      const lap = to < 0 ? count : -count;
+      track.scrollTo({ left: track.scrollLeft + lap * width, behavior: "instant" });
+      to += lap;
+    }
+    scrollToPosition(to);
+  };
+
+  /** Resting on a copy: swap in the real slide it shows. Identical pixels, so nothing visibly moves. */
+  const wrapIfOnCopy = () => {
+    const track = trackRef.current;
+    if (!loop || track === null || touchingRef.current || track.clientWidth === 0) return;
+    const width = track.clientWidth;
+    let lap = 0;
+    if (Math.abs(track.scrollLeft) < 1) lap = count;
+    else if (Math.abs(track.scrollLeft - last * width) < 1) lap = -count;
+    if (lap === 0) return;
+    targetRef.current = null;
+    track.scrollTo({ left: track.scrollLeft + lap * width, behavior: "instant" });
+  };
+
+  /** Check for a copy once scrolling stops (scrollend isn't everywhere, so also after a pause). */
+  const settleSoon = () => {
+    clearTimeout(settleTimer.current);
+    settleTimer.current = setTimeout(wrapIfOnCopy, 120);
+  };
+
+  useEffect(() => () => clearTimeout(settleTimer.current), []);
 
   // The slide nearest the scroll position is the active one, however it got there (swipe,
   // trackpad, buttons). Remembered for the tab, so coming back from a dojo lands on the same one.
   const onScroll = () => {
+    settleSoon();
     const track = trackRef.current;
     if (track === null || track.clientWidth === 0) return;
-    const index = clampIndex(Math.round(track.scrollLeft / track.clientWidth));
-    if (targetRef.current === index) targetRef.current = null;
+    const position = clampPosition(Math.round(track.scrollLeft / track.clientWidth));
+    if (targetRef.current === position) targetRef.current = null;
+    const index = slides[position].index;
     if (index === active) return;
     setActive(index);
     try {
@@ -74,16 +137,27 @@ export function HomeCarousel() {
     targetRef.current = null;
   };
 
-  // Before first paint, so coming back doesn't flash the first dojo.
+  const onTouchStart = () => {
+    touchingRef.current = true;
+    dropTarget();
+  };
+
+  const onTouchEnd = () => {
+    touchingRef.current = false;
+    settleSoon();
+  };
+
+  // Before first paint, so coming back doesn't flash the first dojo (or, looping, the copy).
   useLayoutEffect(() => {
     let saved = 0;
     try {
       saved = Number(sessionStorage.getItem(SLIDE_KEY) ?? 0);
     } catch {
-      return;
+      // Storage blocked: start on the first dojo.
     }
-    if (Number.isInteger(saved) && saved > 0) scrollToSlide(clampIndex(saved), "auto");
-  }, [clampIndex, scrollToSlide]);
+    const index = Number.isInteger(saved) && saved > 0 && saved < count ? saved : 0;
+    if (index + offset > 0) scrollToSlide(index + offset, "auto");
+  }, [count, offset, scrollToSlide]);
 
   const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     if (e.target !== e.currentTarget) return;
@@ -108,21 +182,25 @@ export function HomeCarousel() {
           tabIndex={0}
           onKeyDown={onKeyDown}
           onScroll={onScroll}
+          onScrollEnd={wrapIfOnCopy}
           onPointerDown={dropTarget}
-          onTouchStart={dropTarget}
+          onTouchStart={onTouchStart}
+          onTouchEnd={onTouchEnd}
+          onTouchCancel={onTouchEnd}
           onWheel={dropTarget}
           className="relative flex flex-1 snap-x snap-mandatory [scrollbar-width:none] overflow-x-auto overscroll-x-contain focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-black/40 [&::-webkit-scrollbar]:hidden"
         >
-          {dojos.map((dojo, i) => (
+          {slides.map(({ dojo, index, copy }, position) => (
             <DojoSlide
-              key={dojo.id}
+              key={copy ? `copy-${position}` : dojo.id}
               ref={(el) => {
-                slideRefs.current[i] = el;
+                slideRefs.current[position] = el;
               }}
               dojo={dojo}
-              index={i}
-              total={dojos.length}
-              active={i === active}
+              index={index}
+              total={count}
+              active={index === active}
+              copy={copy}
             />
           ))}
         </div>
@@ -140,12 +218,16 @@ function DojoSlide({
   index,
   total,
   active,
+  copy,
 }: {
   ref: (el: HTMLDivElement | null) => void;
   dojo: DojoSummary;
   index: number;
   total: number;
+  /** This dojo is the one shown: its art plays (a copy's too, so the swap is seamless). */
   active: boolean;
+  /** A loop copy at either end of the track: seen mid-swipe only, hidden from assistive tech. */
+  copy: boolean;
 }) {
   const t = useT();
   const text = useText();
@@ -156,10 +238,11 @@ function DojoSlide({
   return (
     <div
       ref={ref}
-      role="group"
-      aria-roledescription="slide"
-      aria-label={t("home.slide")(index + 1, total)}
-      inert={!active}
+      role={copy ? undefined : "group"}
+      aria-roledescription={copy ? undefined : "slide"}
+      aria-label={copy ? undefined : t("home.slide")(index + 1, total)}
+      aria-hidden={copy || undefined}
+      inert={copy || !active}
       className="relative flex w-full shrink-0 snap-center snap-always flex-col"
       style={art && { backgroundColor: art.background }}
     >
@@ -282,13 +365,7 @@ function CarouselControls({
         "md:top-auto md:right-8 md:bottom-[88px] md:h-12 lg:right-10",
       )}
     >
-      <button
-        type="button"
-        onClick={() => step(-1)}
-        disabled={active === 0}
-        aria-label={t("home.prev")}
-        className={arrow}
-      >
+      <button type="button" onClick={() => step(-1)} aria-label={t("home.prev")} className={arrow}>
         <ChevronLeft aria-hidden className="size-5" />
       </button>
       <div className="flex items-center gap-1 px-1">
@@ -311,13 +388,7 @@ function CarouselControls({
           </button>
         ))}
       </div>
-      <button
-        type="button"
-        onClick={() => step(1)}
-        disabled={active === dojos.length - 1}
-        aria-label={t("home.next")}
-        className={arrow}
-      >
+      <button type="button" onClick={() => step(1)} aria-label={t("home.next")} className={arrow}>
         <ChevronRight aria-hidden className="size-5" />
       </button>
     </div>
