@@ -14,6 +14,12 @@ export const loginBonus = defineScenario({
   title: "No money, just your login",
   summary: "Bonus: your candidate account is ready. Just sign in.",
   legit: false,
+  primer: {
+    title: "No money, just your login",
+    body: "Read the email, check where it wants to take you, then decide what to do.",
+    setup:
+      "You're Ananya. You've been applying for internships, and an email says your candidate account is ready. All you have to do is sign in to see your offer documents.",
+  },
   startNodeId: "gmail-login",
 
   nodes: {

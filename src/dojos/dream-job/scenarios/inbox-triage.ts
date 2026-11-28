@@ -20,6 +20,12 @@ export const inboxTriage = defineScenario({
   title: "Sort the inbox",
   summary: "Five job emails. Label each one Legit, Scam or Needs checking.",
   legit: false,
+  primer: {
+    title: "Sort the inbox",
+    body: "Open each email and label it Legit, Scam or Needs checking. Not every job email is a scam.",
+    setup:
+      "You're Ananya. After weeks of internship applications, replies have started arriving. Five job emails are waiting in your inbox.",
+  },
   startNodeId: "inbox",
 
   nodes: {
