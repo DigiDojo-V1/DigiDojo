@@ -1,53 +1,82 @@
 "use client";
 
-import { ChevronLeft, Star } from "lucide-react";
+import { Archive, ChevronLeft, Clock, MailOpen, Star, Trash2 } from "lucide-react";
 import type { TriageLabel } from "@/engine/schema";
 import { useT } from "@/i18n/hooks";
 import { cn } from "@/lib/utils";
+import { FileTypeIcon, fileKind, shortMailDate } from "./gmail/brand";
 import { MailAvatar } from "./MailShell";
 import { useInDojoPanel } from "./panel-slot";
 
 export interface InboxRow {
   id: string;
   displayName: string;
-  shortAddress: string;
   subject: string;
   preview: string;
   date: string;
+  /** Attachment names as the email shows them, drawn as chips under the row. */
+  attachments?: { id: string; name: string }[];
   label?: TriageLabel;
   /** Opened already: drawn as read (not bold). */
   opened?: boolean;
 }
 
+/** Gmail label colours (background and text) for the player's triage labels. */
 const LABEL_STYLE: Record<TriageLabel, string> = {
-  legit: "bg-emerald-100 text-emerald-900 ring-emerald-200",
-  scam: "bg-red-100 text-red-900 ring-red-200",
-  "needs-checking": "bg-amber-100 text-amber-900 ring-amber-200",
+  legit: "bg-[#b9e4d0] text-[#0b4f30]",
+  scam: "bg-[#f2b2a8] text-[#8a1c0a]",
+  "needs-checking": "bg-[#ffe6c7] text-[#7a4706]",
 };
 
-/** The inbox list. Tapping a row opens it; the chosen label shows as a chip under the preview. */
-export function InboxList({ rows, onOpen }: { rows: InboxRow[]; onOpen: (id: string) => void }) {
+/** A Gmail label chip showing the player's triage label for an email. */
+export function TriageLabelChip({ label, className }: { label: TriageLabel; className?: string }) {
   const t = useT();
+  return (
+    <span
+      className={cn(
+        "inline-block shrink-0 rounded-[4px] px-1.5 text-xs leading-5 font-medium whitespace-nowrap",
+        LABEL_STYLE[label],
+        className,
+      )}
+    >
+      {t(`triage.${label}`)}
+    </span>
+  );
+}
+
+/** An attachment chip under a list row: type icon and name in a rounded outline. */
+function AttachmentChip({ name }: { name: string }) {
+  return (
+    <span className="flex h-8 max-w-[200px] min-w-0 items-center gap-2 rounded-full border border-[#dadce0] bg-white pr-3 pl-2 text-[13px] font-medium text-[#444746]">
+      <FileTypeIcon kind={fileKind(name)} />
+      <span className="truncate">{name}</span>
+    </span>
+  );
+}
+
+/** The inbox list. Tapping a row opens it; the chosen label shows as a Gmail label chip. */
+export function InboxList({ rows, onOpen }: { rows: InboxRow[]; onOpen: (id: string) => void }) {
   const desktop = useInDojoPanel();
   if (desktop) return <DenseInboxList rows={rows} onOpen={onOpen} />;
   return (
     <ul className="pb-32">
       {rows.map((row) => {
         const unread = row.opened !== true;
+        const chips = row.label !== undefined || (row.attachments?.length ?? 0) > 0;
         return (
           <li key={row.id}>
             <button
               type="button"
               onClick={() => onOpen(row.id)}
-              className="flex min-h-16 w-full gap-3 px-4 py-3 text-left hover:bg-slate-50 active:bg-slate-100"
+              className="flex min-h-16 w-full gap-4 px-4 py-3 text-left hover:bg-black/[0.03] active:bg-black/5"
             >
               <MailAvatar name={row.displayName} />
               <span className="flex min-w-0 flex-1 flex-col">
                 <span className="flex items-baseline gap-2">
                   <span
                     className={cn(
-                      "min-w-0 flex-1 truncate text-[15px]",
-                      unread ? "font-bold text-slate-900" : "text-slate-700",
+                      "min-w-0 flex-1 truncate text-base",
+                      unread ? "font-bold text-[#1f1f1f]" : "text-[#444746]",
                     )}
                   >
                     {row.displayName}
@@ -55,37 +84,34 @@ export function InboxList({ rows, onOpen }: { rows: InboxRow[]; onOpen: (id: str
                   <span
                     className={cn(
                       "shrink-0 text-xs",
-                      unread ? "font-bold text-slate-900" : "text-slate-500",
+                      unread ? "font-bold text-[#1f1f1f]" : "text-[#444746]",
                     )}
                   >
-                    {row.date}
+                    {shortMailDate(row.date)}
                   </span>
-                </span>
-                <span className="truncate text-xs text-slate-500">{row.shortAddress}</span>
-                <span className="flex items-start gap-2">
-                  <span className="min-w-0 flex-1">
-                    <span
-                      className={cn(
-                        "block truncate text-sm",
-                        unread ? "font-bold text-slate-900" : "text-slate-700",
-                      )}
-                    >
-                      {row.subject}
-                    </span>
-                    <span className="line-clamp-2 text-sm text-slate-500">{row.preview}</span>
-                  </span>
-                  <Star className="mt-1 size-5 shrink-0 text-slate-400" aria-hidden />
                 </span>
                 <span
                   className={cn(
-                    "mt-1.5 self-start rounded-md px-2 py-0.5 text-xs font-medium ring-1",
-                    row.label === undefined
-                      ? "bg-slate-50 text-slate-500 ring-slate-200"
-                      : LABEL_STYLE[row.label],
+                    "truncate text-sm",
+                    unread ? "font-bold text-[#1f1f1f]" : "text-[#444746]",
                   )}
                 >
-                  {row.label === undefined ? t("triage.unlabelled") : t(`triage.${row.label}`)}
+                  {row.subject}
                 </span>
+                <span className="flex items-start gap-3">
+                  <span className="min-w-0 flex-1 truncate text-sm text-[#444746]">
+                    {row.preview}
+                  </span>
+                  <Star className="-mt-0.5 size-5 shrink-0 text-[#444746]" aria-hidden />
+                </span>
+                {chips && (
+                  <span className="mt-2 flex min-w-0 flex-wrap items-center gap-2">
+                    {row.label !== undefined && <TriageLabelChip label={row.label} />}
+                    {row.attachments?.map((a) => (
+                      <AttachmentChip key={a.id} name={a.name} />
+                    ))}
+                  </span>
+                )}
               </span>
             </button>
           </li>
@@ -95,9 +121,8 @@ export function InboxList({ rows, onOpen }: { rows: InboxRow[]; onOpen: (id: str
   );
 }
 
-/** Desktop webmail rows: one line each, sender | subject - preview | label | date. */
+/** Gmail on the web: one line per email, sender | label, subject - snippet | date. */
 function DenseInboxList({ rows, onOpen }: { rows: InboxRow[]; onOpen: (id: string) => void }) {
-  const t = useT();
   return (
     <ul>
       {rows.map((row) => {
@@ -108,40 +133,55 @@ function DenseInboxList({ rows, onOpen }: { rows: InboxRow[]; onOpen: (id: strin
               type="button"
               onClick={() => onOpen(row.id)}
               className={cn(
-                "relative flex h-10 w-full items-center gap-3 border-b border-[#f1f3f4] px-4 text-left text-sm text-[#1f1f1f] hover:z-10 hover:shadow-[inset_1px_0_0_#dadce0,inset_-1px_0_0_#dadce0,0_1px_2px_0_rgba(60,64,67,.3),0_1px_3px_1px_rgba(60,64,67,.15)]",
+                "group relative flex w-full flex-col text-left text-sm text-[#1f1f1f] shadow-[inset_0_-1px_0_0_rgba(100,121,143,0.12)] hover:z-10 hover:shadow-[inset_1px_0_0_#dadce0,inset_-1px_0_0_#dadce0,0_1px_2px_0_rgba(60,64,67,.3),0_1px_3px_1px_rgba(60,64,67,.15)]",
                 unread ? "bg-white" : "bg-[#f2f6fc]",
               )}
             >
-              <span
-                aria-hidden
-                className="size-[18px] shrink-0 rounded-sm border-2 border-[#c4c7c5]"
-              />
-              <Star aria-hidden className="size-[18px] shrink-0 text-[#c4c7c5]" />
-              <span className={cn("w-[180px] shrink-0 truncate", unread && "font-bold")}>
-                {row.displayName}
+              <span className="flex h-10 w-full items-center pr-4 pl-3">
+                <span aria-hidden className="flex w-8 shrink-0 justify-center">
+                  <span className="size-[18px] rounded-[3px] border-2 border-[#c4c7c5] group-hover:border-[#444746]" />
+                </span>
+                <span aria-hidden className="flex w-8 shrink-0 justify-center">
+                  <Star className="size-5 text-[#c4c7c5] group-hover:text-[#444746]" />
+                </span>
+                <span
+                  className={cn("w-[200px] shrink-0 truncate pr-8 pl-2", unread && "font-bold")}
+                >
+                  {row.displayName}
+                </span>
+                <span className="flex min-w-0 flex-1 items-center gap-1">
+                  {row.label !== undefined && <TriageLabelChip label={row.label} />}
+                  <span className="min-w-0 flex-1 truncate">
+                    <span className={cn(unread && "font-bold")}>{row.subject}</span>
+                    <span className="text-[#5f6368]"> - {row.preview}</span>
+                  </span>
+                </span>
+                <span
+                  className={cn(
+                    "w-[72px] shrink-0 pl-2.5 text-right text-xs whitespace-nowrap group-hover:hidden",
+                    unread ? "font-bold" : "text-[#5f6368]",
+                  )}
+                >
+                  {shortMailDate(row.date)}
+                </span>
+                <span
+                  aria-hidden
+                  className="hidden shrink-0 items-center text-[#444746] group-hover:flex"
+                >
+                  {[Archive, Trash2, MailOpen, Clock].map((Icon, i) => (
+                    <span key={i} className="flex size-10 items-center justify-center">
+                      <Icon className="size-5" />
+                    </span>
+                  ))}
+                </span>
               </span>
-              <span className="min-w-0 flex-1 truncate">
-                <span className={cn(unread && "font-bold")}>{row.subject}</span>
-                <span className="text-[#5f6368]"> - {row.preview}</span>
-              </span>
-              <span
-                className={cn(
-                  "shrink-0 rounded px-1.5 py-0.5 text-xs font-medium ring-1",
-                  row.label === undefined
-                    ? "bg-slate-50 text-slate-500 ring-slate-200"
-                    : LABEL_STYLE[row.label],
-                )}
-              >
-                {row.label === undefined ? t("triage.unlabelled") : t(`triage.${row.label}`)}
-              </span>
-              <span
-                className={cn(
-                  "shrink-0 text-right text-xs whitespace-nowrap",
-                  unread && "font-bold",
-                )}
-              >
-                {row.date}
-              </span>
+              {(row.attachments?.length ?? 0) > 0 && (
+                <span className="-mt-1 flex gap-2 pr-4 pb-2 pl-[276px]">
+                  {row.attachments!.map((a) => (
+                    <AttachmentChip key={a.id} name={a.name} />
+                  ))}
+                </span>
+              )}
             </button>
           </li>
         );
@@ -196,15 +236,4 @@ export function TriageLabelBar({
       </button>
     </div>
   );
-}
-
-/** Shortens an address for the inbox list, keeping the domain: "nisha...@onboard-hr.example". */
-export function shortAddress(address: string): string {
-  const at = address.lastIndexOf("@");
-  if (at === -1) return address;
-  const local = address.slice(0, at);
-  const host = address.slice(at + 1);
-  const parts = host.split(".");
-  const domain = parts.length > 2 ? parts.slice(-2).join(".") : host;
-  return `${local.length > 8 ? `${local.slice(0, 5)}...` : local}@${domain}`;
 }

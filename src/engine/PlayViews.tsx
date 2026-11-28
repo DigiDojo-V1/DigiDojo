@@ -22,7 +22,7 @@ import { ComposeBody } from "@/shells/ComposeShell";
 import { EvidenceSheet } from "@/shells/EvidenceSheet";
 import { PanelBody } from "@/shells/evidence/PanelViews";
 import { DojoPanel, useInDojoPanel } from "@/shells/panel-slot";
-import { InboxList, shortAddress, TriageLabelBar, type InboxRow } from "@/shells/InboxShell";
+import { InboxList, TriageLabelBar, TriageLabelChip, type InboxRow } from "@/shells/InboxShell";
 import { MailBody, MailShell } from "@/shells/MailShell";
 import { emailOpenIds, panelFieldIds } from "./evidence";
 import type { Choice, ComposeNode, EmailNode, EvidencePanel, Scenario, TriageNode } from "./schema";
@@ -523,21 +523,26 @@ export function TriageView({
     return {
       id: item.id,
       displayName: mail.displayName,
-      shortAddress: shortAddress(mail.from.address),
       subject: mail.subject,
       preview: mail.preview,
       date: mail.date,
+      attachments: mail.attachments.map((a) => ({ id: a.id, name: a.shownName })),
       label: classifications[item.id],
       opened: seen.includes(item.email.from.id),
     };
   });
 
+  const unread = rows.filter((row) => row.opened !== true).length;
+
   if (openItem !== undefined) {
+    const label = classifications[openItem.id];
     return (
       <>
         <MailShell
           title={t("mail.inbox")}
           backHref={backHref}
+          pager={t("mail.position")(node.items.indexOf(openItem) + 1, node.items.length)}
+          unreadCount={unread}
           footer={
             <DojoPanel>
               <TriageLabelBar
@@ -555,6 +560,7 @@ export function TriageView({
             onToggleFlag={toggleFlag}
             onReveal={reveal}
             onOpenPanel={evidence.open}
+            labels={label === undefined ? undefined : <TriageLabelChip label={label} />}
           />
         </MailShell>
         {evidence.sheet}
@@ -568,6 +574,8 @@ export function TriageView({
       backHref={backHref}
       variant="inbox"
       hint={t("triage.hint")}
+      pager={t("mail.range")(1, node.items.length, node.items.length)}
+      unreadCount={unread}
       footer={
         <DojoPanel>
           <div className="sticky bottom-0 z-30 space-y-2 border-t bg-white/95 p-3 backdrop-blur lg:static lg:border-0 lg:bg-transparent lg:p-0 lg:backdrop-blur-none">
