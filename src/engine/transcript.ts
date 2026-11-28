@@ -15,6 +15,9 @@ export function toBubble(message: Message, locale: Locale): ChatBubble {
     // Words in other people's messages can be highlighted; red flags inside stay hidden.
     flaggable: message.from !== "me",
     time: message.time,
+    ...(message.voiceNote === undefined
+      ? {}
+      : { voiceNote: { durationSec: message.voiceNote.durationSec } }),
   };
 }
 

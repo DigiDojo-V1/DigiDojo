@@ -88,6 +88,20 @@ export const SegmentSchema = z.strictObject({
 });
 export type Segment = z.output<typeof SegmentSchema>;
 
+/**
+ * Draws a message as a voice note: a play button, a waveform and the length. The message's
+ * `text` (or `segments`) is the transcript, shown under the player and flaggable as usual.
+ */
+export const VoiceNoteSchema = z.strictObject({
+  /** Length shown on the note, in seconds. */
+  durationSec: z.number().int().min(1).max(300),
+  /** Which generated voice reads it. Default "male". */
+  voice: z.enum(["male", "female"]).optional(),
+  /** How it's spoken. Default "casual". */
+  mood: z.enum(["casual", "urgent", "pleading"]).optional(),
+});
+export type VoiceNote = z.output<typeof VoiceNoteSchema>;
+
 export const MessageSchema = z.strictObject({
   /** Unique within the scenario, across every flaggable item. */
   id: kebabCase,
@@ -105,6 +119,8 @@ export const MessageSchema = z.strictObject({
   time: z.string().min(1).optional(),
   /** Set only if this message carries a red flag. Not allowed with `segments`. */
   redFlagId: kebabCase.optional(),
+  /** Show it as a voice note, with the text as its transcript. Not for `system` messages. */
+  voiceNote: VoiceNoteSchema.optional(),
 });
 export type Message = z.output<typeof MessageSchema>;
 
@@ -590,6 +606,12 @@ function checkScenarioGraph(s: ScenarioData, ctx: z.RefinementCtx): void {
           issue(
             [...at, "messages", i],
             `message "${message.id}" needs exactly one of text or segments`,
+          );
+        }
+        if (message.voiceNote !== undefined && message.from === "system") {
+          issue(
+            [...at, "messages", i, "voiceNote"],
+            `message "${message.id}" is a system message and can't be a voice note`,
           );
         }
         if (hasSegments && message.redFlagId !== undefined) {

@@ -7,6 +7,7 @@ import { AppChrome } from "@/components/layout/AppChrome";
 import { TopBar } from "@/components/TopBar";
 import { Button } from "@/components/ui/button";
 import { useLocale, useT, useText } from "@/i18n/hooks";
+import type { Locale } from "@/i18n/locale";
 import { formatRupees } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { CallShell } from "@/shells/CallShell";
@@ -36,6 +37,7 @@ import { scenarioKey } from "./keys";
 import { ScenarioIntro } from "./ScenarioIntro";
 import { currentNodeId, useProgressStore, useRunStore } from "./store";
 import { channelTransition, priorTranscript, toBubble } from "./transcript";
+import { voiceNoteSrc } from "./voice";
 
 const DEFAULT_DELAY_MS = 800;
 
@@ -208,8 +210,19 @@ function ThreadView({
   // Text is resolved on every render, so switching language mid-run just re-renders this screen.
   const prior = useMemo(() => priorTranscript(scenario, trail, locale), [scenario, trail, locale]);
   const messages = useMemo(
-    () => [...prior, ...node.messages.slice(0, revealed).map((m) => toBubble(m, locale))],
-    [prior, node.messages, revealed, locale],
+    () =>
+      [...prior, ...node.messages.slice(0, revealed).map((m) => toBubble(m, locale))].map((b) =>
+        b.voiceNote === undefined
+          ? b
+          : {
+              ...b,
+              voiceNote: {
+                ...b.voiceNote,
+                src: voiceSrcFor(scenario, b.id, locale),
+              },
+            },
+      ),
+    [prior, node.messages, revealed, locale, scenario],
   );
 
   const typing = next !== undefined && next.from === "them" && !seenBefore.has(next.id);
@@ -289,6 +302,16 @@ function Shell({ app, ...props }: ShellProps & { app: ThreadApp }) {
     case "call":
       return <CallShell {...props} />;
   }
+}
+
+/** The recording for a voice note bubble, found by its message id. */
+function voiceSrcFor(scenario: Scenario, messageId: string, locale: Locale): string | undefined {
+  for (const node of Object.values(scenario.nodes)) {
+    if (node.kind !== "thread") continue;
+    const message = node.messages.find((m) => m.id === messageId);
+    if (message !== undefined) return voiceNoteSrc(scenario.dojoId, scenario.id, message, locale);
+  }
+  return undefined;
 }
 
 /* ------------------------------------------------------------------ */

@@ -19,7 +19,8 @@ import type { ThreadApp } from "@/engine/schema";
 import { useT } from "@/i18n/hooks";
 import { cn } from "@/lib/utils";
 import { HighlightableText } from "./HighlightableText";
-import type { ChannelTransitionView, ChatBubble } from "./types";
+import type { ChannelTransitionView, ChatBubble, ShellContact } from "./types";
+import { VoiceNote, type VoiceNoteTone } from "./VoiceNote";
 
 /* Pieces shared by the phone and desktop layouts of ChatShell. */
 
@@ -38,7 +39,25 @@ export interface ThemeStyle {
   sender: string;
   /** Widest a bubble may get. Defaults to 80% (phones). */
   bubbleMax?: string;
+  /** "tail": a pointed corner on the sender's side. "round": soft pills with no shadow. */
+  bubble: "tail" | "round";
+  /** Show the contact's small avatar beside the last message of each run of theirs. */
+  themAvatar: boolean;
+  /** Ring around the header avatar, like an active story. */
+  avatarRing?: string;
+  /** Icons on the right of the header. */
+  headerIcons: "call-more" | "call-video";
+  /** Voice notes in other people's bubbles and in yours. */
+  voiceThem: VoiceNoteTone;
+  voiceMe: VoiceNoteTone;
 }
+
+const NEUTRAL_VOICE: VoiceNoteTone = {
+  button: "bg-neutral-800 text-white",
+  played: "bg-neutral-800",
+  idle: "bg-neutral-300",
+  muted: "text-neutral-500",
+};
 
 /** Our own simple palettes. Not copies of the real apps' branding. */
 export const THEMES: Record<ChatTheme, ThemeStyle> = {
@@ -52,6 +71,21 @@ export const THEMES: Record<ChatTheme, ThemeStyle> = {
     me: "bg-emerald-100 text-neutral-900",
     system: "bg-amber-50 text-amber-900",
     sender: "text-emerald-700",
+    bubble: "tail",
+    themAvatar: false,
+    headerIcons: "call-more",
+    voiceThem: {
+      button: "bg-emerald-600 text-white",
+      played: "bg-emerald-600",
+      idle: "bg-neutral-300",
+      muted: "text-neutral-500",
+    },
+    voiceMe: {
+      button: "bg-emerald-700 text-white",
+      played: "bg-emerald-700",
+      idle: "bg-emerald-300",
+      muted: "text-emerald-800/70",
+    },
   },
   telegram: {
     layout: "bubbles",
@@ -63,17 +97,48 @@ export const THEMES: Record<ChatTheme, ThemeStyle> = {
     me: "bg-sky-100 text-neutral-900",
     system: "bg-sky-900/10 text-sky-950",
     sender: "text-sky-700",
+    bubble: "tail",
+    themAvatar: false,
+    headerIcons: "call-more",
+    voiceThem: {
+      button: "bg-sky-600 text-white",
+      played: "bg-sky-600",
+      idle: "bg-sky-200",
+      muted: "text-neutral-500",
+    },
+    voiceMe: {
+      button: "bg-sky-700 text-white",
+      played: "bg-sky-700",
+      idle: "bg-sky-300",
+      muted: "text-sky-800/70",
+    },
   },
   instagram: {
     layout: "bubbles",
-    header: "border-b bg-white text-neutral-900",
+    header: "border-b border-neutral-200 bg-white text-neutral-900",
     headerMuted: "text-neutral-500",
-    avatar: "bg-violet-200 text-violet-900",
+    avatar: "bg-violet-100 text-violet-800",
     wallpaper: "bg-white",
     them: "bg-neutral-100 text-neutral-900",
     me: "bg-violet-600 text-white",
-    system: "bg-neutral-100 text-neutral-600",
-    sender: "text-violet-700",
+    system: "text-neutral-500",
+    sender: "text-neutral-500",
+    bubble: "round",
+    themAvatar: true,
+    avatarRing: "ring-2 ring-violet-500 ring-offset-2 ring-offset-white",
+    headerIcons: "call-video",
+    voiceThem: {
+      button: "bg-violet-600 text-white",
+      played: "bg-violet-600",
+      idle: "bg-neutral-300",
+      muted: "text-neutral-500",
+    },
+    voiceMe: {
+      button: "bg-white text-violet-700",
+      played: "bg-white",
+      idle: "bg-white/40",
+      muted: "text-violet-100",
+    },
   },
   sms: {
     layout: "bubbles",
@@ -85,6 +150,16 @@ export const THEMES: Record<ChatTheme, ThemeStyle> = {
     me: "bg-blue-600 text-white",
     system: "bg-transparent text-slate-500",
     sender: "text-slate-600",
+    bubble: "tail",
+    themAvatar: false,
+    headerIcons: "call-more",
+    voiceThem: NEUTRAL_VOICE,
+    voiceMe: {
+      button: "bg-white text-blue-700",
+      played: "bg-white",
+      idle: "bg-white/40",
+      muted: "text-blue-100",
+    },
   },
   linkedin: {
     layout: "cards",
@@ -96,6 +171,11 @@ export const THEMES: Record<ChatTheme, ThemeStyle> = {
     me: "bg-indigo-50 text-slate-900 ring-1 ring-indigo-100",
     system: "text-slate-500",
     sender: "text-slate-900",
+    bubble: "tail",
+    themAvatar: false,
+    headerIcons: "call-more",
+    voiceThem: NEUTRAL_VOICE,
+    voiceMe: NEUTRAL_VOICE,
   },
 };
 
@@ -203,6 +283,21 @@ export function MessageText({ message }: { message: ChatBubble }) {
   return <HighlightableText targetId={message.id} text={message.text} />;
 }
 
+/** The message as text, or as a voice note with its transcript. */
+export function MessageBody({ message, tone }: { message: ChatBubble; tone: VoiceNoteTone }) {
+  if (message.voiceNote === undefined) return <MessageText message={message} />;
+  return (
+    <VoiceNote
+      id={message.id}
+      durationSec={message.voiceNote.durationSec}
+      src={message.voiceNote.src}
+      speech={message.text}
+      transcript={<MessageText message={message} />}
+      tone={tone}
+    />
+  );
+}
+
 /* ------------------------------------------------------------------ */
 /* Cards layout: name and time above each message, like a work inbox   */
 /* ------------------------------------------------------------------ */
@@ -282,7 +377,7 @@ export function MessageCard({
       )}
       <div className="pl-12">
         <div className={cardClass}>
-          <MessageText message={message} />
+          <MessageBody message={message} tone={isMe ? style.voiceMe : style.voiceThem} />
         </div>
         {isMe && (
           <p className="mt-1 flex items-center justify-end gap-1 text-[11px] text-slate-500">
@@ -315,9 +410,23 @@ export function CardTyping({ name, style }: { name: string; style: ThemeStyle })
 /* Bubbles layout: a messaging app                                     */
 /* ------------------------------------------------------------------ */
 
-export function Bubble({ message, style }: { message: ChatBubble; style: ThemeStyle }) {
+export function Bubble({
+  message,
+  next,
+  lastShown,
+  contact,
+  style,
+}: {
+  message: ChatBubble;
+  next: ChatBubble | undefined;
+  /** Nothing comes after it yet (no later message, no typing indicator). */
+  lastShown: boolean;
+  contact: ShellContact;
+  style: ThemeStyle;
+}) {
   const isMe = message.from === "me";
   const isSystem = message.from === "system";
+  const round = style.bubble === "round";
 
   const body = (
     <>
@@ -326,19 +435,28 @@ export function Bubble({ message, style }: { message: ChatBubble; style: ThemeSt
           {message.sender}
         </span>
       )}
-      <MessageText message={message} />
+      <MessageBody message={message} tone={isMe ? style.voiceMe : style.voiceThem} />
     </>
   );
 
   const bubbleClass = cn(
-    "relative px-3 py-2 text-left text-[15px] leading-snug shadow-sm",
+    "relative px-3 py-2 text-left text-[15px] leading-snug",
     style.bubbleMax ?? "max-w-[80%]",
+    !round && "shadow-sm",
     isSystem
-      ? cn("mx-auto rounded-lg text-center text-[13px] font-medium", style.system)
+      ? cn(
+          "mx-auto text-center text-[13px] font-medium",
+          round ? "max-w-[90%] px-2 py-1 text-xs" : "rounded-lg",
+          style.system,
+        )
       : isMe
-        ? cn("ml-auto rounded-2xl rounded-br-sm", style.me)
-        : cn("mr-auto rounded-2xl rounded-bl-sm", style.them),
+        ? cn("ml-auto", round ? "rounded-[22px] px-3.5" : "rounded-2xl rounded-br-sm", style.me)
+        : cn(round ? "rounded-[22px] px-3.5" : "mr-auto rounded-2xl rounded-bl-sm", style.them),
   );
+
+  // Themes with a side avatar show it once, beside the last message of a run.
+  const withAvatar = style.themAvatar && !isMe && !isSystem;
+  const endsRun = next === undefined ? lastShown : next.from !== message.from;
 
   return (
     <motion.div
@@ -346,25 +464,40 @@ export function Bubble({ message, style }: { message: ChatBubble; style: ThemeSt
       initial={{ opacity: 0, y: 8, scale: 0.98 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.18 }}
-      className="flex"
+      className={cn("flex", withAvatar && "items-end gap-2")}
     >
+      {withAvatar && (
+        <span className={cn("size-7 shrink-0", !endsRun && "invisible")}>
+          <Avatar name={contact.name} src={contact.avatar} className={style.avatar} size="size-7" />
+        </span>
+      )}
       <div className={bubbleClass}>{body}</div>
     </motion.div>
   );
 }
 
-export function TypingIndicator({ className }: { className: string }) {
+export function TypingIndicator({ style, contact }: { style: ThemeStyle; contact: ShellContact }) {
   const t = useT();
+  const round = style.bubble === "round";
   return (
     <motion.div
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.15 }}
-      className="mr-auto"
+      className={cn("mr-auto", style.themAvatar && "flex items-end gap-2")}
       aria-label={t("chat.typingAria")}
     >
-      <TypingDots className={cn("rounded-2xl rounded-bl-sm px-3 py-3 shadow-sm", className)} />
+      {style.themAvatar && (
+        <Avatar name={contact.name} src={contact.avatar} className={style.avatar} size="size-7" />
+      )}
+      <TypingDots
+        className={cn(
+          "px-3 py-3",
+          round ? "rounded-[22px] px-4" : "rounded-2xl rounded-bl-sm shadow-sm",
+          style.them,
+        )}
+      />
     </motion.div>
   );
 }

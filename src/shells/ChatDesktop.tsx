@@ -244,14 +244,21 @@ export function ChatDesktop({
                   style={style}
                 />
               ) : (
-                <Bubble key={m.id} message={m} style={style} />
+                <Bubble
+                  key={m.id}
+                  message={m}
+                  next={messages[i + 1]}
+                  lastShown={i === messages.length - 1 && !typing}
+                  contact={contact}
+                  style={style}
+                />
               ),
             )}
             {typing &&
               (cards ? (
                 <CardTyping key="typing" name={typingSender ?? contact.name} style={style} />
               ) : (
-                <TypingIndicator key="typing" className={style.them} />
+                <TypingIndicator key="typing" style={style} contact={contact} />
               ))}
           </AnimatePresence>
           <div ref={endRef} />

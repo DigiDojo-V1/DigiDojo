@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { AnimatePresence, MotionConfig } from "motion/react";
-import { ChevronLeft, EllipsisVertical, Flag, MoreHorizontal, Phone } from "lucide-react";
+import { ChevronLeft, EllipsisVertical, Flag, MoreHorizontal, Phone, Video } from "lucide-react";
 import { useT } from "@/i18n/hooks";
 import { cn } from "@/lib/utils";
 import { ChatDesktop } from "./ChatDesktop";
@@ -97,7 +97,12 @@ export function ChatShell({
         <ChevronLeft className="size-5" />
       </Link>
       <ContactButton onClick={onContactClick} label={tr("chat.viewProfile")(contact.name)}>
-        <Avatar name={contact.name} src={contact.avatar} className={t.avatar} />
+        <Avatar
+          name={contact.name}
+          src={contact.avatar}
+          className={cn(t.avatar, t.avatarRing)}
+          size={t.avatarRing === undefined ? "size-9" : "size-8"}
+        />
         <div className="min-w-0 flex-1 text-left leading-tight">
           <div className="truncate text-[15px] font-semibold">{contact.name}</div>
           <div className={cn("truncate text-xs", t.headerMuted)}>
@@ -107,6 +112,11 @@ export function ChatShell({
       </ContactButton>
       {cards ? (
         <MoreHorizontal className="mr-2 size-5 shrink-0 opacity-70" aria-hidden />
+      ) : t.headerIcons === "call-video" ? (
+        <div className="mr-1 flex shrink-0 items-center gap-4">
+          <Phone className="size-5" strokeWidth={1.75} aria-label={tr("chat.call")} />
+          <Video className="size-6" strokeWidth={1.75} aria-label={tr("chat.videoCall")} />
+        </div>
       ) : (
         <>
           <Phone className="size-5 shrink-0 opacity-80" aria-hidden />
@@ -149,14 +159,21 @@ export function ChatShell({
                     style={t}
                   />
                 ) : (
-                  <Bubble key={m.id} message={m} style={t} />
+                  <Bubble
+                    key={m.id}
+                    message={m}
+                    next={messages[i + 1]}
+                    lastShown={i === messages.length - 1 && !typing}
+                    contact={contact}
+                    style={t}
+                  />
                 ),
               )}
               {typing &&
                 (cards ? (
                   <CardTyping key="typing" name={typingSender ?? contact.name} style={t} />
                 ) : (
-                  <TypingIndicator key="typing" className={t.them} />
+                  <TypingIndicator key="typing" style={t} contact={contact} />
                 ))}
             </AnimatePresence>
           </div>

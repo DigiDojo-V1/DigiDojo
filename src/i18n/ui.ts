@@ -161,6 +161,12 @@ const en = {
   "chat.sent": "Sent",
   "chat.more": "More options",
   "chat.viewProfile": (name: string) => `View ${name}'s profile`,
+  "chat.call": "Voice call",
+  "chat.videoCall": "Video call",
+  "voice.play": "Play voice note",
+  "voice.stop": "Stop voice note",
+  "voice.label": (length: string) => `Voice note, ${length}`,
+  "voice.transcript": "Transcript",
   "composer.suggested": "Suggested replies",
   "composer.placeholder": "Write a message…",
   "split.messages": "Messages",
@@ -500,6 +506,8 @@ export type UiKey = keyof UiDict;
 const hinglish: Partial<UiDict> = {
   "home.tagline": "Asli scams, nakli apps. Practice yahin karo, nuksaan kahin nahi.",
   "notFound.body": "Yeh page nahi mila.",
+  "voice.play": "Voice note chalao",
+  "voice.stop": "Voice note roko",
 
   "tactic.small-win-first.explanation":
     "Pehle thode paise dete hain, taaki tum unpe bada bharosa kar lo.",

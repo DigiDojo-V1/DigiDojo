@@ -20,6 +20,12 @@ export interface ChatBubble {
   flaggable: boolean;
   /** Display time, e.g. "09:14". */
   time?: string;
+  /** Draw it as a voice note; `text` is the transcript. */
+  voiceNote?: {
+    durationSec: number;
+    /** Generated audio for it, when the server can make one. Otherwise the browser's voice reads it. */
+    src?: string;
+  };
 }
 
 /** The props every fake-app shell accepts, so the player can swap shells by `app`. */
