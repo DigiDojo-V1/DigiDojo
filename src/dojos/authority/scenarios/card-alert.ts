@@ -73,6 +73,14 @@ export const cardAlert = defineScenario({
           "There is no deadline and no penalty. Never rush her.",
           "Never ask her to install anything, tap a link or move money.",
         ],
+        vocabulary: [
+          "Nimbus National Bank",
+          "Kavya Iyer",
+          "GadgetKart Online",
+          "CS-20418",
+          "card security",
+          "18,450",
+        ],
       },
       events: {
         "alert-sms": {

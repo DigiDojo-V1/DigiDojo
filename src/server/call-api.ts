@@ -2,6 +2,7 @@ import { z } from "zod";
 import {
   agentInstructions,
   agentTools,
+  CALL_LANGUAGES,
   CALL_ENDINGS,
   CallReportSchema,
   CallTurnSchema,
@@ -16,6 +17,7 @@ import {
   MAX_TURNS,
   possibleSignals,
   resolveOutcome,
+  transcriptionVocabulary,
   type CallReport,
 } from "@/engine/live-call";
 import type { LiveCallNode, Scenario } from "@/engine/schema";
@@ -75,8 +77,8 @@ export interface LiveConfig {
   systemInstruction: { parts: { text: string }[] };
   speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: string } } };
   tools: ReturnType<typeof agentTools>;
-  inputAudioTranscription: Record<string, never>;
-  outputAudioTranscription: Record<string, never>;
+  inputAudioTranscription: { languageCodes: string[]; customVocabulary: string[] };
+  outputAudioTranscription: { languageCodes: string[] };
 }
 
 export function liveConfig(scenario: Scenario, node: LiveCallNode, locale: Locale): LiveConfig {
@@ -85,8 +87,12 @@ export function liveConfig(scenario: Scenario, node: LiveCallNode, locale: Local
     systemInstruction: { parts: [{ text: agentInstructions(scenario, node, locale) }] },
     speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: node.agent.voice } } },
     tools: agentTools(node),
-    inputAudioTranscription: {},
-    outputAudioTranscription: {},
+    // English and Hindi only, plus the call's names and jargon, so the player is heard accurately.
+    inputAudioTranscription: {
+      languageCodes: [...CALL_LANGUAGES],
+      customVocabulary: transcriptionVocabulary(node),
+    },
+    outputAudioTranscription: { languageCodes: [...CALL_LANGUAGES] },
   };
 }
 

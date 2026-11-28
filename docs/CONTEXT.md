@@ -242,6 +242,7 @@ A `live-call` node is a phone call the player answers with their own voice. An A
       stages: { name: string; say: string; redFlagIds?: string[] }[];
       responses?: { ifPlayer: string; reply: string; redFlagIds?: string[] }[]; // the guide's "response paths"
       rules?: string[];
+      vocabulary?: string[];                          // names, ids and jargon the speech-to-text should expect
     };
     events?: Record<string, CallEvent>;               // things the caller makes happen on the phone
     lifelines?: { id; name; message; reply }[];       // someone the player can quietly text mid-call
@@ -266,6 +267,7 @@ type CallEvent =
 - **Call judge** (`POST /api/call/report`, `src/server/call-api.ts`). After the call, a Gemini text model reads the transcript, the rubric (calibrated with the guide's example users) and the signals, and returns a rating out of 10 (Highly vulnerable < 4 ≤ Moderately safe < 8 ≤ Scam-savvy), what the player did well and wrong (quoting them), what to do better, which red flags the caller actually used, and which red flag each in-call Flag caught. If the judge fails, the player gets a rough local rating. The debrief shows it all as "Your call", with the transcript.
 - **Scoring.** Red flags heard on a call join the normal debrief (`where: "call"`): flagged with the right reason = caught, wrong reason = spotted, heard but not flagged = missed. In-call flags that match nothing are false alarms. Every red flag still needs a carrier in the scripted call (the "every red flag is used" rule still applies).
 - **Security.** The Gemini key never reaches the browser. `POST /api/call/token` builds the whole session config (system prompt, voice, tools) from scenario data and mints a single-use token with that config locked. The browser talks to the Live API directly with it. Both endpoints are rate limited. Our server never stores or logs audio or transcripts. See `docs/DEPLOY_AI.md`.
+- **English and Hindi only.** The speech-to-text is told to expect only `en` and `hi` (`CALL_LANGUAGES`) for both sides, with a vocabulary of call jargon (OTP, KYC, Aadhaar…), both names, the player's made-up details and the node's `agent.vocabulary`, so Indian players are heard accurately. The caller is told never to speak any other language. OTP detection also reads Devanagari digits and Hindi number words.
 - **Never collect real secrets.** The player gets a made-up identity card, every OTP is generated per call, payments are simulated, and the ringing screen says never to say real details.
 - New tactics: `fear`, `blocks-verification`, `fake-proof`, `secret-code`, `small-ask`, `pay-to-clear`.
 

@@ -429,6 +429,11 @@ export const LiveCallNodeSchema = z.strictObject({
       .optional(),
     /** Extra rules for this caller. */
     rules: z.array(AgentText).optional(),
+    /**
+     * Words the speech-to-text should expect on this call (names, ids, jargon), so it hears
+     * them right. The caller's and player's names and the player's details are added for you.
+     */
+    vocabulary: z.array(z.string().trim().min(1).max(60)).max(60).optional(),
   }),
   events: z.record(kebabCase, CallEventSchema).optional(),
   lifelines: z.array(LifelineSchema).optional(),
