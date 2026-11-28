@@ -95,6 +95,19 @@ export const digitalArrest = defineScenario({
           `Only ever name your made-up agency, the ${AGENCY}. Never name a real police force or agency.`,
           "If he pays, say the deposit is received and a clearance certificate will follow tomorrow, remind him to stay quiet, then end the call.",
         ],
+        vocabulary: [
+          "National Narcotics Intelligence Wing",
+          "Inspector Arjun Rawat",
+          "NNIW",
+          "NNIW-7741",
+          "NNIW/CC/2611",
+          "Ishaan",
+          "narcotics",
+          "warrant",
+          "verification deposit",
+          "obstruction of justice",
+          "non-bailable",
+        ],
       },
       events: {
         warrant: {

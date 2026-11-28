@@ -97,6 +97,15 @@ export const kycCall = defineScenario({
           "Don't trigger the OTP message before you've asked for at least some details, unless she's about to hang up.",
           "If she reads out an OTP or pays, say her KYC is now updated, thank her, and end the call.",
         ],
+        vocabulary: [
+          "Nimbus National Bank",
+          "Rohan Mehra",
+          "Mr. Kapoor",
+          "NN-48213",
+          "KYC Verify Services",
+          "re-verification",
+          "central bank guidelines",
+        ],
       },
       events: {
         "otp-sms": {

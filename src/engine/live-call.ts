@@ -197,12 +197,32 @@ const DIGIT_WORDS: Record<string, string> = {
   nau: "9",
 };
 
+/** Hindi number words as the speech-to-text may write them, in Devanagari. */
+const DEVANAGARI_DIGIT_WORDS: Record<string, string> = {
+  शून्य: "0",
+  एक: "1",
+  दो: "2",
+  तीन: "3",
+  चार: "4",
+  पांच: "5",
+  पाँच: "5",
+  छह: "6",
+  छः: "6",
+  छे: "6",
+  सात: "7",
+  आठ: "8",
+  नौ: "9",
+};
+
 /**
  * The digits someone said, in order, with number words turned into digits ("four eight two",
- * "double nine", "char aath"). Everything else is dropped.
+ * "double nine", "char aath", "चार आठ", "४८२"). Everything else is dropped.
  */
 export function spokenDigits(text: string): string {
-  const tokens = text.toLowerCase().match(/[a-z]+|\d+/g) ?? [];
+  // Devanagari digits (०-९) become 0-9.
+  const latin = text.replace(/[०-९]/g, (d) => String(d.charCodeAt(0) - 0x0966));
+  // Latin words, digit runs, or Devanagari words (the block minus its digits and danda marks).
+  const tokens = latin.toLowerCase().match(/[a-z]+|\d+|[ऀ-ॣ॰-ॿ]+/g) ?? [];
   let out = "";
   let repeat = 1;
   for (const token of tokens) {
@@ -214,7 +234,9 @@ export function spokenDigits(text: string): string {
       repeat = 3;
       continue;
     }
-    const digit = /^\d+$/.test(token) ? token : DIGIT_WORDS[token];
+    const digit = /^\d+$/.test(token)
+      ? token
+      : (DIGIT_WORDS[token] ?? DEVANAGARI_DIGIT_WORDS[token]);
     if (digit !== undefined) out += digit.length === 1 ? digit.repeat(repeat) : digit;
     repeat = 1;
   }
@@ -261,11 +283,53 @@ export function fillCode(text: string, code: string | undefined): string {
 export const END_CALL_TOOL = "end_call";
 export const TRIGGER_EVENT_TOOL = "trigger_event";
 
+/**
+ * The only languages a call uses, as BCP-47 codes for the speech-to-text. Telling it to expect
+ * just English and Hindi (rather than guessing among 90+) is what makes it hear Indian players
+ * accurately, including Hinglish.
+ */
+export const CALL_LANGUAGES = ["en", "hi"] as const;
+
 const SPOKEN_LANGUAGE: Record<Locale, string> = {
-  en: "Indian English, the way a call-centre caller in India talks. Keep any Hindi to the odd word like 'ji' or 'achha'.",
+  en: "Indian English, the way a call-centre caller in India talks. Keep any Hindi to the odd word like 'ji' or 'achha'. If the person speaks Hindi, you may answer in Hindi or Hinglish.",
   hinglish:
     "Hinglish: a natural mix of Hindi and English, the way people in Indian cities talk on the phone. If the person answers only in English, follow them into English.",
 };
+
+/** Terms the speech-to-text often mishears on these calls. */
+const BASE_VOCABULARY = [
+  "OTP",
+  "KYC",
+  "PAN",
+  "Aadhaar",
+  "UPI",
+  "CVV",
+  "PIN",
+  "FIR",
+  "IFSC",
+  "1930",
+  "cybercrime.gov.in",
+  "Sanchar Saathi",
+  "digital arrest",
+  "lakh",
+  "crore",
+  "rupees",
+];
+
+/** Most terms the speech-to-text takes; Google suggests up to about 100 for best results. */
+const MAX_VOCABULARY = 100;
+
+/** Words the speech-to-text should expect: common call terms plus this call's names and details. */
+export function transcriptionVocabulary(node: LiveCallNode): string[] {
+  const terms = [
+    ...BASE_VOCABULARY,
+    resolveText(node.caller.name, "en"),
+    node.player.name,
+    ...node.player.details.map((d) => d.value),
+    ...(node.agent.vocabulary ?? []),
+  ];
+  return [...new Set(terms.map((t) => t.trim()).filter((t) => t !== ""))].slice(0, MAX_VOCABULARY);
+}
 
 /** The system instructions for the voice agent on this call. English, built from scenario data. */
 export function agentInstructions(scenario: Scenario, node: LiveCallNode, locale: Locale): string {
@@ -303,6 +367,7 @@ ${events === "" ? "" : `\nTHINGS YOU CAN MAKE HAPPEN ON THEIR PHONE\nCall ${TRIG
 
 HOW YOU SPEAK
 - Language: ${SPOKEN_LANGUAGE[locale]}
+- Only ever speak English, Hindi or a mix of the two. Never switch to any other language, even if the person uses one: answer in simple English then.
 - Like a real phone call: short turns of one to three sentences, then let them talk. Never monologue.
 - React to what they actually say. If they ask a question, answer it in character.
 - Never use stage directions, sound effects, or narration. Only say what ${callerName} would say.
