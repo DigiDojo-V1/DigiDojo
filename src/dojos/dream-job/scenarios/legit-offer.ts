@@ -13,6 +13,12 @@ export const legitOffer = defineScenario({
   title: "The written offer",
   summary: "After two interviews, an offer arrives. Accept it or walk away?",
   legit: true,
+  primer: {
+    title: "The written offer",
+    body: "Open the email, check who sent it and what it asks of you, then decide whether to accept.",
+    setup:
+      "You're Ananya. You've had two interviews with Nexora Technologies for a Business Research Intern role. Today, an email with a written offer lands in your inbox.",
+  },
   startNodeId: "gmail-legit",
 
   nodes: {
