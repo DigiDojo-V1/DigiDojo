@@ -135,10 +135,8 @@ const en = {
   // Dojo page
   "dojo.eyebrow": (order: number) => `Dojo ${order}`,
   "dojo.empty": "No scenarios yet.",
-  "dojo.legit": "Legit",
-  "dojo.coldRun": "Cold run",
   "dojo.takeaways": "What to remember",
-  "dojo.route": "Happens in",
+  "dojo.scenarios": "Scenarios",
 
   // 404
   "notFound.body": "We couldn't find this page.",
