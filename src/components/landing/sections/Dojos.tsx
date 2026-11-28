@@ -1,10 +1,11 @@
 "use client";
 
 import { ArrowRight } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
-import { useRef } from "react";
+import { useRef, useState } from "react";
+import { GRAIN_BACKGROUND } from "@/components/home/art";
 import { isComingSoon, useDojoSummaries } from "@/components/layout/chrome-data";
+import { dojoArt } from "@/dojos/art";
 import { useT, useText } from "@/i18n/hooks";
 import { dojoHref } from "@/lib/routes";
 import { clamp, easeOutCubic } from "../camera";
@@ -47,11 +48,75 @@ function DojosTitle() {
   );
 }
 
+/**
+ * A card's picture: the dojo's animated scene from the app's home carousel (`src/dojos/art.ts`),
+ * on its colour with the same grain. Coming-soon dojos get a tag over it; a dojo without art gets
+ * a dark card with its name.
+ */
+function DojoCardArt({
+  dojoId,
+  name,
+  soon,
+  paused,
+}: {
+  dojoId: string;
+  name: string;
+  soon: boolean;
+  paused: boolean;
+}) {
+  const t = useT();
+  const art = dojoArt(dojoId);
+  const tag = soon && (
+    <span
+      className={`${MONO} absolute top-3 left-3 rounded-full bg-[#121212] px-2.5 py-1 text-[8px] text-[#ece9e2]`}
+    >
+      {t("landing.dojos.soon")}
+    </span>
+  );
+
+  if (!art) {
+    return (
+      <div className="relative flex aspect-[16/10] flex-col justify-end overflow-hidden bg-[#121212] p-4 text-[#ece9e2]">
+        {tag}
+        <span className={`${DISPLAY} text-[56px] leading-[0.85] opacity-90`}>{name}</span>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      aria-hidden
+      className="relative aspect-[16/10] overflow-hidden"
+      style={{ backgroundColor: art.background }}
+    >
+      <art.Scene
+        paused={paused}
+        className="absolute inset-0 size-full transition duration-500 group-hover:scale-[1.03]"
+      />
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.16] mix-blend-multiply"
+        style={{ backgroundImage: GRAIN_BACKGROUND }}
+      />
+      {tag}
+    </div>
+  );
+}
+
 /** 06 Dojos: the title, then one card per dojo along the thread. */
 export function Dojos() {
   const t = useT();
   const text = useText();
   const dojos = useDojoSummaries();
+  // Each card's scene only animates while the camera can see it.
+  const [onScreen, setOnScreen] = useState<readonly boolean[]>(() => Z.dojos.map(() => true));
+  const track =
+    (i: number) =>
+    ({ opacity }: NodeFrame) => {
+      const visible = opacity > 0.005;
+      if (visible !== onScreen[i]) {
+        setOnScreen((prev) => prev.map((v, j) => (j === i ? visible : v)));
+      }
+    };
 
   return (
     <>
@@ -60,28 +125,13 @@ export function Dojos() {
         const name = text(dojo.name);
         const soon = isComingSoon(dojo.scenarioKeys);
         return (
-          <WorldNode key={dojo.id} spec={{ z: Z.dojos[i], ...CARD_PLACES[i], mx: 0, my: -10 }}>
+          <WorldNode
+            key={dojo.id}
+            spec={{ z: Z.dojos[i], ...CARD_PLACES[i], mx: 0, my: -10 }}
+            onFrame={track(i)}
+          >
             <Link href={dojoHref(dojo.id)} className="group block w-[min(380px,82vw)]">
-              <div className="relative aspect-[16/10] overflow-hidden bg-black/10">
-                {soon ? (
-                  <div className="absolute inset-0 flex flex-col justify-between bg-[#121212] p-4 text-[#ece9e2]">
-                    <span className={`${MONO} text-[8px] opacity-60`}>
-                      {t("landing.dojos.soon")}
-                    </span>
-                    <span className={`${DISPLAY} text-[56px] leading-[0.85] opacity-90`}>
-                      {name}
-                    </span>
-                  </div>
-                ) : (
-                  <Image
-                    src={`/landing/dojo-${dojo.id}.jpg`}
-                    alt={t("landing.dojos.imageAlt")(name)}
-                    fill
-                    sizes="(max-width: 768px) 82vw, 380px"
-                    className="object-cover object-top transition duration-500 group-hover:scale-[1.03]"
-                  />
-                )}
-              </div>
+              <DojoCardArt dojoId={dojo.id} name={name} soon={soon} paused={!onScreen[i]} />
               <p className={`${MONO} mt-3 text-[8px] opacity-55`}>
                 {String(i + 1).padStart(2, "0")} / {String(dojos.length).padStart(2, "0")}
               </p>

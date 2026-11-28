@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Copy, X } from "lucide-react";
+import { ArrowRight, Check, Copy, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
@@ -275,6 +275,13 @@ export function Finale() {
           >
             {t("landing.finale.report")}
           </a>
+          <Link
+            href={APP_HOME}
+            className="group mt-5 inline-flex items-center gap-3 rounded-full bg-[var(--land-fg)] px-7 py-4 text-[15px] font-medium text-[var(--land-bg)] transition hover:gap-4"
+          >
+            {t("landing.finale.cta")}
+            <ArrowRight aria-hidden className="size-4 transition group-hover:translate-x-0.5" />
+          </Link>
         </div>
       </WorldNode>
 
