@@ -1,6 +1,6 @@
 # Bhai, urgent
 
-> Drafted by Claude from the dojo plan in docs/CONTEXT.md. Pair 3: check it against the real cases below and change anything that doesn't ring true. The code lives in `src/dojos/trust-me-bro/scenarios/bhai-urgent.ts`.
+> The code lives in `src/dojos/trust-me-bro/scenarios/bhai-urgent.ts`.
 
 **Dojo:** trust-me-bro
 **Scenario id:** `bhai-urgent`
