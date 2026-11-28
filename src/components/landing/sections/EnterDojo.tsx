@@ -53,7 +53,7 @@ function Player() {
           <div ref={barRef} className="absolute inset-y-0 left-0 rounded bg-white" />
         </div>
         <span ref={timeRef} className="font-mono text-[9px] tabular-nums">
-          0:00 / 0:12
+          0:00 / 0:34
         </span>
         <Volume2 className="size-3" />
       </figcaption>
