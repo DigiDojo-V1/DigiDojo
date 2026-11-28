@@ -31,8 +31,15 @@ export function VideoFeed({
   });
 
   return (
-    <div className="relative mx-3 overflow-hidden rounded-2xl bg-slate-900 ring-1 ring-white/10">
-      <svg viewBox="0 0 240 260" className="block w-full" role="img" aria-label={name}>
+    <div className="relative mx-3 shrink-0 overflow-hidden rounded-2xl bg-slate-900 ring-1 ring-white/10">
+      {/* Short enough to leave room for captions; the slice crops the desk, never the face. */}
+      <svg
+        viewBox="0 0 240 260"
+        preserveAspectRatio="xMidYMin slice"
+        className="block h-[min(30dvh,250px)] w-full"
+        role="img"
+        aria-label={name}
+      >
         <defs>
           <linearGradient id="wall" x1="0" x2="0" y1="0" y2="1">
             <stop offset="0" stopColor="#1e3a5f" />
@@ -92,7 +99,7 @@ export function VideoFeed({
         <p className="truncate text-sm font-semibold">{name}</p>
         {label !== undefined && <p className="truncate text-[11px] text-white/70">{label}</p>}
       </div>
-      <div className="absolute right-2.5 bottom-2.5 flex h-24 w-[4.5rem] flex-col items-center justify-center gap-1 rounded-lg bg-slate-800 text-center text-[10px] leading-tight text-white/60 ring-1 ring-white/15">
+      <div className="absolute right-2.5 bottom-2.5 flex h-20 w-16 flex-col items-center justify-center gap-1 rounded-lg bg-slate-800 text-center text-[10px] leading-tight text-white/60 ring-1 ring-white/15">
         <VideoOff className="size-4" aria-hidden />
         {t("call.cameraOff")}
       </div>

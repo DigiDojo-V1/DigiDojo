@@ -7,9 +7,7 @@ import {
   CallReportSchema,
   CallTurnSchema,
   callRedFlagIds,
-  cleanRating,
   DEFAULT_MAX_MINUTES,
-  fallbackReport,
   LiveFlagSchema,
   liveCallNode,
   MAX_LIVE_FLAGS,
@@ -20,6 +18,7 @@ import {
   transcriptionVocabulary,
   type CallReport,
 } from "@/engine/live-call";
+import { capParts, fallbackReport, scoreConversation, sumParts } from "@/engine/call-score";
 import type { LiveCallNode, Scenario } from "@/engine/schema";
 import { LOCALES, type Locale } from "@/i18n/locale";
 import type { ApiResult } from "./flag-api";
@@ -79,9 +78,12 @@ export interface LiveConfig {
   systemInstruction: { parts: { text: string }[] };
   speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: string } } };
   tools: ReturnType<typeof agentTools>;
+  temperature: number;
   inputAudioTranscription: { languageCodes: string[]; customVocabulary: string[] };
   outputAudioTranscription: { languageCodes: string[] };
 }
+
+export const LIVE_TEMPERATURE = 0.7;
 
 export function liveConfig(scenario: Scenario, node: LiveCallNode, locale: Locale): LiveConfig {
   return {
@@ -89,6 +91,8 @@ export function liveConfig(scenario: Scenario, node: LiveCallNode, locale: Local
     systemInstruction: { parts: [{ text: agentInstructions(scenario, node, locale) }] },
     speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: node.agent.voice } } },
     tools: agentTools(node),
+    // A little below the default, so the caller keeps one voice and sticks to its script.
+    temperature: LIVE_TEMPERATURE,
     // English and Hindi only, plus the call's names and jargon, so the player is heard accurately.
     inputAudioTranscription: {
       languageCodes: [...CALL_LANGUAGES],
@@ -145,7 +149,12 @@ export async function handleCallToken(
 const ModelMomentSchema = z.object({ quote: z.string(), why: z.string() });
 const ModelReportSchema = z.object({
   outcome_id: z.string(),
-  rating: z.number(),
+  scores: z.object({
+    secrets: z.number(),
+    questions: z.number(),
+    pressure: z.number(),
+    exit: z.number(),
+  }),
   summary: z.string(),
   good_moves: z.array(ModelMomentSchema),
   mistakes: z.array(ModelMomentSchema),
@@ -176,8 +185,15 @@ export async function handleCallReport(
   while (chars > MAX_TRANSCRIPT_CHARS && transcript.length > 1)
     chars -= transcript.shift()!.text.length;
 
-  const record = { signals, endedBy: req.endedBy, durationMs: req.durationMs, flags: req.flags };
-  const fallback = () => ({ status: 200, body: { report: fallbackReport(node, record) } });
+  const record = {
+    signals,
+    endedBy: req.endedBy,
+    durationMs: req.durationMs,
+    flags: req.flags,
+    transcript,
+  };
+  const legit = scenario.legit === true;
+  const fallback = () => ({ status: 200, body: { report: fallbackReport(node, record, legit) } });
   if (deps.judge === null) return fallback();
   if (!(await deps.allow())) return fallback();
   if (!(await deps.withinDailyCap())) return fallback();
@@ -202,9 +218,14 @@ export async function handleCallReport(
     );
     const redFlagIds = new Set(callRedFlagIds(node));
     const outcome = resolveOutcome(node, signals, answer.outcome_id);
-    const decisive = new Set(node.outcomes.flatMap((o) => o.events ?? []));
-    const handedOver = signals.some((s) => decisive.has(s));
-    const rating = cleanRating(handedOver ? Math.min(answer.rating, 2.5) : answer.rating);
+    // The judge marks each part; what the conversation shows for certain binds its marks.
+    const facts = scoreConversation(node, record, legit);
+    const judged = { ...answer.scores };
+    if (facts.leaks > 0) judged.secrets = Math.min(judged.secrets, facts.parts.secrets);
+    if (facts.reported) {
+      judged.exit = legit ? Math.min(judged.exit, facts.parts.exit) : Math.max(judged.exit, 1.5);
+    }
+    const parts = capParts(judged, facts.handedOver);
     const moments = (list: z.infer<typeof ModelMomentSchema>[]) =>
       list
         .slice(0, 5)
@@ -230,7 +251,8 @@ export async function handleCallReport(
 
     const report: CallReport = CallReportSchema.parse({
       outcomeId: outcome.id,
-      rating,
+      rating: sumParts(parts),
+      parts,
       summary: clip(answer.summary, 500),
       goodMoves: moments(answer.good_moves),
       mistakes: moments(answer.mistakes),

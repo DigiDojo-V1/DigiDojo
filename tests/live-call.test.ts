@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
+import { fallbackReport } from "@/engine/call-score";
 import { kycCall } from "@/dojos/authority/scenarios/kyc-call";
 import { digitalArrest } from "@/dojos/authority/scenarios/digital-arrest";
 import {
@@ -7,7 +8,6 @@ import {
   agentTools,
   callRedFlagIds,
   cleanRating,
-  fallbackReport,
   fillCode,
   liveCallNode,
   liveFlagTactics,
@@ -67,7 +67,7 @@ describe("where a call leads", () => {
 
   it("lists every signal the call can record", () => {
     expect(possibleSignals(kycNode).toSorted()).toEqual(
-      ["kyc-fee.declined", "kyc-fee.paid", "otp-sms.read"].toSorted(),
+      ["call.reported", "kyc-fee.declined", "kyc-fee.paid", "otp-sms.read"].toSorted(),
     );
     expect(possibleSignals(arrestNode)).toContain("brother.sent");
     expect(possibleSignals(arrestNode)).toContain("warrant.opened");
@@ -88,6 +88,7 @@ describe("where a call leads", () => {
       endedBy: "caller",
       durationMs: 200_000,
       flags: [],
+      transcript: [],
     });
     expect(lost.outcomeId).toBe("handed-over");
     expect(lost.rating).toBeLessThan(4);
@@ -97,6 +98,7 @@ describe("where a call leads", () => {
       endedBy: "player",
       durationMs: 40_000,
       flags: [],
+      transcript: [],
     });
     expect(ratingBand(quick.rating)).toBe("savvy");
   });
@@ -205,6 +207,7 @@ describe("scoring a live call", () => {
   const report = (over: Partial<CallReport>): CallReport => ({
     outcomeId: "kept-safe",
     rating: 8,
+    parts: { secrets: 4, questions: 1, pressure: 2, exit: 1 },
     summary: "",
     goodMoves: [],
     mistakes: [],

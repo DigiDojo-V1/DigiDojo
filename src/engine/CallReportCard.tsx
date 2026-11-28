@@ -1,10 +1,27 @@
 "use client";
 
-import { ChevronDown, CircleCheck, CircleX, Loader2, PhoneCall, Sparkles } from "lucide-react";
+import {
+  ChevronDown,
+  CircleCheck,
+  CircleX,
+  Loader2,
+  PhoneCall,
+  ShieldCheck,
+  Sparkles,
+} from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useT, useText } from "@/i18n/hooks";
 import { cn } from "@/lib/utils";
-import { ratingBand, type LiveCallRecord, type ReportMoment } from "./live-call";
+import {
+  PART_MAX,
+  ratingBand,
+  REPORTED_SIGNAL,
+  SCORE_PARTS,
+  type CallReport,
+  type LiveCallRecord,
+  type ReportMoment,
+  type ScorePart,
+} from "./live-call";
 import type { Scenario } from "./schema";
 
 const BAND_STYLE = {
@@ -80,6 +97,13 @@ export function CallReportCard({
               <p className="text-xs text-muted-foreground">{t("report.notAnalysed")}</p>
             )}
             {report.summary !== "" && <p className="text-sm leading-relaxed">{report.summary}</p>}
+            <ScoreParts parts={report.parts} legit={scenario.legit === true} />
+            {record.signals.includes(REPORTED_SIGNAL) && (
+              <p className="flex items-center gap-1.5 text-sm">
+                <ShieldCheck className="size-4 text-emerald-600" aria-hidden />
+                {t("report.reported")}
+              </p>
+            )}
             <Moments
               title={t("report.good")}
               icon={<CircleCheck className="size-4 text-emerald-600" aria-hidden />}
@@ -133,6 +157,44 @@ export function CallReportCard({
   );
 }
 
+/** The rating, part by part: four rows that add up to the score out of 10. */
+function ScoreParts({ parts, legit }: { parts: CallReport["parts"]; legit: boolean }) {
+  const t = useT();
+  const label = (part: ScorePart) =>
+    legit && (part === "pressure" || part === "exit")
+      ? t(`callScore.part.${part}.legit`)
+      : t(`callScore.part.${part}`);
+  return (
+    <section className="space-y-2">
+      <h3 className="text-sm font-semibold">{t("report.parts")}</h3>
+      <ul className="space-y-2">
+        {SCORE_PARTS.map((part) => {
+          const share = parts[part] / PART_MAX[part];
+          return (
+            <li key={part} className="space-y-1">
+              <div className="flex items-baseline justify-between gap-2 text-sm">
+                <span>{label(part)}</span>
+                <span className="font-semibold tabular-nums">
+                  {t("callScore.points")(String(parts[part]), PART_MAX[part])}
+                </span>
+              </div>
+              <div className="h-1.5 overflow-hidden rounded-full bg-muted">
+                <div
+                  className={cn(
+                    "h-full rounded-full",
+                    share >= 0.75 ? "bg-emerald-500" : share >= 0.4 ? "bg-amber-500" : "bg-red-500",
+                  )}
+                  style={{ width: `${share * 100}%` }}
+                />
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  );
+}
+
 function Moments({
   title,
   icon,
@@ -142,6 +204,7 @@ function Moments({
   icon: React.ReactNode;
   moments: ReportMoment[];
 }) {
+  const t = useT();
   if (moments.length === 0) return null;
   return (
     <section className="space-y-1.5">
@@ -156,7 +219,7 @@ function Moments({
                 “{m.quote}”
               </blockquote>
             )}
-            <p className="mt-0.5">{m.why}</p>
+            <p className="mt-0.5">{m.key !== undefined ? t(`callScore.move.${m.key}`) : m.why}</p>
           </li>
         ))}
       </ul>

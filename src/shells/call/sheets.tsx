@@ -2,7 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import { MotionConfig, motion } from "motion/react";
-import { Check, CheckCheck, Flag, IdCard, IndianRupee, Send, X } from "lucide-react";
+import { Check, CheckCheck, Flag, IdCard, IndianRupee, Send, ShieldAlert, X } from "lucide-react";
 import { useT } from "@/i18n/hooks";
 import { cn } from "@/lib/utils";
 
@@ -282,6 +282,43 @@ export function LiveFlagSheet({
           </button>
         </>
       )}
+    </CallSheet>
+  );
+}
+
+/** "Report this caller?": blocks the number and reports it, which also hangs up. */
+export function ReportSheet({
+  number,
+  onReport,
+  onClose,
+}: {
+  number: string;
+  onReport: () => void;
+  onClose: () => void;
+}) {
+  const t = useT();
+  return (
+    <CallSheet
+      title={t("call.report.title")}
+      icon={<ShieldAlert className="size-5 text-red-600" aria-hidden />}
+      onClose={onClose}
+    >
+      <p className="text-sm leading-snug text-slate-700">{t("call.report.body")(number)}</p>
+      <p className="mt-2 text-xs text-slate-500">{t("call.report.sim")}</p>
+      <button
+        type="button"
+        onClick={onReport}
+        className="mt-4 h-12 w-full rounded-xl bg-red-600 font-semibold text-white hover:bg-red-500"
+      >
+        {t("call.report.confirm")}
+      </button>
+      <button
+        type="button"
+        onClick={onClose}
+        className="mt-2 h-11 w-full rounded-xl font-medium text-slate-700 hover:bg-slate-100"
+      >
+        {t("call.report.cancel")}
+      </button>
     </CallSheet>
   );
 }

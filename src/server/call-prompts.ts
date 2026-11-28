@@ -1,5 +1,5 @@
 import type { CallEnding, CallTurn, LiveFlag } from "@/engine/live-call";
-import { callRedFlagIds } from "@/engine/live-call";
+import { callRedFlagIds, PART_MAX, REPORTED_SIGNAL, SCORE_PARTS } from "@/engine/live-call";
 import type { LiveCallNode, Scenario } from "@/engine/schema";
 import type { Locale } from "@/i18n/locale";
 import { resolveText } from "@/i18n/text";
@@ -26,7 +26,12 @@ The player answered a simulated call. An AI played the caller from a script. You
 
 Your job:
 1. Pick the outcome id whose condition fits what the PLAYER actually did. Judge their words and actions, not the caller's.
-2. Rate the player from 0 to 10 in half points, using the rubric and the calibration examples. Sharing a code or paying is 1 to 2 at most. Asking sharp questions early and hanging up to verify is 9 to 10.
+2. Score the player in four parts, in half points. Their sum is the rating out of 10, so use the rubric and the calibration examples to land the total:
+   - "secrets" (0 to 4): kept their details safe. 4 = shared nothing beyond their name. Take points off for each personal or account detail said aloud (date of birth, PAN, Aadhaar digits, account or card number). 0 if they read out a code or paid.
+   - "questions" (0 to 2): questioned the caller: asked who they are, why they're calling, for proof or an ID.
+   - "pressure" (0 to 2): on a scam call, didn't give in to threats or urgency (said no, didn't follow instructions). On a genuine call, stayed calm and engaged instead of brushing it off.
+   - "exit" (0 to 2): on a scam call, ended it safely: hung up, reported the number, said they'd verify on an official number, or told someone. On a genuine call, verified the right way (asked how to check, or called the number on the card). Reporting a genuine caller as fraud scores 0 here.
+   Sharing a code or paying puts the total at 1 to 2 at most. Asking sharp questions early and hanging up to verify is 9 to 10.
 3. List what they did well and their mistakes, each with a short quote of the PLAYER's own words (at most 20 words) and why it mattered. Use an empty quote for actions with no words (like hanging up). Only list things that really happened.
 4. Give 2 to 4 concrete things to do better next time, specific to this call.
 5. "heard": which of the listed red flags the CALLER actually used, each with a short quote of the caller's words (at most 25 words). Only use red flag ids from the list. Leave out any the caller never got to.
@@ -51,6 +56,8 @@ export function signalMeaning(node: LiveCallNode, signal: string): string {
   if (event?.kind === "document" && what === "opened")
     return `the player opened the file "${event.fileName}" the caller sent`;
   const lifeline = node.lifelines?.find((l) => l.id === id);
+  if (signal === REPORTED_SIGNAL)
+    return "the player blocked the caller's number and reported it as fraud";
   if (lifeline !== undefined && what === "sent")
     return `the player quietly messaged ${plain(lifeline.name)} for help during the call`;
   return signal;
@@ -135,7 +142,13 @@ export function callJudgeSchema(node: LiveCallNode) {
     type: "object",
     properties: {
       outcome_id: { type: "string", enum: node.outcomes.map((o) => o.id) },
-      rating: { type: "number" },
+      scores: {
+        type: "object",
+        properties: Object.fromEntries(
+          SCORE_PARTS.map((p) => [p, { type: "number", minimum: 0, maximum: PART_MAX[p] }]),
+        ),
+        required: [...SCORE_PARTS],
+      },
       summary: { type: "string" },
       good_moves: { type: "array", items: moment, maxItems: 5 },
       mistakes: { type: "array", items: moment, maxItems: 5 },
@@ -165,7 +178,7 @@ export function callJudgeSchema(node: LiveCallNode) {
     },
     required: [
       "outcome_id",
-      "rating",
+      "scores",
       "summary",
       "good_moves",
       "mistakes",
