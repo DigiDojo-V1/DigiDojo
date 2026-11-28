@@ -1,7 +1,7 @@
 import { getScenario } from "@/dojos/registry";
 import { handleCallToken } from "@/server/call-api";
 import { getVoice } from "@/server/gemini";
-import { callerKey, getLimiter } from "@/server/ratelimit";
+import { callerKey, getDailyCap, getLimiter } from "@/server/ratelimit";
 
 export const maxDuration = 10;
 
@@ -14,6 +14,7 @@ export async function POST(request: Request) {
     minter: voice?.minter ?? null,
     model: voice?.models.live ?? "",
     allow: () => getLimiter("callToken").allow(caller),
+    withinDailyCap: () => getDailyCap("callToken").take(),
     getScenario,
   });
   return Response.json(result.body, { status: result.status });

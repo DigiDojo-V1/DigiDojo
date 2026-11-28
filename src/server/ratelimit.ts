@@ -2,6 +2,14 @@ import "server-only";
 import { createHash } from "node:crypto";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
+import {
+  blockOnRedisErrorFrom,
+  capFrom,
+  createDailyCap,
+  type CapKind,
+  type DailyCap,
+  type DayCounter,
+} from "./daily-cap";
 
 /** Per-IP limit for one endpoint. */
 export interface Limiter {
@@ -61,6 +69,36 @@ export function getLimiter(kind: keyof typeof LIMITS): Limiter {
   }
   limiters.set(kind, limiter);
   return limiter;
+}
+
+const caps = new Map<CapKind, DailyCap>();
+
+/** The global daily budget for one AI endpoint, read from env vars (see daily-cap.ts). */
+export function getDailyCap(kind: CapKind): DailyCap {
+  const existing = caps.get(kind);
+  if (existing !== undefined) return existing;
+  const client = getRedis();
+  const counter: DayCounter | null =
+    client === null
+      ? null
+      : {
+          async increment(key, ttlSeconds) {
+            const count = await client.incr(key);
+            if (count === 1) await client.expire(key, ttlSeconds);
+            return count;
+          },
+          async read(key) {
+            return Number((await client.get<number>(key)) ?? 0);
+          },
+        };
+  const cap = createDailyCap({
+    kind,
+    cap: capFrom(process.env, kind),
+    counter,
+    blockOnRedisError: blockOnRedisErrorFrom(process.env),
+  });
+  caps.set(kind, cap);
+  return cap;
 }
 
 /** A hashed caller id, so raw IPs never reach Redis. */

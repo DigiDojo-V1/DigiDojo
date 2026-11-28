@@ -25,6 +25,8 @@ export interface FlagApiDeps {
   llm: LlmLike | null;
   /** False means the caller is over its rate limit. */
   allow: () => Promise<boolean>;
+  /** Takes one call from today's global AI budget. False once it's spent. */
+  withinDailyCap: () => Promise<boolean>;
   getScenario: (dojoId: string, scenarioId: string) => Scenario | undefined;
 }
 
@@ -81,6 +83,8 @@ export async function handleJudge(raw: unknown, deps: FlagApiDeps): Promise<ApiR
     return rf === undefined ? [] : [rf];
   });
   if (redFlags.length === 0 || deps.llm === null) return { status: 200, body: { result: null } };
+  // Today's budget is spent: the note goes unmarked, as if AI marking were off.
+  if (!(await deps.withinDailyCap())) return { status: 200, body: { result: null } };
   const rubric = redFlags.find((rf) => rf.tactic === req.tactic) ?? redFlags[0]!;
 
   try {

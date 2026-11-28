@@ -1,6 +1,6 @@
 import { getScenario } from "@/dojos/registry";
 import { handleJudge } from "@/server/flag-api";
-import { callerKey, getLimiter } from "@/server/ratelimit";
+import { callerKey, getDailyCap, getLimiter } from "@/server/ratelimit";
 import { getLlm } from "@/server/openai";
 
 export const maxDuration = 15;
@@ -12,6 +12,7 @@ export async function POST(request: Request) {
   const result = await handleJudge(body, {
     llm: getLlm(),
     allow: () => getLimiter("judge").allow(caller),
+    withinDailyCap: () => getDailyCap("judge").take(),
     getScenario,
   });
   return Response.json(result.body, { status: result.status });
