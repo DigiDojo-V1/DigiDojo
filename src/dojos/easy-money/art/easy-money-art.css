@@ -1,0 +1,131 @@
+/*
+ * Easy Money loops. Pivots are in the scene's own coordinates (the 2752 x 1536 source image).
+ * The note swings toward the player every 10 s; he leans in to grab it in time with the swing.
+ * Plain global CSS (next.config runs every .css file as global), so every name carries `em-`.
+ */
+
+/* Coins, sparkles and the glow spin and scale about their own centres. */
+.em-glow,
+.em-coin,
+.em-spark {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* Line, hook and note: a pendulum hanging from the top of the line. */
+.em-scene .em-lure {
+  transform-box: view-box;
+  transform-origin: 1396px 0;
+  animation: em-sway 5s ease-in-out infinite alternate;
+}
+
+@keyframes em-sway {
+  from {
+    transform: rotate(-3deg);
+  }
+  to {
+    transform: rotate(3deg);
+  }
+}
+
+/* Upper body pivots at the hips: reaching for the note, then sitting back. */
+.em-scene .em-upper {
+  transform-box: view-box;
+  transform-origin: 2130px 1120px;
+  animation: em-lean 10s ease-in-out infinite;
+}
+
+@keyframes em-lean {
+  0%,
+  100% {
+    transform: rotate(-4deg);
+  }
+  50% {
+    transform: rotate(1.2deg);
+  }
+}
+
+.em-glow {
+  animation: em-pulse 2.6s ease-in-out infinite alternate;
+}
+
+@keyframes em-pulse {
+  from {
+    opacity: 0.3;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 0.65;
+    transform: scale(1.08);
+  }
+}
+
+.em-coin {
+  animation: em-bob 3.2s ease-in-out infinite alternate;
+}
+
+.em-coin:nth-of-type(2) {
+  animation-duration: 2.7s;
+  animation-delay: -1s;
+}
+
+.em-coin:nth-of-type(3) {
+  animation-duration: 3.6s;
+  animation-delay: -2s;
+}
+
+.em-coin:nth-of-type(4) {
+  animation-duration: 2.9s;
+  animation-delay: -0.5s;
+}
+
+@keyframes em-bob {
+  from {
+    transform: translateY(-14px) rotate(-8deg);
+  }
+  to {
+    transform: translateY(14px) rotate(8deg);
+  }
+}
+
+.em-spark {
+  animation: em-twinkle 1.8s ease-in-out infinite;
+}
+
+.em-spark:nth-of-type(2) {
+  animation-delay: -0.4s;
+}
+
+.em-spark:nth-of-type(3) {
+  animation-delay: -0.9s;
+}
+
+.em-spark:nth-of-type(4) {
+  animation-delay: -1.3s;
+}
+
+.em-spark:nth-of-type(5) {
+  animation-delay: -0.7s;
+}
+
+@keyframes em-twinkle {
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scale(0.4);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
+.em-paused * {
+  animation-play-state: paused !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .em-scene * {
+    animation: none !important;
+  }
+}
