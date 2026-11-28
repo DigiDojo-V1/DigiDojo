@@ -25,5 +25,7 @@ export const PLAYER = {
   email: "ananya.rao@example.com",
 } as const;
 
-export const REAL_WORLD_ACTION =
-  "If money has already been paid, call 1930 and report the incident at cybercrime.gov.in.";
+export const REAL_WORLD_ACTION = {
+  en: "If money has already been paid, call 1930 and report the incident at cybercrime.gov.in.",
+  hinglish: "Agar paise de chuke ho, toh 1930 pe call karo aur cybercrime.gov.in pe report karo.",
+};
