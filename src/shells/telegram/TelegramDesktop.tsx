@@ -178,14 +178,22 @@ function Composer() {
   );
 }
 
-/** Fictional other chats: Telegram's own service chat, Saved Messages and everyday people. */
+/** Fictional other chats: Telegram's own service chat, Saved Messages and everyday people.
+ * Photos: Unsplash License stock images in /public/shells/telegram (see docs/IMAGE_CREDITS.md). */
 const OTHER_CHATS = [
   { n: 1, kind: "telegram", unread: 0, muted: false },
   { n: 2, kind: "saved", unread: 0, muted: false },
   { n: 3, kind: "person", unread: 2, muted: false },
-  { n: 4, kind: "person", unread: 14, muted: true },
-  { n: 5, kind: "person", unread: 0, muted: false, sentByMe: true },
-  { n: 6, kind: "person", unread: 5, muted: true },
+  { n: 4, kind: "person", unread: 14, muted: true, src: "/shells/telegram/chat-4.jpg" },
+  {
+    n: 5,
+    kind: "person",
+    unread: 0,
+    muted: false,
+    sentByMe: true,
+    src: "/shells/telegram/chat-5.jpg",
+  },
+  { n: 6, kind: "person", unread: 5, muted: true, src: "/shells/telegram/chat-6.jpg" },
 ] as const;
 
 /** The left column: menu, search, the open chat and the others. Decorative. */
@@ -217,7 +225,12 @@ function ChatList({ className, active }: { className: string; active: ReactNode 
                 <Bookmark className="size-6 fill-white" />
               </span>
             ) : (
-              <TelegramAvatar name={name} size="size-[54px]" text="text-xl" />
+              <TelegramAvatar
+                name={name}
+                src={"src" in chat ? chat.src : undefined}
+                size="size-[54px]"
+                text="text-xl"
+              />
             );
           return (
             <ChatRow
