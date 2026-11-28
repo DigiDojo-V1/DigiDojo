@@ -10,7 +10,10 @@ export interface Limiter {
 }
 
 export const LIMITS = {
-  judge: { requests: 10, window: "1 m" },
+  judge: { requests: 10, window: "1 m", prefix: "digidojo:flag:judge" },
+  /** One token per live call. */
+  callToken: { requests: 8, window: "10 m", prefix: "digidojo:call:token" },
+  callReport: { requests: 12, window: "10 m", prefix: "digidojo:call:report" },
 } as const;
 
 let redis: Redis | null | undefined;
@@ -34,16 +37,16 @@ export function getLimiter(kind: keyof typeof LIMITS): Limiter {
   let limiter: Limiter;
   if (client === null) {
     if (!warned && process.env.NODE_ENV !== "production") {
-      console.warn("Upstash Redis is not configured: the flag API is not rate limited.");
+      console.warn("Upstash Redis is not configured: the AI endpoints are not rate limited.");
       warned = true;
     }
     limiter = { allow: async () => true };
   } else {
-    const { requests, window } = LIMITS[kind];
+    const { requests, window, prefix } = LIMITS[kind];
     const rl = new Ratelimit({
       redis: client,
       limiter: Ratelimit.slidingWindow(requests, window),
-      prefix: `digidojo:flag:${kind}`,
+      prefix,
     });
     limiter = {
       async allow(key) {

@@ -4,6 +4,7 @@ import { createJSONStorage, persist, type StateStorage } from "zustand/middlewar
 import { z } from "zod";
 import { DEFAULT_LOCALE, LOCALES, type Locale } from "@/i18n/locale";
 import type { FlagRecord, JudgeState } from "./flags";
+import type { CallReport, LiveCallRecord } from "./live-call";
 import type { Choice, LocalizedText, Scenario, Tactic, TriageLabel } from "./schema";
 
 /* ------------------------------------------------------------------ */
@@ -33,6 +34,8 @@ interface RunState {
   flags: Record<string, FlagRecord>;
   /** Inbox triage labels, keyed by triage item id. */
   classifications: Record<string, TriageLabel>;
+  /** Live voice calls, by node id. Taking a call again replaces its record. */
+  liveCalls: Record<string, LiveCallRecord>;
   rewinds: number;
 }
 
@@ -57,6 +60,12 @@ interface RunActions {
   classify: (itemId: string, label: TriageLabel) => void;
   /** Leave a triage node for its `nextNodeId`. */
   submitTriage: (nextNodeId: string) => void;
+  /** Leave the current node for `nextNodeId`, e.g. when a call ends or is answered. */
+  advanceTo: (nextNodeId: string, label?: LocalizedText) => void;
+  /** Store a finished live call. */
+  saveLiveCall: (record: LiveCallRecord) => void;
+  /** The judge's review arrived (or failed) for the call at `nodeId`. */
+  setCallReport: (nodeId: string, report: CallReport | "error") => void;
   rewind: (nodeId: string) => void;
   openDebrief: () => void;
   /** Clear the run, e.g. when the player leaves the scenario. */
@@ -72,6 +81,7 @@ const initialRun: RunState = {
   seen: [],
   flags: {},
   classifications: {},
+  liveCalls: {},
   rewinds: 0,
 };
 
@@ -146,6 +156,19 @@ export const useRunStore = create<RunState & RunActions>()((set) => ({
     set((s) => ({ classifications: { ...s.classifications, [itemId]: label } })),
 
   submitTriage: (nextNodeId) => set((s) => advance(s, nextNodeId)),
+
+  advanceTo: (nextNodeId, label) => set((s) => advance(s, nextNodeId, label)),
+
+  saveLiveCall: (record) =>
+    set((s) => ({ liveCalls: { ...s.liveCalls, [record.nodeId]: record } })),
+
+  setCallReport: (nodeId, report) =>
+    set((s) => {
+      const call = s.liveCalls[nodeId];
+      if (call === undefined) return s;
+      const outcomeId = typeof report === "object" ? report.outcomeId : call.outcomeId;
+      return { liveCalls: { ...s.liveCalls, [nodeId]: { ...call, report, outcomeId } } };
+    }),
 
   rewind: (nodeId) =>
     set((s) => {

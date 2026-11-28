@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",
+    "@google/genai": "^3.6.1",
     "@upstash/ratelimit": "^2.2.2",
     "@upstash/redis": "^1.41.1",
     "class-variance-authority": "^0.7.1",

@@ -1,3 +1,4 @@
+import { nextNodeIds } from "@/engine/evidence";
 import type { AppTheme, Scenario } from "@/engine/schema";
 
 /** Where a step of a scenario happens. "inbox" is the triage screen. */
@@ -22,8 +23,7 @@ export function scenarioChannels(scenario: Scenario): Channel[] {
     const channel: Channel = node.kind === "triage" ? "inbox" : node.app;
     if (!channels.includes(channel)) channels.push(channel);
 
-    if (node.kind === "triage") queue.push(node.nextNodeId);
-    else queue.push(...node.choices.map((choice) => choice.nextNodeId));
+    queue.push(...nextNodeIds(node));
   }
   return channels;
 }

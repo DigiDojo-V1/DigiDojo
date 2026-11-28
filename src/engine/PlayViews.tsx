@@ -17,6 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useLocale, useT, useText } from "@/i18n/hooks";
 import { cn } from "@/lib/utils";
+import { HangUpButton } from "@/shells/call/parts";
 import { ComposeBody } from "@/shells/ComposeShell";
 import { EvidenceSheet } from "@/shells/EvidenceSheet";
 import { PanelBody } from "@/shells/evidence/PanelViews";
@@ -33,13 +34,16 @@ import { toMailView, toPanelView } from "./views";
 /* Shared pieces                                                       */
 /* ------------------------------------------------------------------ */
 
-/** The reply choices under a screen. `composer` = suggested replies over a message box; `mail` = a mail app's reply bar. */
+/**
+ * The reply choices under a screen. `composer` = suggested replies over a message box; `mail` =
+ * a mail app's reply bar; `call` = things to say, with the hang-up choice as the red button.
+ */
 export function ChoiceFooter({
   choices,
   variant = "default",
 }: {
   choices: readonly Choice[];
-  variant?: "default" | "composer" | "mail";
+  variant?: "default" | "composer" | "mail" | "call";
 }) {
   const choose = useRunStore((s) => s.choose);
   const t = useT();
@@ -68,6 +72,36 @@ export function ChoiceFooter({
           ))}
         </motion.div>
       </DojoPanel>
+    );
+  }
+
+  if (variant === "call") {
+    const hangUp = choices.find((c) => c.hangUp === true);
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="sticky bottom-0 z-30 space-y-2 border-t border-white/10 bg-slate-950/90 p-3 backdrop-blur"
+      >
+        <p className="text-xs font-medium text-white/60">{t("call.whatDoYouSay")}</p>
+        {choices.map((choice, i) =>
+          choice.hangUp === true ? null : (
+            <button
+              key={`${i}-${choice.nextNodeId}`}
+              type="button"
+              onClick={() => choose(choice)}
+              className="flex min-h-11 w-full items-center rounded-2xl bg-white/10 px-4 py-2.5 text-left text-[15px] leading-snug text-white ring-1 ring-white/15 transition-colors hover:bg-white/15 active:bg-white/20"
+            >
+              {text(choice.label)}
+            </button>
+          ),
+        )}
+        {hangUp !== undefined && (
+          <div className="pt-2">
+            <HangUpButton onClick={() => choose(hangUp)} label={text(hangUp.label)} />
+          </div>
+        )}
+      </motion.div>
     );
   }
 

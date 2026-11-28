@@ -23,7 +23,7 @@ import type { ChannelTransitionView, ChatBubble } from "./types";
 
 /* Pieces shared by the phone and desktop layouts of ChatShell. */
 
-export type ChatTheme = "whatsapp" | "telegram" | "instagram" | "linkedin";
+export type ChatTheme = "whatsapp" | "telegram" | "instagram" | "linkedin" | "sms";
 
 export interface ThemeStyle {
   /** "bubbles": a messaging app. "cards": a professional network inbox (name and time above each message). */
@@ -74,6 +74,17 @@ export const THEMES: Record<ChatTheme, ThemeStyle> = {
     me: "bg-violet-600 text-white",
     system: "bg-neutral-100 text-neutral-600",
     sender: "text-violet-700",
+  },
+  sms: {
+    layout: "bubbles",
+    header: "border-b border-slate-200 bg-slate-50 text-slate-900",
+    headerMuted: "text-slate-500",
+    avatar: "bg-slate-300 text-slate-700",
+    wallpaper: "bg-white",
+    them: "bg-slate-100 text-slate-900",
+    me: "bg-blue-600 text-white",
+    system: "bg-transparent text-slate-500",
+    sender: "text-slate-600",
   },
   linkedin: {
     layout: "cards",

@@ -66,7 +66,8 @@ export function ChatShell({
     setPane(next);
   };
 
-  if (docked) {
+  // SMS has no desktop version: on desktop, SmsShell puts this phone layout in a phone mockup.
+  if (docked && theme !== "sms") {
     return (
       <ChatDesktop
         theme={theme}
@@ -117,7 +118,7 @@ export function ChatShell({
 
   return (
     <MotionConfig reducedMotion="user">
-      <div className={cn("flex min-h-dvh flex-col", t.wallpaper)}>
+      <div className={cn("flex min-h-dvh flex-col lg:min-h-full", t.wallpaper)}>
         <div className="sticky top-0 z-40">
           <SimulationBar />
           {header}
