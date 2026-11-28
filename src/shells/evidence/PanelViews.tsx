@@ -24,7 +24,11 @@ export function PanelBody({ panel, ...flag }: FlagProps & { panel: PanelView }) 
     case "web-page":
       return <WebPageView panel={panel} {...flag} />;
     case "document":
-      return <DocumentPages panel={panel} {...flag} />;
+      return (
+        <div className="bg-[#2a2a2c]">
+          <DocumentPages panel={panel} {...flag} />
+        </div>
+      );
   }
 }
 

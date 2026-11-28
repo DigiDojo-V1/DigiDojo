@@ -1,17 +1,30 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { ChevronLeft, ChevronRight, Minus, Plus, X } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Download,
+  Maximize,
+  Minus,
+  Plus,
+  Printer,
+  X,
+} from "lucide-react";
 import { useT } from "@/i18n/hooks";
 import { cn } from "@/lib/utils";
+import { FileTypeIcon, GMAIL_FONT } from "../gmail/brand";
 import { FlagToggle } from "../MailShell";
 import { SimulationBar } from "../SimulationBar";
 import type { FlagProps, PanelFieldView, PanelView } from "../types";
 
 /**
- * A cloud-drive style PDF preview: dark chrome, a floating page and zoom pill, and A4 pages
- * drawn as a real letter (letterhead, date, paragraphs, terms table, signature, footer).
- * Our own design in the spirit of the real thing, never a copy. Every line stays flaggable.
+ * The Google Drive PDF preview that opens over Gmail: a dark overlay, the file name with a
+ * File / View / Tools / Help menu, a page and zoom toolbar, page thumbnails on the left, and
+ * A4 pages drawn as a real letter (letterhead, date, paragraphs, terms table, signature,
+ * footer). Used with permission (see CLAUDE.md). Every line on the page stays flaggable; the
+ * menu and the download, print and full-screen buttons are decorative.
  */
 
 const ZOOMS = [1, 1.25, 1.5, 2] as const;
@@ -59,74 +72,120 @@ export function PdfViewer({
     target?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
+  const toolButton =
+    "flex size-10 shrink-0 items-center justify-center rounded-full text-[#e3e3e3] hover:bg-white/10 disabled:opacity-40";
+
   return (
-    <div className="flex h-full w-full flex-col bg-[#2a2a2c] text-white">
+    <div
+      className={cn(
+        "flex h-full w-full flex-col bg-[#1f1f1f] text-white lg:bg-transparent",
+        GMAIL_FONT,
+      )}
+    >
       <SimulationBar />
-      <header className="flex h-14 shrink-0 items-center gap-2 bg-[#1f1f21] pr-3 pl-1">
+      <header className="flex h-16 shrink-0 items-center gap-3 pr-3 pl-1 lg:h-[76px] lg:pr-4 lg:pl-2">
         <button
           type="button"
           onClick={onClose}
           aria-label={t("evidence.close")}
           className="flex size-11 shrink-0 items-center justify-center rounded-full hover:bg-white/10"
         >
-          <X className="size-5" />
+          <X className="size-6" />
         </button>
-        <span
-          aria-hidden
-          className="flex h-6 shrink-0 items-center rounded-[4px] bg-[#e5463b] px-1.5 text-[10px] font-bold tracking-wide"
-        >
-          {t("evidence.pdf.badge")}
-        </span>
+        <FileTypeIcon kind="pdf" className="size-7" />
         <div className="min-w-0 flex-1 leading-tight">
-          <h2 className="truncate text-[15px] font-medium">{panel.title}</h2>
-          <p className="truncate text-[11px] text-neutral-400">
+          <h2 className="truncate text-lg">{panel.title}</h2>
+          <p aria-hidden className="mt-1 hidden gap-5 text-sm text-[#e3e3e3] lg:flex">
+            <span>{t("evidence.pdf.menu.file")}</span>
+            <span>{t("evidence.pdf.menu.view")}</span>
+            <span>{t("evidence.pdf.menu.tools")}</span>
+            <span>{t("evidence.pdf.menu.help")}</span>
+          </p>
+          <p className="truncate text-xs text-[#c4c7c5] lg:hidden">
             {panel.subtitle ?? t("evidence.pdf.pages")(total)}
           </p>
         </div>
+        <span
+          aria-hidden
+          className="hidden h-10 shrink-0 items-center gap-2 rounded-full border border-[#8e918f] pr-3 pl-5 text-sm font-medium lg:flex"
+        >
+          {t("evidence.pdf.editWith")} <ChevronDown className="size-4" />
+        </span>
       </header>
-      <p className="shrink-0 bg-[#1f1f21] px-4 pb-2 text-[11px] text-neutral-300">
-        {t("evidence.hint")}
-      </p>
+      <p className="shrink-0 px-4 pb-2 text-[11px] text-[#c4c7c5]">{t("evidence.hint")}</p>
 
-      <div className="relative min-h-0 flex-1">
-        <div ref={scrollRef} className="h-full overflow-auto">
-          {/* Floating toolbar */}
-          <div className="sticky top-0 z-10 flex justify-center px-3 pt-2 pb-1">
-            <div className="flex h-11 items-center gap-1 rounded-full bg-[#1f1f21]/95 px-3 text-sm text-neutral-100 shadow-lg ring-1 ring-white/10 backdrop-blur">
-              <span className="text-neutral-300">{t("evidence.pdf.pageWord")}</span>
+      {/* Page and zoom toolbar */}
+      <div className="mx-2 flex h-12 shrink-0 items-center gap-1 rounded-xl bg-[#333537] px-3 text-sm text-[#e3e3e3] lg:mx-3 lg:h-14 lg:rounded-2xl lg:px-5">
+        <span>{t("evidence.pdf.pageWord")}</span>
+        <span
+          aria-live="polite"
+          className="mx-1.5 flex h-7 min-w-7 items-center justify-center rounded-md bg-[#1f1f1f] px-1.5 ring-1 ring-[#8e918f]"
+        >
+          {page}
+        </span>
+        <span>/ {total}</span>
+        <span aria-hidden className="mx-3 h-6 w-px bg-[#5f6368]" />
+        <span aria-hidden className="hidden items-center sm:flex">
+          <span className={toolButton} title={t("evidence.pdf.download")}>
+            <Download className="size-5" />
+          </span>
+          <span className={toolButton} title={t("evidence.pdf.print")}>
+            <Printer className="size-5" />
+          </span>
+          <span className={toolButton} title={t("evidence.pdf.fullscreen")}>
+            <Maximize className="size-5" />
+          </span>
+          <span className="mx-3 h-6 w-px bg-[#5f6368]" />
+        </span>
+        <button
+          type="button"
+          onClick={() => setZoomIndex((i) => Math.max(0, i - 1))}
+          disabled={zoomIndex === 0}
+          aria-label={t("evidence.pdf.zoomOut")}
+          className={toolButton}
+        >
+          <Minus className="size-5" />
+        </button>
+        <span className="flex w-16 items-center justify-center gap-0.5 tabular-nums">
+          {Math.round(zoom * 100)}% <ChevronDown className="size-4" aria-hidden />
+        </span>
+        <button
+          type="button"
+          onClick={() => setZoomIndex((i) => Math.min(ZOOMS.length - 1, i + 1))}
+          disabled={zoomIndex === ZOOMS.length - 1}
+          aria-label={t("evidence.pdf.zoomIn")}
+          className={toolButton}
+        >
+          <Plus className="size-5" />
+        </button>
+      </div>
+
+      <div className="relative flex min-h-0 flex-1">
+        {/* Page thumbnails (desktop) */}
+        <div className="hidden w-[132px] shrink-0 flex-col gap-4 overflow-y-auto py-4 pr-3 pl-2 lg:flex">
+          {panel.sections.map((section, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => goTo(i + 1)}
+              aria-label={t("evidence.pdf.page")(i + 1, total)}
+              className="flex items-start gap-2 text-xs text-[#e3e3e3]"
+            >
+              <span className="w-3 text-right">{i + 1}</span>
               <span
-                aria-live="polite"
-                className="mx-1 flex h-7 min-w-7 items-center justify-center rounded-md px-1.5 ring-1 ring-neutral-500"
+                className={cn(
+                  "flex-1 rounded-md p-1",
+                  page === i + 1 ? "ring-2 ring-[#a8c7fa]" : "ring-1 ring-transparent",
+                )}
               >
-                {page}
+                <Thumbnail heading={section.heading !== undefined} />
               </span>
-              <span className="text-neutral-300">/ {total}</span>
-              <span aria-hidden className="mx-2 h-5 w-px bg-neutral-600" />
-              <button
-                type="button"
-                onClick={() => setZoomIndex((i) => Math.max(0, i - 1))}
-                disabled={zoomIndex === 0}
-                aria-label={t("evidence.pdf.zoomOut")}
-                className="flex size-9 items-center justify-center rounded-full hover:bg-white/10 disabled:opacity-40"
-              >
-                <Minus className="size-4" />
-              </button>
-              <span className="w-12 text-center tabular-nums">
-                {zoom === 1 ? t("evidence.pdf.fit") : `${Math.round(zoom * 100)}%`}
-              </span>
-              <button
-                type="button"
-                onClick={() => setZoomIndex((i) => Math.min(ZOOMS.length - 1, i + 1))}
-                disabled={zoomIndex === ZOOMS.length - 1}
-                aria-label={t("evidence.pdf.zoomIn")}
-                className="flex size-9 items-center justify-center rounded-full hover:bg-white/10 disabled:opacity-40"
-              >
-                <Plus className="size-4" />
-              </button>
-            </div>
-          </div>
+            </button>
+          ))}
+        </div>
 
-          <div style={{ zoom }} className="pb-6">
+        <div ref={scrollRef} className="min-w-0 flex-1 overflow-auto">
+          <div style={{ zoom }} className="mx-auto max-w-[840px] pb-6">
             <DocumentPages
               panel={panel}
               pageRef={(i, el) => {
@@ -158,6 +217,18 @@ export function PdfViewer({
   );
 }
 
+/** A page thumbnail: a small white sheet with a letterhead and lines. */
+function Thumbnail({ heading }: { heading: boolean }) {
+  return (
+    <span aria-hidden className="block aspect-[1/1.414] bg-white px-2 pt-2.5">
+      {heading && <span className="mb-1.5 block h-1 w-8 bg-[#3c4043]" />}
+      {[90, 70, 84, 60, 88, 76, 66, 90, 54, 80].map((w, i) => (
+        <span key={i} className="mt-1 block h-[2px] bg-[#c4c7c5]" style={{ width: `${w}%` }} />
+      ))}
+    </span>
+  );
+}
+
 function PageArrow({
   side,
   label,
@@ -177,8 +248,8 @@ function PageArrow({
       onClick={onClick}
       aria-label={label}
       className={cn(
-        "absolute bottom-4 z-10 flex size-11 items-center justify-center rounded-full bg-[#1f1f21]/80 text-white shadow-lg ring-1 ring-white/20 backdrop-blur",
-        side === "left" ? "left-3" : "right-3",
+        "absolute bottom-4 z-10 flex size-11 items-center justify-center rounded-full bg-[#333537]/90 text-white shadow-lg ring-1 ring-white/20 backdrop-blur",
+        side === "left" ? "left-3 lg:left-[144px]" : "right-3",
       )}
     >
       <Icon className="size-6" />
@@ -199,7 +270,7 @@ export function DocumentPages({
   const t = useT();
   const total = panel.sections.length;
   return (
-    <div className="space-y-3 bg-[#2a2a2c] px-2 py-3">
+    <div className="space-y-3 px-2 py-3 lg:space-y-4 lg:px-6 lg:py-4">
       {panel.sections.map((section, i) => (
         <article
           key={i}

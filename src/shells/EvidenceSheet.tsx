@@ -11,7 +11,7 @@ import type { FlagProps, PanelView } from "./types";
 
 /**
  * An overlay showing a profile, company page, official record, web page or PDF. Every field is
- * flaggable. Phones: full screen. Desktop: a drawer from the right (a centred viewer for PDFs),
+ * flaggable. Phones: full screen. Desktop: a drawer from the right (PDFs fill the app area, as in Gmail),
  * over the fake app only, so the Dojo panel stays in view.
  */
 export function EvidenceSheet({
@@ -33,8 +33,8 @@ export function EvidenceSheet({
         aria-modal="true"
         aria-label={panel.title}
         className={cn(
-          "fixed inset-0 z-50 flex justify-center bg-black/40 lg:right-[340px]",
-          isDocument ? "lg:items-center lg:p-6" : "lg:justify-end",
+          "fixed inset-0 z-50 flex justify-center lg:right-[340px]",
+          isDocument ? "bg-black/40 lg:bg-black/[.88]" : "bg-black/40 lg:justify-end",
         )}
       >
         <button
@@ -51,7 +51,7 @@ export function EvidenceSheet({
           className={cn(
             "relative flex w-full max-w-[420px] flex-col md:max-w-[640px]",
             isDocument
-              ? "lg:h-full lg:max-h-[960px] lg:max-w-[860px] lg:overflow-hidden lg:rounded-xl lg:shadow-2xl"
+              ? "lg:h-full lg:max-w-none lg:overflow-hidden"
               : "lg:max-w-[min(760px,70%)] lg:shadow-2xl",
           )}
         >

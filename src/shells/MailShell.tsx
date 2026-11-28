@@ -6,59 +6,75 @@ import {
   Archive,
   ArrowLeft,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  ChevronUp,
+  CircleCheck,
   CircleHelp,
   Clock,
-  Forward,
-  Grip,
-  Inbox,
-  Maximize2,
-  Minus,
-  OctagonAlert,
-  Reply,
-  RotateCw,
-  Settings,
-  SlidersHorizontal,
-  Tag,
-  Users,
-  X,
-  ChevronLeft,
-  ChevronUp,
+  Download,
   EllipsisVertical,
   File,
-  FileArchive,
-  FileText,
   Flag,
+  FolderInput,
+  Forward,
+  Grip,
   Image as ImageIcon,
-  MailOpen,
+  Inbox,
+  Info,
+  Mail,
+  Maximize2,
   Menu,
+  Minus,
+  OctagonAlert,
   Paperclip,
   Pencil,
+  Plus,
+  Printer,
+  Reply,
+  RotateCw,
   Search,
   SendHorizontal,
-  Smartphone,
+  Settings,
+  SlidersHorizontal,
+  Smile,
+  SquareArrowOutUpRight,
   Star,
+  Tag,
   Trash2,
   UserRound,
+  Users,
+  X,
   type LucideIcon,
 } from "lucide-react";
 import { MotionConfig } from "motion/react";
 import { useT } from "@/i18n/hooks";
 import { cn } from "@/lib/utils";
+import {
+  AddToDriveIcon,
+  FILE_COLOUR,
+  FileTypeIcon,
+  fileKind,
+  GMAIL_BODY_FONT,
+  GMAIL_FONT,
+  GmailLockup,
+  shortMailDate,
+  type FileKind,
+} from "./gmail/brand";
 import { HighlightableText } from "./HighlightableText";
 import { useInDojoPanel } from "./panel-slot";
 import { SimulationBar } from "./SimulationBar";
 import type { FlagProps, MailView } from "./types";
 
 /**
- * A fake mail app: the familiar layout of a phone mail client, with our own styling (no real
- * app's logo, colours or typeface). Icons for actions we don't simulate are decorative only.
- * Nothing here opens a real link: destinations are only ever shown as text, in a browser-style
- * status pill at the bottom-left (on hover, focus or tap), the way a desktop browser shows a
- * link's real URL.
+ * Gmail, replicated with its real UI and logo (used with permission, see CLAUDE.md). Phones get
+ * the Android app: search pill, letter avatars, the Compose button. On desktop (docked Dojo
+ * panel) it is the web app: logo and search bar, folder list with Compose, and the list or
+ * reading view in a rounded white panel. Replies open in a compose window in the bottom-right.
  *
- * On desktop (docked Dojo panel) it switches to a webmail layout: top bar with search, folder
- * list with a Compose button, and the list or reading view in a rounded white panel. Replies
- * open in a compose window in the bottom-right corner.
+ * Icons for actions we don't simulate are decorative only. Nothing here opens a real link:
+ * destinations are only ever shown as text, in a browser-style status pill at the bottom-left
+ * (on hover, focus or tap), the way a desktop browser shows a link's real URL.
  */
 export function MailShell({
   title,
@@ -68,6 +84,8 @@ export function MailShell({
   footer,
   children,
   variant = "message",
+  pager,
+  unreadCount,
 }: {
   /** Header text, e.g. "Inbox". */
   title: string;
@@ -78,6 +96,10 @@ export function MailShell({
   children: ReactNode;
   /** "inbox": search bar and list; "message": reading view; "compose": reply composer. */
   variant?: "inbox" | "message" | "compose";
+  /** Desktop top-right position text, e.g. "1–5 of 5" or "2 of 5". */
+  pager?: string;
+  /** Unread count beside Inbox in the desktop folder list. */
+  unreadCount?: number;
 }) {
   const t = useT();
   const [linkStatus, setLinkStatus] = useState<string | null>(null);
@@ -95,6 +117,8 @@ export function MailShell({
             footer={footer}
             variant={variant}
             linkStatus={linkStatus}
+            pager={pager}
+            unreadCount={unreadCount}
           >
             {children}
           </DesktopMail>
@@ -103,96 +127,79 @@ export function MailShell({
     );
   }
 
-  const back = (
-    <Link
-      href={backHref}
-      aria-label={t("nav.back")}
-      className="flex size-11 shrink-0 items-center justify-center rounded-full hover:bg-slate-100"
-    >
-      <ChevronLeft className="size-5" />
-    </Link>
-  );
-
   return (
     <MotionConfig reducedMotion="user">
       <LinkStatusContext.Provider value={setLinkStatus}>
-        <div className="flex min-h-dvh flex-col bg-white">
+        <div className={cn("flex min-h-dvh flex-col bg-white text-[#1f1f1f]", GMAIL_FONT)}>
           <div className="sticky top-0 z-40 bg-white">
             <SimulationBar />
             {variant === "inbox" ? (
               <header className="px-2 pt-2 pb-1">
                 <div className="flex items-center gap-1">
-                  {back}
+                  <Link
+                    href={backHref}
+                    aria-label={t("nav.back")}
+                    className="flex size-11 shrink-0 items-center justify-center rounded-full text-[#444746] hover:bg-black/5"
+                  >
+                    <ArrowLeft className="size-6" />
+                  </Link>
                   <div
                     aria-hidden
-                    className="flex h-12 min-w-0 flex-1 items-center gap-3 rounded-full bg-slate-100 px-4 text-[15px] text-slate-500"
+                    className="flex h-12 min-w-0 flex-1 items-center gap-4 rounded-full bg-[#eaf1fb] pr-2 pl-4 text-base text-[#444746]"
                   >
-                    <Menu className="size-5 shrink-0" />
+                    <Menu className="size-6 shrink-0" />
                     <span className="flex-1 truncate">{t("mail.search")}</span>
-                    <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-teal-700 text-white">
-                      <UserRound className="size-4" />
-                    </span>
+                    <Avatar />
                   </div>
                 </div>
-                <h1 className="px-3 pt-3 text-xs font-medium tracking-wide text-slate-500 uppercase">
-                  {title}
-                </h1>
+                <h1 className="px-3 pt-4 text-sm text-[#444746]">{title}</h1>
               </header>
             ) : (
-              <header className="flex h-14 items-center gap-1 border-b border-slate-200 px-1 text-slate-700">
-                {back}
+              <header className="flex h-14 items-center gap-1 px-1 text-[#444746]">
+                <Link
+                  href={backHref}
+                  aria-label={t("nav.back")}
+                  className="flex size-11 shrink-0 items-center justify-center rounded-full hover:bg-black/5"
+                >
+                  <ArrowLeft className="size-6" />
+                </Link>
                 <span
                   className={cn(
                     "min-w-0 flex-1 truncate",
-                    variant === "compose" ? "text-lg font-medium text-slate-900" : "sr-only",
+                    variant === "compose" ? "text-[22px] text-[#1f1f1f]" : "sr-only",
                   )}
                 >
                   {title}
                 </span>
-                <span aria-hidden className="flex items-center gap-5 pr-3">
-                  {variant === "compose" ? (
-                    <>
-                      <Paperclip className="size-5" />
-                      <SendHorizontal className="size-5" />
-                    </>
-                  ) : (
-                    <>
-                      <Archive className="size-5" />
-                      <Trash2 className="size-5" />
-                      <MailOpen className="size-5" />
-                    </>
-                  )}
-                  <EllipsisVertical className="size-5" />
+                {variant !== "compose" && <span className="flex-1" />}
+                <span aria-hidden className="flex items-center gap-1 pr-1">
+                  {(variant === "compose"
+                    ? [Paperclip, SendHorizontal, EllipsisVertical]
+                    : [Archive, Trash2, Mail, EllipsisVertical]
+                  ).map((Icon, i) => (
+                    <span key={i} className="flex size-11 items-center justify-center">
+                      <Icon className="size-[22px]" />
+                    </span>
+                  ))}
                 </span>
               </header>
             )}
             {toolbar}
           </div>
-          {hint !== undefined && (
-            <p className="mx-auto mt-3 flex items-center gap-1.5 rounded-full bg-black/5 px-3 py-1 text-xs text-neutral-600">
-              <Flag className="size-3" aria-hidden /> {hint}
-            </p>
-          )}
+          {hint !== undefined && <HintPill hint={hint} />}
           <div className="relative flex-1">{children}</div>
           {variant === "inbox" && (
             <div
               aria-hidden
               className="pointer-events-none sticky bottom-28 z-20 flex justify-end px-4"
             >
-              <span className="flex h-14 items-center gap-3 rounded-2xl bg-teal-100 px-5 text-[15px] font-medium text-teal-900 shadow-md">
-                <Pencil className="size-5" /> {t("mail.compose")}
+              <span className="flex h-14 items-center gap-3 rounded-2xl bg-[#c2e7ff] pr-5 pl-4 text-sm font-medium text-[#001d35] shadow-[0_1px_3px_rgba(0,0,0,.3),0_4px_8px_3px_rgba(0,0,0,.15)]">
+                <Pencil className="size-6" /> {t("mail.compose")}
               </span>
             </div>
           )}
           <div className="sticky bottom-0 z-30">
-            {linkStatus !== null && (
-              <div
-                role="status"
-                className="pointer-events-none absolute bottom-full left-0 mb-0 max-w-[calc(100%-1.5rem)] truncate rounded-tr-md border border-b-0 border-l-0 border-slate-300 bg-slate-100 px-2 py-0.5 text-xs text-slate-800 shadow-sm"
-              >
-                {linkStatus}
-              </div>
-            )}
+            {linkStatus !== null && <LinkStatusPill url={linkStatus} />}
             {footer}
           </div>
         </div>
@@ -201,11 +208,67 @@ export function MailShell({
   );
 }
 
+function HintPill({ hint }: { hint: string }) {
+  return (
+    <p className="mx-auto mt-3 mb-1 flex max-w-[calc(100%-2rem)] items-center gap-1.5 rounded-full bg-[#f1f3f4] px-3 py-1 text-xs text-[#444746]">
+      <Flag className="size-3 shrink-0" aria-hidden /> {hint}
+    </p>
+  );
+}
+
+function LinkStatusPill({ url, fixed = false }: { url: string; fixed?: boolean }) {
+  return (
+    <div
+      role="status"
+      className={cn(
+        "pointer-events-none truncate rounded-tr-md border border-b-0 border-l-0 border-slate-300 bg-slate-100 px-2 py-0.5 text-xs text-slate-800 shadow-sm",
+        fixed
+          ? "fixed bottom-0 left-0 z-50 max-w-[60vw]"
+          : "absolute bottom-full left-0 max-w-[calc(100%-1.5rem)]",
+      )}
+    >
+      {url}
+    </div>
+  );
+}
+
+/** The signed-in account's round avatar. */
+function Avatar({ className }: { className?: string }) {
+  return (
+    <span
+      aria-hidden
+      className={cn(
+        "flex size-8 shrink-0 items-center justify-center rounded-full bg-[#5e35b1] text-white",
+        className,
+      )}
+    >
+      <UserRound className="size-[18px]" />
+    </span>
+  );
+}
+
 /* ------------------------------------------------------------------ */
-/* Desktop webmail layout                                              */
+/* Desktop: Gmail on the web                                           */
 /* ------------------------------------------------------------------ */
 
-const ICON_BUTTON = "flex size-10 items-center justify-center rounded-full text-[#444746]";
+const ICON_BUTTON = "flex size-10 shrink-0 items-center justify-center rounded-full text-[#444746]";
+
+/** A decorative row of round icon buttons, with optional dividers ("|") between groups. */
+function IconRow({ icons }: { icons: (LucideIcon | "|")[] }) {
+  return (
+    <span aria-hidden className="flex items-center">
+      {icons.map((Icon, i) =>
+        Icon === "|" ? (
+          <span key={i} className="mx-2 h-5 w-px bg-[#c4c7c5]" />
+        ) : (
+          <span key={i} className={ICON_BUTTON}>
+            <Icon className="size-5" />
+          </span>
+        ),
+      )}
+    </span>
+  );
+}
 
 function DesktopMail({
   title,
@@ -216,6 +279,8 @@ function DesktopMail({
   children,
   variant,
   linkStatus,
+  pager,
+  unreadCount,
 }: {
   title: string;
   backHref: string;
@@ -225,10 +290,12 @@ function DesktopMail({
   children: ReactNode;
   variant: "inbox" | "message" | "compose";
   linkStatus: string | null;
+  pager?: string;
+  unreadCount?: number;
 }) {
   const t = useT();
-  const folders: { icon: LucideIcon; label: string; active?: boolean }[] = [
-    { icon: Inbox, label: t("mail.inbox"), active: true },
+  const folders: { icon: LucideIcon; label: string; count?: number; active?: boolean }[] = [
+    { icon: Inbox, label: t("mail.inbox"), count: unreadCount, active: true },
     { icon: Star, label: t("mail.starred") },
     { icon: Clock, label: t("mail.snoozed") },
     { icon: SendHorizontal, label: t("mail.sent") },
@@ -237,70 +304,81 @@ function DesktopMail({
   ];
 
   return (
-    <div className="relative flex h-full min-h-0 flex-1 flex-col bg-[#f6f8fc] text-[#1f1f1f]">
-      {/* Top bar: menu, app name, search, settings. Decorative. */}
-      <header className="flex h-16 shrink-0 items-center gap-2 px-4" aria-hidden>
-        <span className={ICON_BUTTON}>
+    <div
+      className={cn(
+        "relative flex h-full min-h-0 flex-1 flex-col bg-[#f6f8fc] text-[#1f1f1f]",
+        GMAIL_FONT,
+      )}
+    >
+      {/* Top bar: menu, logo, search, help, settings, apps, account. Decorative. */}
+      <header className="flex h-16 shrink-0 items-center gap-1 pr-2 pl-2" aria-hidden>
+        <span className={cn(ICON_BUTTON, "size-12")}>
           <Menu className="size-6" />
         </span>
-        <span className="w-[180px] shrink-0 pl-1 text-[22px] text-[#444746]">
-          {t("mail.appName")}
-        </span>
-        <div className="flex h-12 max-w-[720px] min-w-0 flex-1 items-center gap-4 rounded-full bg-[#e9eef6] px-4 text-[#444746]">
-          <Search className="size-5 shrink-0" />
-          <span className="flex-1 truncate">{t("mail.search")}</span>
-          <SlidersHorizontal className="size-5 shrink-0" />
+        <GmailLockup name={t("mail.appName")} className="shrink-0 pr-4 pl-1 xl:w-[190px]" />
+        <div className="flex h-12 max-w-[720px] min-w-0 flex-1 items-center gap-1 rounded-full bg-[#eaf1fb] px-1 text-[#444746]">
+          <span className={ICON_BUTTON}>
+            <Search className="size-5" />
+          </span>
+          <span className="flex-1 truncate text-base">{t("mail.search")}</span>
+          <span className={ICON_BUTTON}>
+            <SlidersHorizontal className="size-5" />
+          </span>
         </div>
-        <span className="ml-auto flex shrink-0 items-center gap-1">
+        <span className="ml-auto flex shrink-0 items-center pl-2">
           <span className={ICON_BUTTON}>
-            <CircleHelp className="size-5" />
+            <CircleHelp className="size-6" />
           </span>
           <span className={ICON_BUTTON}>
-            <Settings className="size-5" />
+            <Settings className="size-6" />
           </span>
           <span className={ICON_BUTTON}>
-            <Grip className="size-5" />
+            <Grip className="size-6" />
           </span>
-          <span className="ml-1 flex size-8 items-center justify-center rounded-full bg-teal-700 text-white">
-            <UserRound className="size-4" />
+          <span className="flex size-12 items-center justify-center">
+            <Avatar />
           </span>
         </span>
       </header>
 
       <div className="flex min-h-0 flex-1">
-        {/* Folders. Decorative: only the inbox exists. */}
-        <nav aria-hidden className="hidden w-[256px] shrink-0 flex-col pr-4 xl:flex">
-          <span className="mb-4 ml-2 flex h-14 w-[142px] items-center gap-3 rounded-2xl bg-[#c2e7ff] px-4 text-sm font-medium text-[#001d35] shadow-sm">
-            <Pencil className="size-5" /> {t("mail.compose")}
+        {/* Folders: an icon rail on narrow screens, the full list from xl. Decorative. */}
+        <nav aria-hidden className="flex w-[72px] shrink-0 flex-col xl:w-[256px] xl:pr-4">
+          <span className="mx-2 mb-4 flex size-14 items-center justify-center gap-3 rounded-2xl bg-[#c2e7ff] text-sm font-medium text-[#001d35] xl:w-auto xl:max-w-max xl:justify-start xl:pr-6 xl:pl-4">
+            <Pencil className="size-6 shrink-0" />
+            <span className="hidden xl:inline">{t("mail.compose")}</span>
           </span>
-          {folders.map(({ icon: Icon, label, active }) => (
+          {folders.map(({ icon: Icon, label, count, active }) => (
             <span
               key={label}
               className={cn(
-                "flex h-8 items-center gap-4 rounded-r-full pr-3 pl-6 text-sm",
-                active ? "bg-[#d3e3fd] font-bold text-[#001d35]" : "text-[#444746]",
+                "mx-2 flex h-8 items-center justify-center rounded-full text-sm xl:mx-0 xl:justify-start xl:gap-[18px] xl:rounded-l-none xl:pr-3 xl:pl-[26px]",
+                active ? "bg-[#d3e3fd] font-bold text-[#001d35]" : "text-[#1f1f1f]",
               )}
             >
               <Icon className="size-5 shrink-0" />
-              <span className="flex-1">{label}</span>
+              <span className="hidden flex-1 xl:inline">{label}</span>
+              {count !== undefined && count > 0 && (
+                <span className="hidden text-xs xl:inline">{count}</span>
+              )}
             </span>
           ))}
+          <span className="mt-4 hidden h-10 items-center justify-between pr-4 pl-[26px] text-base font-medium xl:flex">
+            {t("mail.labels")}
+            <Plus className="size-5 text-[#444746]" />
+          </span>
         </nav>
 
-        <main className="mr-4 mb-4 ml-4 flex min-w-0 flex-1 flex-col overflow-hidden rounded-2xl bg-white xl:ml-0">
+        <main className="mr-4 mb-4 flex min-w-0 flex-1 flex-col overflow-hidden rounded-2xl bg-white">
           {/* Action row */}
-          <div className="flex h-12 shrink-0 items-center gap-1 px-2">
+          <div className="flex h-12 shrink-0 items-center px-2">
             {variant === "inbox" ? (
-              <span aria-hidden className="flex items-center gap-1">
-                <span className={ICON_BUTTON}>
-                  <span className="size-[18px] rounded-sm border-2 border-[#444746]" />
+              <span aria-hidden className="flex items-center">
+                <span className="flex h-10 items-center gap-0.5 rounded-full pr-1 pl-2.5 text-[#444746]">
+                  <span className="size-[18px] rounded-[3px] border-2 border-[#444746]" />
+                  <ChevronDown className="size-4" />
                 </span>
-                <span className={ICON_BUTTON}>
-                  <RotateCw className="size-5" />
-                </span>
-                <span className={ICON_BUTTON}>
-                  <EllipsisVertical className="size-5" />
-                </span>
+                <IconRow icons={[RotateCw, EllipsisVertical]} />
               </span>
             ) : (
               <>
@@ -311,59 +389,65 @@ function DesktopMail({
                 >
                   <ArrowLeft className="size-5" />
                 </Link>
-                <span aria-hidden className="flex items-center gap-1">
-                  <span className={ICON_BUTTON}>
-                    <Archive className="size-5" />
-                  </span>
-                  <span className={ICON_BUTTON}>
-                    <OctagonAlert className="size-5" />
-                  </span>
-                  <span className={ICON_BUTTON}>
-                    <Trash2 className="size-5" />
-                  </span>
-                  <span className="mx-1 h-5 w-px bg-black/10" />
-                  <span className={ICON_BUTTON}>
-                    <MailOpen className="size-5" />
-                  </span>
-                  <span className={ICON_BUTTON}>
-                    <Clock className="size-5" />
-                  </span>
-                  <span className={ICON_BUTTON}>
-                    <EllipsisVertical className="size-5" />
-                  </span>
-                </span>
+                <span className="w-2" />
+                <IconRow
+                  icons={[
+                    Archive,
+                    OctagonAlert,
+                    Trash2,
+                    "|",
+                    Mail,
+                    Clock,
+                    CircleCheck,
+                    "|",
+                    FolderInput,
+                    Tag,
+                    EllipsisVertical,
+                  ]}
+                />
               </>
+            )}
+            {pager !== undefined && (
+              <span aria-hidden className="ml-auto flex items-center gap-1 text-xs text-[#5f6368]">
+                <span className="pr-2">{pager}</span>
+                <span className={cn(ICON_BUTTON, "text-[#c4c7c5]")}>
+                  <ChevronLeft className="size-5" />
+                </span>
+                <span className={cn(ICON_BUTTON, "text-[#c4c7c5]")}>
+                  <ChevronRight className="size-5" />
+                </span>
+              </span>
             )}
             <h1 className="sr-only">{title}</h1>
           </div>
 
           {variant === "inbox" && (
-            <div aria-hidden className="flex h-14 shrink-0 border-b border-[#f1f3f4] text-sm">
+            <div aria-hidden className="flex h-14 shrink-0 text-sm">
               {[
                 { icon: Inbox, label: t("mail.primary"), active: true },
                 { icon: Tag, label: t("mail.promotions") },
                 { icon: Users, label: t("mail.social") },
+                { icon: Info, label: t("mail.updates") },
               ].map(({ icon: Icon, label, active }) => (
                 <span
                   key={label}
                   className={cn(
-                    "flex w-[250px] items-center gap-4 px-4 font-medium",
-                    active ? "border-b-[3px] border-[#0b57d0] text-[#0b57d0]" : "text-[#444746]",
+                    "relative flex max-w-[250px] min-w-0 flex-1 items-center gap-4 px-4 font-medium",
+                    active ? "text-[#0b57d0]" : "text-[#444746]",
                   )}
                 >
-                  <Icon className="size-5" />
-                  {label}
+                  <Icon className="size-5 shrink-0" />
+                  <span className="truncate">{label}</span>
+                  {active && (
+                    <span className="absolute inset-x-2 bottom-0 h-[3px] rounded-t-[3px] bg-[#0b57d0]" />
+                  )}
                 </span>
               ))}
             </div>
           )}
 
           {toolbar}
-          {hint !== undefined && (
-            <p className="mx-auto mt-3 flex items-center gap-1.5 rounded-full bg-black/5 px-3 py-1 text-xs text-neutral-600">
-              <Flag className="size-3" aria-hidden /> {hint}
-            </p>
-          )}
+          {hint !== undefined && <HintPill hint={hint} />}
           <div className="relative min-h-0 flex-1 overflow-y-auto">
             {variant === "compose" ? null : children}
           </div>
@@ -385,8 +469,11 @@ function DesktopMail({
           </header>
           <div className="min-h-0 flex-1 overflow-y-auto">{children}</div>
           <div aria-hidden className="flex h-14 shrink-0 items-center gap-3 px-4 text-[#444746]">
-            <span className="flex h-9 items-center rounded-full bg-[#0b57d0] px-6 text-sm font-medium text-white">
-              {t("mail.send")}
+            <span className="flex h-9 items-center overflow-hidden rounded-full bg-[#0b57d0] text-sm font-medium text-white">
+              <span className="pr-4 pl-6">{t("mail.send")}</span>
+              <span className="flex h-full items-center border-l border-white/30 px-2">
+                <ChevronDown className="size-4" />
+              </span>
             </span>
             <Paperclip className="size-5" />
             <ImageIcon className="size-5" />
@@ -395,14 +482,7 @@ function DesktopMail({
         </section>
       )}
 
-      {linkStatus !== null && (
-        <div
-          role="status"
-          className="pointer-events-none fixed bottom-0 left-0 z-50 max-w-[60vw] truncate rounded-tr-md border border-b-0 border-l-0 border-slate-300 bg-slate-100 px-2 py-0.5 text-xs text-slate-800 shadow-sm"
-        >
-          {linkStatus}
-        </div>
-      )}
+      {linkStatus !== null && <LinkStatusPill url={linkStatus} fixed />}
       {/* Choices render into the Dojo panel. */}
       {footer}
     </div>
@@ -469,8 +549,8 @@ function MailLink({
         }}
         className={
           isUrl
-            ? "min-h-11 min-w-0 cursor-pointer text-left text-[15px] break-all text-blue-700 underline underline-offset-2 hover:text-blue-800"
-            : "min-h-11 cursor-pointer rounded-md bg-indigo-700 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-800"
+            ? "min-h-11 min-w-0 cursor-pointer text-left break-all text-[#1155cc] underline hover:text-[#0b4ab0] lg:min-h-0"
+            : "min-h-11 cursor-pointer rounded bg-[#1a73e8] px-6 py-2.5 text-sm font-bold text-white hover:bg-[#1765cc]"
         }
       >
         {link.text}
@@ -512,15 +592,16 @@ export function FlagToggle({
   );
 }
 
-/** Colours for initial avatars, picked from the name so a sender always looks the same. */
+/** Gmail's letter-avatar colours, picked from the name so a sender always looks the same. */
 const AVATAR_COLOURS = [
-  "bg-teal-600",
-  "bg-indigo-600",
-  "bg-rose-600",
-  "bg-amber-600",
-  "bg-sky-700",
-  "bg-fuchsia-700",
-  "bg-emerald-700",
+  "bg-[#5c6bc0]",
+  "bg-[#ef6c00]",
+  "bg-[#00897b]",
+  "bg-[#8e24aa]",
+  "bg-[#d81b60]",
+  "bg-[#039be5]",
+  "bg-[#7cb342]",
+  "bg-[#6d4c41]",
 ] as const;
 
 /** A round avatar with the sender's first letter. Shared with the inbox list and composer. */
@@ -531,7 +612,7 @@ export function MailAvatar({ name, className }: { name: string; className?: stri
     <span
       aria-hidden
       className={cn(
-        "flex size-10 shrink-0 items-center justify-center rounded-full text-base font-medium text-white",
+        "flex size-10 shrink-0 items-center justify-center rounded-full text-lg text-white",
         AVATAR_COLOURS[hash % AVATAR_COLOURS.length],
         className,
       )}
@@ -541,46 +622,47 @@ export function MailAvatar({ name, className }: { name: string; className?: stri
   );
 }
 
-/** A labelled, flaggable line such as "Reply-To: x@y". */
+/** One row of the "to me" details card, like Gmail's "from: / reply-to: / to:" popup. */
 function DetailRow({
   id,
   label,
   value,
+  name,
   ...flag
-}: FlagProps & { id: string; label: string; value: string }) {
-  const flagged = flag.flaggedIds.includes(id);
+}: Partial<FlagProps> & { id?: string; label: string; value: string; name?: string }) {
+  const flaggable = id !== undefined && flag.flaggedIds !== undefined && flag.onToggleFlag;
+  const flagged = flaggable && flag.flaggedIds!.includes(id);
   return (
-    <div
-      className={cn(
-        "flex items-center gap-2 rounded-md px-1.5 py-1 text-sm",
-        flagged && "bg-red-50 ring-1 ring-red-300",
-      )}
-    >
-      <span className="w-[72px] shrink-0 text-right text-slate-500">{label}:</span>
-      <span className="min-w-0 flex-1 font-mono text-[13px] break-all text-slate-900">{value}</span>
-      <FlagToggle id={id} label={`${label} ${value}`} {...flag} />
+    <div className="contents">
+      <span className="pt-1 text-right text-[#5f6368] lowercase">{label}:</span>
+      <span
+        className={cn(
+          "flex min-h-7 min-w-0 items-start gap-1 rounded",
+          flagged && "bg-red-50 ring-1 ring-red-300",
+        )}
+      >
+        <span className="min-w-0 flex-1 pt-1 break-words text-[#1f1f1f]">
+          {name !== undefined && <span className="font-bold">{name} </span>}
+          <span className="inline-block max-w-full break-all">
+            {name !== undefined ? `<${value}>` : value}
+          </span>
+        </span>
+        {flaggable && (
+          <FlagToggle
+            id={id}
+            label={`${label} ${value}`}
+            flaggedIds={flag.flaggedIds!}
+            onToggleFlag={flag.onToggleFlag!}
+            className="-my-2"
+          />
+        )}
+      </span>
     </div>
   );
 }
 
-/** The icon for the name as shown (cut-short names count by what's visible, as in a real app). */
-function fileIcon(name: string): { Icon: LucideIcon; tint: string } {
-  const ext =
-    name
-      .toLowerCase()
-      .replace(/[.…]+$/, "")
-      .split(".")
-      .pop() ?? "";
-  if (ext === "pdf") return { Icon: FileText, tint: "text-red-600" };
-  if (ext === "apk") return { Icon: Smartphone, tint: "text-emerald-700" };
-  if (["zip", "rar", "7z"].includes(ext)) return { Icon: FileArchive, tint: "text-amber-700" };
-  if (["jpg", "jpeg", "png", "gif", "webp"].includes(ext))
-    return { Icon: ImageIcon, tint: "text-sky-700" };
-  return { Icon: File, tint: "text-slate-600" };
-}
-
 /**
- * The reading pane: sender, details, body, links and attachments. What the player has
+ * The reading pane: subject, sender, details, body, links and attachments. What the player has
  * revealed comes from `seenIds`, so it stays open across re-renders and rewinds.
  */
 export function MailBody({
@@ -588,44 +670,76 @@ export function MailBody({
   seenIds,
   onReveal,
   onOpenPanel,
+  labels,
   ...flag
 }: FlagProps & {
   mail: MailView;
   seenIds: readonly string[];
   onReveal: (ids: string[]) => void;
   onOpenPanel: (panelId: string) => void;
+  /** Extra label chips after the subject, e.g. the player's triage label. */
+  labels?: ReactNode;
 }) {
   const t = useT();
   const detailIds = [mail.from.id, ...(mail.replyTo ? [mail.replyTo.id] : []), mail.to.id];
   const detailsOpen = detailIds.every((id) => seenIds.includes(id));
+  const fromFlagged = flag.flaggedIds.includes(mail.from.id);
 
   return (
-    <article className="pb-6">
-      {/* Subject, label chip and star */}
-      <div className="flex items-start gap-2 px-4 pt-4 lg:pt-5 lg:pr-6 lg:pl-[72px]">
-        <h1 className="min-w-0 flex-1 text-[22px] leading-snug text-slate-900">
+    <article className="pb-8">
+      {/* Subject, label chips, and print / new window (desktop) or star (phone) */}
+      <div className="flex items-start gap-2 pt-3 pr-2 pl-4 lg:pt-5 lg:pr-4 lg:pl-[72px]">
+        <h1 className="min-w-0 flex-1 pt-1 text-[22px] leading-7 text-[#1f1f1f]">
           {mail.subject}{" "}
-          <span className="inline-block translate-y-[-2px] rounded bg-slate-200 px-1.5 py-0.5 align-middle text-[11px] text-slate-700">
-            {t("mail.inboxLabel")}
+          <span className="inline-flex translate-y-[-3px] items-center gap-1 align-middle">
+            <span className="rounded-[4px] bg-[#dddddd] px-1.5 text-xs leading-5 text-[#444746]">
+              {t("mail.inboxLabel")}
+            </span>
+            {labels}
           </span>
         </h1>
-        <Star className="mt-1.5 size-5 shrink-0 text-slate-400" aria-hidden />
+        <span aria-hidden className="hidden lg:flex">
+          <span className={ICON_BUTTON}>
+            <Printer className="size-5" />
+          </span>
+          <span className={ICON_BUTTON}>
+            <SquareArrowOutUpRight className="size-5" />
+          </span>
+        </span>
+        <span aria-hidden className={cn(ICON_BUTTON, "lg:hidden")}>
+          <Star className="size-[22px]" />
+        </span>
       </div>
 
       {/* Sender row */}
-      <div className="mt-4 px-4 lg:pr-6">
+      <div className="mt-3 pr-2 pl-4 lg:mt-5 lg:pr-4">
         <div className="flex items-start gap-3 lg:gap-4">
           <MailAvatar name={mail.displayName} />
           <div className="min-w-0 flex-1">
-            <div className="flex items-baseline gap-2">
-              <span className="min-w-0 truncate font-semibold text-slate-900">
+            <div className="flex min-h-5 flex-wrap items-center gap-x-1.5">
+              <span className="min-w-0 truncate font-bold text-[#1f1f1f] lg:text-sm">
                 {mail.displayName}
               </span>
-              <span className="shrink-0 text-xs text-slate-500">{mail.date}</span>
+              {mail.showFromAddress && (
+                <span
+                  className={cn(
+                    "flex min-w-0 items-center rounded text-xs text-[#5f6368]",
+                    fromFlagged && "bg-red-50 ring-1 ring-red-300",
+                  )}
+                >
+                  <span className="break-all">&lt;{mail.from.address}&gt;</span>
+                  <FlagToggle
+                    id={mail.from.id}
+                    label={`${t("mail.from")} ${mail.from.address}`}
+                    {...flag}
+                  />
+                </span>
+              )}
+              <span className="text-xs text-[#5f6368] lg:hidden">{shortMailDate(mail.date)}</span>
             </div>
             <button
               type="button"
-              className="-ml-2 flex min-h-11 items-center gap-0.5 rounded-md px-2 text-left text-sm text-slate-600 hover:bg-slate-100"
+              className="-ml-1.5 flex min-h-9 items-center gap-0.5 rounded px-1.5 text-left text-xs text-[#5f6368] hover:bg-black/5 lg:min-h-6"
               onClick={() => onReveal(detailIds)}
               aria-expanded={detailsOpen}
               aria-label={detailsOpen ? t("mail.hideDetails") : t("mail.showDetails")}
@@ -638,20 +752,34 @@ export function MailBody({
               )}
             </button>
           </div>
-          <EllipsisVertical className="mt-1 size-5 shrink-0 text-slate-400" aria-hidden />
+          <span aria-hidden className="flex shrink-0 items-center text-[#444746]">
+            <span className="mr-2 hidden text-xs whitespace-nowrap text-[#5f6368] lg:inline">
+              {mail.date}
+            </span>
+            <span className={cn(ICON_BUTTON, "hidden lg:flex")}>
+              <Star className="size-5" />
+            </span>
+            <span className={cn(ICON_BUTTON, "hidden lg:flex")}>
+              <Smile className="size-5" />
+            </span>
+            <span className={ICON_BUTTON}>
+              <Reply className="size-5" />
+            </span>
+            <span className={ICON_BUTTON}>
+              <EllipsisVertical className="size-5" />
+            </span>
+          </span>
         </div>
 
-        {mail.showFromAddress && !detailsOpen && (
-          <DetailRow id={mail.from.id} label={t("mail.from")} value={mail.from.address} {...flag} />
-        )}
         {!detailsOpen && (
-          <p className="mt-1 text-xs text-slate-500 lg:ml-14">{t("mail.tapSender")}</p>
+          <p className="mt-0.5 pl-[52px] text-xs text-[#5f6368] lg:pl-14">{t("mail.tapSender")}</p>
         )}
         {detailsOpen && (
-          <div className="mt-1 space-y-0.5 rounded-xl border border-slate-200 bg-white p-2 shadow-sm lg:ml-14 lg:max-w-[640px]">
+          <div className="mt-1 ml-0 grid grid-cols-[auto_minmax(0,1fr)] gap-x-2 rounded-lg bg-white py-3 pr-1 pl-3 text-xs shadow-[0_1px_3px_rgba(60,64,67,.3),0_4px_8px_3px_rgba(60,64,67,.15)] lg:ml-14 lg:max-w-[600px]">
             <DetailRow
               id={mail.from.id}
               label={t("mail.from")}
+              name={mail.displayName}
               value={mail.from.address}
               {...flag}
             />
@@ -664,16 +792,19 @@ export function MailBody({
               />
             )}
             <DetailRow id={mail.to.id} label={t("mail.to")} value={mail.to.address} {...flag} />
-            <div className="flex items-center gap-2 px-1.5 py-1 text-sm">
-              <span className="w-[72px] shrink-0 text-right text-slate-500">{t("mail.date")}:</span>
-              <span className="min-w-0 flex-1 text-slate-900">{mail.date}</span>
-            </div>
+            <DetailRow label={t("mail.date")} value={mail.date} />
+            <DetailRow label={t("mail.subject")} value={mail.subject} />
           </div>
         )}
       </div>
 
       {/* Body */}
-      <div className="mt-5 space-y-3 px-4 text-[15px] leading-relaxed text-slate-900 lg:max-w-[820px] lg:pr-6 lg:pl-[72px] lg:text-sm lg:leading-relaxed">
+      <div
+        className={cn(
+          "mt-5 space-y-5 px-4 text-sm leading-[1.45] text-[#222] lg:max-w-[880px] lg:pr-6 lg:pl-[72px]",
+          GMAIL_BODY_FONT,
+        )}
+      >
         {mail.body.map((paragraph) => (
           <p key={paragraph.targetId}>
             <HighlightableText targetId={paragraph.targetId} text={paragraph.text} />
@@ -683,7 +814,7 @@ export function MailBody({
 
       {/* Buttons and links: inert, only their destination can be inspected */}
       {mail.links.length > 0 && (
-        <div className="mt-5 space-y-2 px-4 lg:pl-[72px]">
+        <div className={cn("mt-5 space-y-2 px-4 text-sm lg:pl-[72px]", GMAIL_BODY_FONT)}>
           {mail.links.map((link) => (
             <MailLink
               key={link.id}
@@ -694,87 +825,255 @@ export function MailBody({
             />
           ))}
           {!mail.links.every((link) => seenIds.includes(link.id)) && (
-            <p className="text-xs text-slate-500">{t("mail.inspectLinkHint")}</p>
+            <p className="font-sans text-xs text-[#5f6368]">{t("mail.inspectLinkHint")}</p>
           )}
         </div>
       )}
 
-      {/* Attachments */}
       {mail.attachments.length > 0 && (
-        <div className="mt-6 border-t border-slate-200 px-4 pt-4 lg:mr-6 lg:ml-[72px] lg:px-0">
-          <p className="mb-2 flex items-center gap-1.5 text-sm font-medium text-slate-700">
-            <Paperclip className="size-4" aria-hidden />
-            {t("mail.attachments")(mail.attachments.length)}
-          </p>
-          <div className="space-y-3 lg:grid lg:grid-cols-[repeat(auto-fill,minmax(220px,1fr))] lg:items-start lg:gap-3 lg:space-y-0">
-            {mail.attachments.map((a) => {
-              const inspected = seenIds.includes(a.id);
-              const { Icon, tint } = fileIcon(a.shownName);
-              return (
-                <div key={a.id} className="overflow-hidden rounded-xl border border-slate-200">
-                  <button
-                    type="button"
-                    onClick={() => onReveal([a.id])}
-                    aria-expanded={inspected}
-                    className="block w-full text-left"
-                  >
-                    <span className="flex h-24 items-center justify-center bg-slate-100">
-                      <Icon className={cn("size-10", tint)} aria-hidden />
-                    </span>
-                    <span className="flex items-center gap-2 px-3 py-2.5">
-                      <Icon className={cn("size-4 shrink-0", tint)} aria-hidden />
-                      <span className="min-w-0 flex-1 truncate text-sm font-medium text-slate-900">
-                        {a.shownName}
-                      </span>
-                      {a.sizeLabel !== undefined && (
-                        <span className="shrink-0 text-xs text-slate-500">{a.sizeLabel}</span>
-                      )}
-                    </span>
-                  </button>
-                  {inspected && (
-                    <div className="space-y-1 border-t border-slate-200 bg-slate-50 px-2 py-2">
-                      <DetailRow
-                        id={a.id}
-                        label={t("mail.fileName")}
-                        value={a.fullName}
-                        {...flag}
-                      />
-                      <p className="px-1.5 text-sm">
-                        <span className="text-slate-500">{t("mail.fileType")} </span>
-                        <span className="font-medium text-slate-900">{a.actualType}</span>
-                      </p>
-                      {a.documentId !== undefined && (
-                        <button
-                          type="button"
-                          onClick={() => onOpenPanel(a.documentId!)}
-                          className="flex min-h-11 items-center gap-1.5 px-1.5 text-sm font-semibold text-indigo-700"
-                        >
-                          <Search className="size-4" aria-hidden /> {t("mail.openDocument")}
-                        </button>
-                      )}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
+        <Attachments
+          mail={mail}
+          seenIds={seenIds}
+          onReveal={onReveal}
+          onOpenPanel={onOpenPanel}
+          {...flag}
+        />
       )}
 
-      {/* Desktop reply row. Decorative: the real choices are in the Dojo panel. */}
-      <div aria-hidden className="mt-8 hidden gap-3 pl-[72px] lg:flex">
+      {/* Reply row. Decorative: the real choices are in the Dojo panel or the footer. */}
+      <div aria-hidden className="mt-8 flex flex-wrap gap-3 px-4 lg:pl-[72px]">
         {[
           { icon: Reply, label: t("mail.reply") },
           { icon: Forward, label: t("mail.forward") },
         ].map(({ icon: Icon, label }) => (
           <span
             key={label}
-            className="flex h-10 items-center gap-2 rounded-full border border-[#747775] px-6 text-sm font-medium text-[#444746]"
+            className="flex h-10 items-center gap-2 rounded-full border border-[#747775] pr-5 pl-4 text-sm font-medium text-[#444746]"
           >
-            <Icon className="size-4" /> {label}
+            <Icon className="size-5" /> {label}
           </span>
         ))}
+        <span className="flex size-10 items-center justify-center rounded-full border border-[#747775] text-[#444746]">
+          <Smile className="size-5" />
+        </span>
       </div>
     </article>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Attachments                                                         */
+/* ------------------------------------------------------------------ */
+
+/**
+ * "One attachment • Scanned by Gmail", then Gmail's attachment cards. Tapping a card inspects
+ * it (its full name and real type appear below) and opens its preview when it has one.
+ */
+function Attachments({
+  mail,
+  seenIds,
+  onReveal,
+  onOpenPanel,
+  ...flag
+}: FlagProps & {
+  mail: MailView;
+  seenIds: readonly string[];
+  onReveal: (ids: string[]) => void;
+  onOpenPanel: (panelId: string) => void;
+}) {
+  const t = useT();
+  const inspected = mail.attachments.filter((a) => seenIds.includes(a.id));
+  return (
+    <div className="mx-4 mt-6 border-t border-dotted border-[#c4c7c5] pt-4 lg:mr-6 lg:ml-[72px]">
+      <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
+        <span className="font-bold text-[#1f1f1f]">
+          {t("mail.attachments")(mail.attachments.length)}
+        </span>
+        <span aria-hidden className="text-[#5f6368]">
+          •
+        </span>
+        <span className="flex items-center gap-1 text-[#5f6368]">
+          {t("mail.scannedBy")} <Info className="size-4" aria-hidden />
+        </span>
+        <span
+          aria-hidden
+          className="ml-2 hidden items-center gap-2 font-medium text-[#444746] sm:flex"
+        >
+          <AddToDriveIcon className="size-5" />
+          {mail.attachments.length === 1 ? t("mail.addToDrive") : t("mail.addAllToDrive")}
+        </span>
+      </p>
+
+      <div className="mt-3 flex flex-wrap gap-3">
+        {mail.attachments.map((a) => (
+          <AttachmentCard
+            key={a.id}
+            name={a.shownName}
+            size={a.sizeLabel}
+            kind={fileKind(a.shownName)}
+            inspected={seenIds.includes(a.id)}
+            onClick={() => {
+              onReveal([a.id]);
+              if (a.documentId !== undefined) onOpenPanel(a.documentId);
+            }}
+          />
+        ))}
+      </div>
+
+      {inspected.length > 0 && (
+        <div className="mt-3 space-y-2">
+          {inspected.map((a) => (
+            <div
+              key={a.id}
+              className="grid max-w-[600px] grid-cols-[auto_minmax(0,1fr)] gap-x-2 rounded-lg border border-[#dadce0] py-2 pr-1 pl-3 text-xs"
+            >
+              <DetailRow id={a.id} label={t("mail.fileName")} value={a.fullName} {...flag} />
+              <span className="py-1 text-right text-[#5f6368] lowercase">{t("mail.fileType")}</span>
+              <span className="py-1 font-bold text-[#1f1f1f]">{a.actualType}</span>
+              {a.documentId !== undefined && (
+                <button
+                  type="button"
+                  onClick={() => onOpenPanel(a.documentId!)}
+                  className="col-start-2 flex min-h-9 items-center gap-1.5 text-sm font-medium text-[#0b57d0]"
+                >
+                  <Search className="size-4" aria-hidden /> {t("mail.openDocument")}
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** A Gmail attachment card: preview on top, type icon and name below, a folded corner. */
+function AttachmentCard({
+  name,
+  size,
+  kind,
+  inspected,
+  onClick,
+}: {
+  name: string;
+  size?: string;
+  kind: FileKind;
+  inspected: boolean;
+  onClick: () => void;
+}) {
+  const t = useT();
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-expanded={inspected}
+      aria-label={name}
+      className="group relative block h-[120px] w-[180px] overflow-hidden border border-[#dadce0] bg-[#f5f5f5] text-left"
+    >
+      {/* Preview */}
+      {kind === "pdf" ? (
+        <span
+          aria-hidden
+          className="absolute inset-x-0 top-0 bottom-[34px] overflow-hidden bg-white"
+        >
+          <MiniPage />
+        </span>
+      ) : (
+        <span
+          aria-hidden
+          className="absolute inset-x-0 top-0 bottom-[34px] flex items-center justify-center"
+        >
+          <FileTypeIcon kind={kind} className="size-9" />
+        </span>
+      )}
+      {/* Name bar */}
+      <span className="absolute inset-x-0 bottom-0 flex h-[34px] items-center gap-2 border-t border-[#e0e0e0] bg-[#f5f5f5] pr-7 pl-2.5">
+        <FileTypeIcon kind={kind} />
+        <span className="min-w-0 truncate text-[13px] font-bold text-[#5f6368]">{name}</span>
+      </span>
+      {/* Folded corner */}
+      <span aria-hidden className="absolute -right-px -bottom-px h-5 w-10">
+        <span
+          className="absolute inset-0 bg-[#c8c8c8]"
+          style={{ clipPath: "polygon(0 100%, 50% 0, 50% 100%)" }}
+        />
+        <span
+          className="absolute inset-0"
+          style={{
+            background: FILE_COLOUR[kind],
+            clipPath: "polygon(50% 0, 100% 0, 50% 100%)",
+          }}
+        />
+        <span
+          className="absolute inset-0 bg-white"
+          style={{ clipPath: "polygon(100% 0, 100% 100%, 50% 100%)" }}
+        />
+      </span>
+      {/* Hover: full name, size, download and Add to Drive */}
+      <span
+        aria-hidden
+        className="absolute inset-0 hidden flex-col bg-[#f1f1f1] px-3 pt-2.5 pb-3 group-hover:flex"
+      >
+        <span className="flex items-start gap-2">
+          <FileTypeIcon kind={kind} className="mt-0.5" />
+          <span className="line-clamp-2 text-sm leading-tight font-bold break-all text-[#5f6368]">
+            {name}
+          </span>
+        </span>
+        {size !== undefined && <span className="mt-1 pl-6 text-xs text-[#80868b]">{size}</span>}
+        <span className="mt-auto flex gap-2 pl-6">
+          <span
+            title={t("mail.download")}
+            className="flex size-7 items-center justify-center rounded bg-[#757575] text-white"
+          >
+            <Download className="size-4" />
+          </span>
+          <span
+            title={t("mail.addToDrive")}
+            className="flex size-7 items-center justify-center rounded bg-[#757575] text-white"
+          >
+            <AddToDriveIcon className="size-4" />
+          </span>
+        </span>
+        <span className="absolute -right-px -bottom-px h-5 w-10">
+          <span
+            className="absolute inset-0 bg-[#c8c8c8]"
+            style={{ clipPath: "polygon(0 100%, 50% 0, 50% 100%)" }}
+          />
+          <span
+            className="absolute inset-0"
+            style={{
+              background: FILE_COLOUR[kind],
+              clipPath: "polygon(50% 0, 100% 0, 50% 100%)",
+            }}
+          />
+          <span
+            className="absolute inset-0 bg-white"
+            style={{ clipPath: "polygon(100% 0, 100% 100%, 50% 100%)" }}
+          />
+        </span>
+      </span>
+    </button>
+  );
+}
+
+/** A thumbnail of a letter's first page: letterhead, a title and lines of text. */
+function MiniPage() {
+  const widths = [92, 70, 84, 60, 88, 76, 66, 90, 54];
+  return (
+    <span className="absolute inset-x-3 top-2 bottom-0 border border-[#e0e0e0] bg-white px-2.5 pt-2.5 shadow-[0_1px_2px_rgba(0,0,0,.08)]">
+      <span className="flex items-center gap-1.5 border-b border-[#9aa0a6] pb-1.5">
+        <span className="size-3.5 rounded-sm bg-[#3c4043]" />
+        <span className="h-1.5 w-12 rounded-full bg-[#5f6368]" />
+      </span>
+      <span className="mx-auto mt-1.5 block h-1 w-14 rounded-full bg-[#80868b]" />
+      {widths.map((w, i) => (
+        <span
+          key={i}
+          className="mt-1 block h-[3px] rounded-full bg-[#dadce0]"
+          style={{ width: `${w}%` }}
+        />
+      ))}
+    </span>
   );
 }
