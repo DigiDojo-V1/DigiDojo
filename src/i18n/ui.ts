@@ -106,6 +106,8 @@ const en = {
   "landing.app.meta": "Free · no sign-up · about 3 min a scenario",
   "landing.app.cta": "Enter the dojo",
   "landing.app.videoLabel": "A scenario playing in DigiDojo",
+  "landing.app.play": "Play demo",
+  "landing.app.pause": "Pause demo",
   "landing.finale.title": "Don't take the bait",
   "landing.finale.help": "Lost money? Call",
   "landing.finale.number": "1930",

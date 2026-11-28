@@ -1,8 +1,8 @@
 "use client";
 
-import { Play, Volume2 } from "lucide-react";
+import { Pause, Play, Volume2 } from "lucide-react";
 import Link from "next/link";
-import { useRef, type ReactNode } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import { useT } from "@/i18n/hooks";
 import { cn } from "@/lib/utils";
 import { APP_HOME } from "@/lib/routes";
@@ -18,18 +18,35 @@ const EXIT_FROM = Z.app + 0.12;
 const EXIT_LENGTH = 1.35;
 const MIN_RADIUS = 2.5;
 
-function Player() {
+/** True once the visitor pauses the demo, so scrolling back doesn't restart it. */
+type PausedRef = React.RefObject<boolean>;
+
+function Player({ userPausedRef }: { userPausedRef: PausedRef }) {
   const t = useT();
+  const videoRef = useRef<HTMLVideoElement>(null);
   const barRef = useRef<HTMLDivElement>(null);
   const timeRef = useRef<HTMLSpanElement>(null);
+  const [playing, setPlaying] = useState(false);
   const fmt = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+  const toggle = () => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (video.paused) {
+      userPausedRef.current = false;
+      void video.play().catch(() => undefined);
+    } else {
+      userPausedRef.current = true;
+      video.pause();
+    }
+  };
   return (
     <figure
       aria-label={t("landing.app.videoLabel")}
       className="overflow-hidden rounded-md bg-[#1a1a1a] shadow-[0_40px_80px_-30px_rgba(0,0,0,0.55)]"
     >
       <video
-        className="block aspect-[16/10] w-full bg-[#efeeeb] object-cover object-top"
+        ref={videoRef}
+        className="block aspect-[16/10] w-full cursor-pointer bg-[#efeeeb] object-cover object-top"
         src="/landing/demo.webm"
         poster="/landing/demo-poster.jpg"
         autoPlay
@@ -37,6 +54,9 @@ function Player() {
         loop
         playsInline
         preload="metadata"
+        onClick={toggle}
+        onPlay={() => setPlaying(true)}
+        onPause={() => setPlaying(false)}
         onTimeUpdate={(e) => {
           const v = e.currentTarget;
           if (barRef.current && v.duration) {
@@ -48,7 +68,18 @@ function Player() {
         }}
       />
       <figcaption className="flex items-center gap-3 px-3 py-2 text-white/80">
-        <Play className="size-3 fill-current" />
+        <button
+          type="button"
+          onClick={toggle}
+          aria-label={playing ? t("landing.app.pause") : t("landing.app.play")}
+          className="-m-1.5 grid size-6 place-items-center rounded transition hover:text-white focus-visible:outline-2 focus-visible:outline-white"
+        >
+          {playing ? (
+            <Pause className="size-3 fill-current" aria-hidden />
+          ) : (
+            <Play className="size-3 fill-current" aria-hidden />
+          )}
+        </button>
         <div className="relative h-0.5 flex-1 rounded bg-white/20">
           <div ref={barRef} className="absolute inset-y-0 left-0 rounded bg-white" />
         </div>
@@ -61,7 +92,7 @@ function Player() {
   );
 }
 
-function Content() {
+function Content({ userPausedRef }: { userPausedRef: PausedRef }) {
   const t = useT();
   return (
     <div className="mx-auto grid h-full w-full max-w-[1320px] content-center items-center gap-8 px-5 py-20 text-[#121212] sm:px-14 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.25fr)] md:gap-14">
@@ -90,7 +121,7 @@ function Content() {
           <span aria-hidden className="h-px w-4 bg-current transition-all group-hover:w-6" />
         </Link>
       </div>
-      <Player />
+      <Player userPausedRef={userPausedRef} />
     </div>
   );
 }
@@ -104,6 +135,7 @@ export function EnterDojo() {
   const layerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const videoActive = useRef(false);
+  const userPausedRef = useRef(false);
 
   useFrame(({ camZ, vp }) => {
     const layer = layerRef.current;
@@ -149,15 +181,15 @@ export function EnterDojo() {
     const shouldPlay = show > 0.5 && exit < 0.8;
     if (video && shouldPlay !== videoActive.current) {
       videoActive.current = shouldPlay;
-      if (shouldPlay) void video.play().catch(() => undefined);
-      else video.pause();
+      if (!shouldPlay) video.pause();
+      else if (!userPausedRef.current) void video.play().catch(() => undefined);
     }
   });
 
   if (engine.isStatic) {
     return (
       <section id="land-app" className="bg-[#ec7230]">
-        <Content />
+        <Content userPausedRef={userPausedRef} />
       </section>
     );
   }
@@ -165,7 +197,7 @@ export function EnterDojo() {
   return (
     <Layer layerRef={layerRef}>
       <div ref={contentRef} className="h-full overflow-y-auto" style={{ opacity: 0 }}>
-        <Content />
+        <Content userPausedRef={userPausedRef} />
       </div>
     </Layer>
   );
