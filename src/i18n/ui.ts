@@ -141,17 +141,12 @@ const en = {
   // 404
   "notFound.body": "We couldn't find this page.",
 
-  // App chrome (wide screens)
-  "chrome.nav": "Main",
-  "chrome.home": "Home",
-  "chrome.progressTitle": "Your training",
+  // App chrome
   "chrome.progressBody": (done: number, total: number) =>
     `${done} of ${total} scenario${total === 1 ? "" : "s"} done`,
-  "chrome.howTitle": "How it works",
   "chrome.how1": "Live through a real scam inside a fake app.",
   "chrome.how2": "Flag anything suspicious, then make your call.",
   "chrome.how3": "See what you caught, and what you missed, in the debrief.",
-  "chrome.helpTitle": "Lost money to a scam?",
   "chrome.helpBody": "Call 1930 right away and report it at cybercrime.gov.in.",
 
   // Dojo panel (the side panel next to a fake app on wide screens)
@@ -177,16 +172,11 @@ const en = {
   "desktop.navMe": "Me",
 
   // Primer
-  "primer.eyebrow": "The trick",
   "primer.start": "Start simulation",
   "primer.howToPlay": "How to play",
-  "primer.setup": "Your situation",
-  "primer.watchFor": "Ask yourself",
-  "primer.goals": "Your goals",
-  "primer.goalSpot": "Spot the red flags",
-  "primer.goalCalm": "Avoid false alarms",
-  "primer.goalDecide": "Make the right call",
-  "primer.someGenuine": "Heads up: some messages are genuine. Don't flag everything.",
+  "primer.step1": "Play it out in the fake app, as if it's really happening to you.",
+  "primer.step2": "Tap anything suspicious to flag it. Some messages are genuine.",
+  "primer.step3": "Make your call, then see what you caught in the debrief.",
 
   // How to play
   "howto.title": "How to play",
