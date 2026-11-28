@@ -46,3 +46,8 @@ next-env.d.ts
 
 # Design reference video (local only)
 /homePageInspiration.mov
+
+# dojo art: full-size Gemini sources and pipeline scratch output
+/scripts/art/*/source/
+/scripts/art/*/out/
+/.venv-art/
