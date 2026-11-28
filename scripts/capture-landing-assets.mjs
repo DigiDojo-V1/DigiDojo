@@ -18,6 +18,7 @@ const VIEWPORT = { width: 1280, height: 800 };
 const CARDS = [
   { dojo: "easy-money", scenario: "task-scam", settleMs: 9000 },
   { dojo: "dream-job", scenario: "easy-too-good", settleMs: 6000 },
+  { dojo: "authority", scenario: "kyc-call", settleMs: 4000 },
 ];
 const DEMO = { dojo: "easy-money", scenario: "task-scam", lengthMs: 13000 };
 
