@@ -1,7 +1,7 @@
 # Dojo art
 
 Each dojo's slide on the home carousel can have an animated illustration: a flat, grainy 2D scene
-whose parts move in slow loops. Easy Money and Dream Job have one. This folder turns a generated
+whose parts move in slow loops. Easy Money, Dream Job and Trust Me Bro have one. This folder turns a generated
 image into the vector layers the app animates.
 
 ## How a scene is made
@@ -60,6 +60,34 @@ image into the vector layers the app animates.
   dropped. The hug layer traces with finer colour clustering (`color_precision=7`,
   `layer_difference=8`): at the default settings the envelope's fold lines and her ID badge
   merged into the cream.
+
+## How Trust Me Bro is split
+
+- **Floor**: the user's floor shadow, redrawn as one flat ellipse and drawn first. Traced with his
+  legs, the jeans' shape leaked a blue hairline along its top, and Gemini's sparkle sat on its tip.
+- **Back** (static): wall, pillar, the scammer and the user minus every moving part. Filled in
+  under the cut-out (his face, hood, hoodie and can continue by nearest colour), under his eyes
+  (eye white), under the user's head (the neck continues up) and under the thumb (screen, then
+  palm). Traces with the finest clustering (`color_precision=8`, `layer_difference=5`): coarser,
+  the hoodie's dark hem, the jeans' waistband and the phone's lilac edge merged away. An
+  edge-snapping (Kuwahara) filter runs first, or the 1 px blends between flat colours trace as
+  outlines of an in-between colour (a purple ring round the phone).
+- **Cut-out**: the printed face inside its white outline, plus the stick. Bobs and tilts about the
+  fist. The stick is kept 2 px clear of the fist; its blended edge traced as a tan sliver.
+- **Fist**: drawn again over the stick, static.
+- **Eyes**: whites, and pupils clipped to the whites (only pixels darker than lum 70: the eye bags
+  below are dark too).
+- **Head**: the user's hair, face and ear, cut at the jaw (the top of the neck's shadow). Nods and
+  tips about the neck. Extended under the raised arm, filled from its interior, not its edge.
+- **Arm**: his raised arm, hand and can, drawn over the head.
+- **Thumb**: the top digit over the phone; hovers and taps the pay button about its knuckle.
+- **Drawn in code, not traced**: the string (painted out of the back, except where it enters each
+  can, so the rims keep their shape) with its blips and twitch, the hole in the wall (redrawn as
+  two ellipses, since the string crossed it) and the pay button (Gemini's flat image had none).
+  The twitch animates the CSS `d` property, which Safari ignores: there the string stays still.
+- **Gemini's mistakes**: two stray V-shaped strokes on the user's forearm are painted out. The
+  background brightens towards the wall and the figures have a 1-3 px pale pink rim where they
+  meet it; both count as background, or they trace as salmon outlines.
 
 ## Checking a scene
 
