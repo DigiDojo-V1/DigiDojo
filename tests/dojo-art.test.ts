@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { DOJO_ART } from "@/dojos/art";
+import * as dreamJob from "@/dojos/dream-job/art/scene";
 import { BAG, COINS, LEGS, LURE, SPARKS, UPPER } from "@/dojos/easy-money/art/scene";
 import { DOJOS } from "@/dojos/registry";
 
@@ -18,5 +19,29 @@ describe("dojo art", () => {
     expect(COINS).toHaveLength(4);
     expect(SPARKS).toHaveLength(5);
     for (const group of [...COINS, ...SPARKS]) expect(group.length).toBeGreaterThan(0);
+  });
+
+  it("has every Dream Job layer traced", () => {
+    const { ARM, BODY, BROWS, HEAD, LEGS, PUPILS, WHITES } = dreamJob;
+    for (const layer of [LEGS, ARM, BODY, HEAD, BROWS]) expect(layer.length).toBeGreaterThan(0);
+    // One white and one pupil per eye, left then right.
+    expect(WHITES).toHaveLength(2);
+    expect(PUPILS).toHaveLength(2);
+    for (const group of [...WHITES, ...PUPILS]) expect(group.length).toBeGreaterThan(0);
+  });
+
+  it("writes well-formed shapes that start inside the source image", () => {
+    const layers = [
+      ...[BAG, UPPER, LEGS, LURE, ...COINS, ...SPARKS],
+      ...[dreamJob.LEGS, dreamJob.ARM, dreamJob.BODY, dreamJob.HEAD, dreamJob.BROWS],
+      ...[...dreamJob.WHITES, ...dreamJob.PUPILS],
+    ];
+    for (const [d, fill] of layers.flat()) {
+      expect(d).toMatch(/^M\d+ \d+/);
+      expect(fill).toMatch(/^#[0-9a-f]{6}$/);
+      const [, x, y] = /^M(\d+) (\d+)/.exec(d) ?? [];
+      expect(Number(x)).toBeLessThanOrEqual(2752);
+      expect(Number(y)).toBeLessThanOrEqual(1536);
+    }
   });
 });
