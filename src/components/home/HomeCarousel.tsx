@@ -1,24 +1,15 @@
 "use client";
 
-import { ArrowRight, ChevronLeft, ChevronRight, PhoneCall } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useLayoutEffect, useRef, useState, type KeyboardEvent } from "react";
 import { DISPLAY, MONO } from "@/components/landing/styles";
-import {
-  isComingSoon,
-  playableScenarioKeys,
-  useDojoSummaries,
-  type DojoSummary,
-} from "@/components/layout/chrome-data";
+import { isComingSoon, useDojoSummaries, type DojoSummary } from "@/components/layout/chrome-data";
 import { DojoProgress } from "@/components/progress/DojoProgress";
-import { useHydrated, useProgressStore } from "@/engine/store";
+import { BIG_CARD, CARD_PAD as PAD, HomeShell } from "./HomeShell";
 import { useT, useText } from "@/i18n/hooks";
-import { LanguageToggle } from "@/i18n/LanguageToggle";
 import { dojoHref } from "@/lib/routes";
 import { cn } from "@/lib/utils";
-
-/** Same horizontal padding for everything inside the card, so text, Start and the bar line up. */
-const PAD = "px-5 md:px-8 lg:px-10";
 
 /** sessionStorage key for the last dojo shown. */
 const SLIDE_KEY = "digidojo-home-slide";
@@ -104,70 +95,39 @@ export function HomeCarousel() {
   };
 
   return (
-    <div className="flex min-h-dvh flex-col bg-[rgb(232,228,222)] text-[#121212] antialiased">
-      <HomeHeader />
-
-      <main className="mx-auto flex w-full max-w-[1280px] flex-1 flex-col px-4 md:px-6 lg:px-8">
-        <section
-          aria-roledescription="carousel"
-          aria-label={t("home.carousel")}
-          className="relative flex min-h-[560px] flex-1 flex-col overflow-hidden rounded-[28px] bg-[#f3f1ec] ring-1 ring-black/10"
+    <HomeShell>
+      <section
+        aria-roledescription="carousel"
+        aria-label={t("home.carousel")}
+        className={cn(BIG_CARD, "relative flex min-h-[560px] flex-1 flex-col overflow-hidden")}
+      >
+        <div
+          ref={trackRef}
+          tabIndex={0}
+          onKeyDown={onKeyDown}
+          onScroll={onScroll}
+          onPointerDown={dropTarget}
+          onTouchStart={dropTarget}
+          onWheel={dropTarget}
+          className="relative flex flex-1 snap-x snap-mandatory [scrollbar-width:none] overflow-x-auto overscroll-x-contain focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-black/40 [&::-webkit-scrollbar]:hidden"
         >
-          <div
-            ref={trackRef}
-            tabIndex={0}
-            onKeyDown={onKeyDown}
-            onScroll={onScroll}
-            onPointerDown={dropTarget}
-            onTouchStart={dropTarget}
-            onWheel={dropTarget}
-            className="relative flex flex-1 snap-x snap-mandatory [scrollbar-width:none] overflow-x-auto overscroll-x-contain focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-black/40 [&::-webkit-scrollbar]:hidden"
-          >
-            {dojos.map((dojo, i) => (
-              <DojoSlide
-                key={dojo.id}
-                ref={(el) => {
-                  slideRefs.current[i] = el;
-                }}
-                dojo={dojo}
-                index={i}
-                total={dojos.length}
-                active={i === active}
-              />
-            ))}
-          </div>
+          {dojos.map((dojo, i) => (
+            <DojoSlide
+              key={dojo.id}
+              ref={(el) => {
+                slideRefs.current[i] = el;
+              }}
+              dojo={dojo}
+              index={i}
+              total={dojos.length}
+              active={i === active}
+            />
+          ))}
+        </div>
 
-          <CarouselControls dojos={dojos} active={active} goTo={goTo} step={step} />
-        </section>
-      </main>
-
-      <footer className="flex items-center justify-center gap-2 px-4 py-4 text-center text-xs text-black/60">
-        <PhoneCall aria-hidden className="size-3.5 shrink-0 text-red-600" />
-        <span>{t("chrome.helpBody")}</span>
-      </footer>
-    </div>
-  );
-}
-
-/** Wordmark and overall progress on the left, language on the right. */
-function HomeHeader() {
-  const t = useT();
-  const dojos = useDojoSummaries();
-  const hydrated = useHydrated();
-  const completed = useProgressStore((s) => s.completed);
-  const keys = playableScenarioKeys(dojos);
-  const done = hydrated ? keys.filter((k) => completed[k]).length : 0;
-
-  return (
-    <header className="mx-auto flex w-full max-w-[1280px] items-center justify-between gap-4 px-4 py-4 md:px-6 lg:px-8">
-      <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:gap-5">
-        <h1 className={`${DISPLAY} text-xl leading-none tracking-[0.06em]`}>
-          <Link href="/">{t("home.title")}</Link>
-        </h1>
-        <p className={`${MONO} text-black/55`}>{t("chrome.progressBody")(done, keys.length)}</p>
-      </div>
-      <LanguageToggle />
-    </header>
+        <CarouselControls dojos={dojos} active={active} goTo={goTo} step={step} />
+      </section>
+    </HomeShell>
   );
 }
 
