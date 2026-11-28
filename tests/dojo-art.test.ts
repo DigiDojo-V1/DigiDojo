@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { DOJO_ART } from "@/dojos/art";
+import * as authority from "@/dojos/authority/art/scene";
 import * as dreamJob from "@/dojos/dream-job/art/scene";
 import { BAG, COINS, LEGS, LURE, SPARKS, UPPER } from "@/dojos/easy-money/art/scene";
 import { DOJOS } from "@/dojos/registry";
@@ -46,6 +47,34 @@ describe("dojo art", () => {
     expect(startX(PUPILS[0]!)).toBeLessThan(startX(PUPILS[1]!));
   });
 
+  it("has every Authority layer traced", () => {
+    const { ARM, BACK, CHAPPAL, EVIDENCE, HER, SHIN, THIGH, TORSO } = authority;
+    const { BROWS, CABLE, SHORTS, WHITES } = authority;
+    for (const layer of [BACK, EVIDENCE, TORSO, ARM, SHIN, CHAPPAL, THIGH, HER]) {
+      expect(layer.length).toBeGreaterThan(0);
+    }
+    for (const layer of [CABLE, WHITES, BROWS, SHORTS]) expect(layer.length).toBeGreaterThan(0);
+  });
+
+  it("gives the Authority component sane measurements to draw from", () => {
+    const { CAGE, EYES, GINGHAM, PUPIL, SWEAT_FILL } = authority;
+    // Two eyes, left then right, on one level; the pupil rests inside each white.
+    expect(EYES).toHaveLength(2);
+    expect(EYES[0].cx).toBeLessThan(EYES[1].cx);
+    expect(EYES[0].cy).toBe(EYES[1].cy);
+    for (const e of EYES) expect(Math.hypot(PUPIL.dx / e.rx, PUPIL.dy / e.ry)).toBeLessThan(1);
+    // The bars run left to right inside the cage's outline, and the notch sits in its top edge.
+    const bars = [...CAGE.bars];
+    expect(bars).toEqual([...bars].sort((p, q) => p - q));
+    expect(bars[0]!).toBeGreaterThan(CAGE.x0 + CAGE.stroke);
+    expect(bars.at(-1)! + CAGE.bar_w).toBeLessThan(CAGE.x1 - CAGE.stroke);
+    expect(CAGE.notch.x0).toBeGreaterThan(CAGE.x0);
+    expect(CAGE.notch.x1).toBeLessThan(CAGE.x1);
+    for (const fill of [PUPIL.fill, SWEAT_FILL, GINGHAM.stripe, GINGHAM.cross]) {
+      expect(fill).toMatch(/^#[0-9a-f]{6}$/);
+    }
+  });
+
   it("writes well-formed shapes that start inside the source image", () => {
     const layers = [
       ...[BAG, UPPER, LEGS, LURE, ...COINS, ...SPARKS],
@@ -54,6 +83,9 @@ describe("dojo art", () => {
       ...[trustMeBro.FLOOR, trustMeBro.BACK, trustMeBro.CUTOUT, trustMeBro.FIST],
       ...[trustMeBro.HEAD, trustMeBro.ARM, trustMeBro.THUMB],
       ...[...trustMeBro.WHITES, ...trustMeBro.PUPILS],
+      ...[authority.BACK, authority.EVIDENCE, authority.TORSO, authority.ARM, authority.SHIN],
+      ...[authority.CHAPPAL, authority.THIGH, authority.HER, authority.CABLE, authority.WHITES],
+      ...[authority.BROWS, authority.SHORTS],
     ];
     for (const [d, fill] of layers.flat()) {
       expect(d).toMatch(/^M\d+ \d+/);
