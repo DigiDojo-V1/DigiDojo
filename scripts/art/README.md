@@ -1,8 +1,8 @@
 # Dojo art
 
 Each dojo's slide on the home carousel can have an animated illustration: a flat, grainy 2D scene
-whose parts move in slow loops. Easy Money, Dream Job and Trust Me Bro have one. This folder turns a generated
-image into the vector layers the app animates.
+whose parts move in slow loops. Easy Money, Dream Job and Trust Me Bro have one. This folder turns
+a generated image into the vector layers the app animates.
 
 ## How a scene is made
 
