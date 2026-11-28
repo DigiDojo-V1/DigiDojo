@@ -26,7 +26,6 @@ const en = {
   "landing.menu": "Menu",
   "landing.menu.close": "Close",
   "landing.menu.openApp": "Open the app",
-  "landing.header.cta": "Open DigiDojo",
   "landing.rail.aria": "Where you are on the page",
   "landing.section.home": "Home",
   "landing.section.why": "Why",
