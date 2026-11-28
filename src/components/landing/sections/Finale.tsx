@@ -2,11 +2,10 @@
 
 import { ArrowRight, Check, Copy, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import Link from "next/link";
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { useT } from "@/i18n/hooks";
-import { APP_HOME } from "@/lib/routes";
+import { EntranceLink } from "../EntranceLink";
 import { clamp, easeOutCubic, lerp } from "../camera";
 import { useEngine, WorldNode, type NodeFrame } from "../engine";
 import { Parachutist } from "../figures/Props";
@@ -275,13 +274,10 @@ export function Finale() {
           >
             {t("landing.finale.report")}
           </a>
-          <Link
-            href={APP_HOME}
-            className="group mt-5 inline-flex items-center gap-3 rounded-full bg-[var(--land-fg)] px-7 py-4 text-[15px] font-medium text-[var(--land-bg)] transition hover:gap-4"
-          >
+          <EntranceLink className="group mt-5 inline-flex items-center gap-3 rounded-full bg-[var(--land-fg)] px-7 py-4 text-[15px] font-medium text-[var(--land-bg)] transition hover:gap-4">
             {t("landing.finale.cta")}
             <ArrowRight aria-hidden className="size-4 transition group-hover:translate-x-0.5" />
-          </Link>
+          </EntranceLink>
         </div>
       </WorldNode>
 
@@ -300,9 +296,7 @@ export function Finale() {
           >
             {t("landing.footer.sources")}
           </button>
-          <Link href={APP_HOME} className="hover:opacity-100">
-            {t("landing.footer.openApp")}
-          </Link>
+          <EntranceLink className="hover:opacity-100">{t("landing.footer.openApp")}</EntranceLink>
           <span>{t("landing.footer.simulation")}</span>
           <span>{t("landing.footer.copyright")}</span>
         </nav>

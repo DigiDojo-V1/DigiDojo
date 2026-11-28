@@ -1,11 +1,10 @@
 "use client";
 
 import { Pause, Play, Volume2 } from "lucide-react";
-import Link from "next/link";
 import { useRef, useState, type ReactNode } from "react";
 import { useT } from "@/i18n/hooks";
+import { EntranceLink } from "../EntranceLink";
 import { cn } from "@/lib/utils";
-import { APP_HOME } from "@/lib/routes";
 import { clamp, easeInOutCubic, perspectiveScale, smoothstep } from "../camera";
 import { useEngine, useFrame } from "../engine";
 import { MONO, SERIF } from "../styles";
@@ -113,13 +112,10 @@ function Content({ userPausedRef }: { userPausedRef: PausedRef }) {
         </h2>
         <p className="mt-5 max-w-[400px] text-[13.5px] leading-[1.55]">{t("landing.app.body")}</p>
         <p className={`${MONO} mt-4 text-[8px] opacity-70`}>{t("landing.app.meta")}</p>
-        <Link
-          href={APP_HOME}
-          className="group mt-6 inline-flex items-center gap-3 rounded-full bg-[#121212] px-6 py-3.5 text-[14px] font-medium text-[#ece9e2] transition hover:gap-4"
-        >
+        <EntranceLink className="group mt-6 inline-flex items-center gap-3 rounded-full bg-[#121212] px-6 py-3.5 text-[14px] font-medium text-[#ece9e2] transition hover:gap-4">
           {t("landing.app.cta")}
           <span aria-hidden className="h-px w-4 bg-current transition-all group-hover:w-6" />
-        </Link>
+        </EntranceLink>
       </div>
       <Player userPausedRef={userPausedRef} />
     </div>

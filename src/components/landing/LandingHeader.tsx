@@ -2,10 +2,9 @@
 
 import { ArrowRight, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useT } from "@/i18n/hooks";
-import { APP_HOME } from "@/lib/routes";
+import { EntranceLink } from "./EntranceLink";
 import { useEngine } from "./engine";
 import { SECTIONS } from "./world";
 
@@ -108,13 +107,12 @@ export function LandingHeader() {
                 </motion.li>
               ))}
             </ol>
-            <Link
-              href={APP_HOME}
+            <EntranceLink
               className={`${MONO} mt-8 inline-flex items-center gap-2 self-start rounded-full bg-[#121212] px-5 py-3 text-[#e8e4de]`}
             >
               {t("landing.menu.openApp")}
               <ArrowRight className="size-3.5" />
-            </Link>
+            </EntranceLink>
           </motion.nav>
         )}
       </AnimatePresence>

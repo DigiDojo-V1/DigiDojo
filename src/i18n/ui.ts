@@ -136,6 +136,8 @@ const en = {
   "home.counter": (i: number, n: number) =>
     `${String(i).padStart(2, "0")} / ${String(n).padStart(2, "0")}`,
   "home.goTo": (name: string) => `Show ${name}`,
+  "home.entranceWelcome": "Welcome to the dojo",
+  "home.entranceSkip": "Skip intro",
 
   // Progress
   "progress.completed": "Completed",
