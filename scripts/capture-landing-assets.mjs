@@ -29,10 +29,14 @@ const PROGRESS = JSON.stringify({
 /**
  * Headless recordings have no mouse pointer, so draw one. It glides to each target before
  * the click and keeps its place across page loads.
+ *
+ * The outer element only moves (translate); the inner arrow only presses (scale about its
+ * tip). Scaling the element that carries the translate would scale the position too and
+ * throw the pointer toward the top-left corner on every click.
  */
 function installCursor() {
   const ARROW =
-    '<svg width="22" height="22" viewBox="0 0 24 24"><path d="M4 2l15 11-6.5 1.2L9 21z" fill="#111" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg>';
+    '<svg width="22" height="22" viewBox="0 0 24 24" style="display:block"><path d="M4 2l15 11-6.5 1.2L9 21z" fill="#111" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg>';
   const mount = () => {
     if (document.getElementById("demo-cursor")) return;
     // Hide the Next.js dev badge from the first frame.
@@ -41,16 +45,20 @@ function installCursor() {
     document.documentElement.appendChild(style);
     const el = document.createElement("div");
     el.id = "demo-cursor";
-    el.innerHTML = ARROW;
+    // The arrow's tip is at (4, 2) of its 24-unit box; offset it so the tip is the hotspot.
+    el.innerHTML = `<div id="demo-cursor-arrow" style="margin:-2px 0 0 -4px;transform-origin:4px 2px">${ARROW}</div>`;
     const start = JSON.parse(sessionStorage.getItem("demo-cursor") ?? "[900,700]");
     Object.assign(el.style, {
       position: "fixed",
       left: "0",
       top: "0",
+      width: "0",
+      height: "0",
       zIndex: "2147483647",
       pointerEvents: "none",
       transform: `translate(${start[0]}px, ${start[1]}px)`,
       filter: "drop-shadow(0 2px 3px rgba(0,0,0,.35))",
+      willChange: "transform",
     });
     document.documentElement.appendChild(el);
   };
@@ -64,7 +72,33 @@ function installCursor() {
     },
     press() {
       const el = document.getElementById("demo-cursor");
-      el?.animate([{ scale: 1 }, { scale: 0.8 }, { scale: 1 }], { duration: 220 });
+      if (!el) return;
+      el.querySelector("#demo-cursor-arrow")?.animate(
+        [{ transform: "scale(1)" }, { transform: "scale(0.85)" }, { transform: "scale(1)" }],
+        { duration: 240, easing: "ease-out" },
+      );
+      // A soft ring at the tip, so the click reads in the clip.
+      const ring = document.createElement("div");
+      Object.assign(ring.style, {
+        position: "absolute",
+        left: "-14px",
+        top: "-14px",
+        width: "28px",
+        height: "28px",
+        borderRadius: "50%",
+        background: "rgba(236,114,48,.35)",
+        border: "2px solid rgba(236,114,48,.8)",
+      });
+      el.prepend(ring);
+      ring
+        .animate(
+          [
+            { transform: "scale(.3)", opacity: 1 },
+            { transform: "scale(1.4)", opacity: 0 },
+          ],
+          { duration: 450, easing: "ease-out" },
+        )
+        .finished.then(() => ring.remove());
     },
   };
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mount);
